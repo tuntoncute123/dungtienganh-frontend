@@ -734,6 +734,14 @@ export default function AdminPage() {
     { title: "Tài khoản", dataIndex: "username", key: "username", render: (text: string) => <strong>{text}</strong> },
     { title: "Họ và tên", dataIndex: "name", key: "name" },
     { 
+      title: "Mật khẩu", 
+      dataIndex: "plainPassword", 
+      key: "plainPassword",
+      render: (pw: string) => pw 
+        ? <span style={{ fontFamily: "monospace", background: "#f1f5f9", padding: "2px 6px", borderRadius: 4 }}>{pw}</span>
+        : <Tag color="orange">Chưa có</Tag>
+    },
+    { 
       title: "Khóa học được học", 
       dataIndex: "allowedCourses", 
       key: "allowedCourses",
@@ -775,6 +783,7 @@ export default function AdminPage() {
             size="small"
             onClick={() => {
               setEditingUser(record);
+              userForm.resetFields();
               userForm.setFieldsValue({
                 username: record.username,
                 name: record.name,
@@ -1466,8 +1475,7 @@ export default function AdminPage() {
                 rules={[{ required: true, message: "Nhập mật khẩu" }]}
               >
                 <Input
-                  placeholder={editingUser ? "Mật khẩu hiện tại đang hiển thị ở trên" : "Nhập mật khẩu..."}
-                  autoComplete="new-password"
+                  placeholder="Nhập mật khẩu..."
                 />
               </Form.Item>
             </Col>
