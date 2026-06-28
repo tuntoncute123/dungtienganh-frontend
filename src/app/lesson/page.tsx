@@ -8,7 +8,6 @@ import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
 import VideoPlayer from "@/components/lesson/VideoPlayer";
 import LessonDocuments from "@/components/lesson/LessonDocuments";
-import DiscussionPanel from "@/components/lesson/DiscussionPanel";
 import LessonPlaylist from "@/components/lesson/LessonPlaylist";
 import ViewModeSelector from "@/components/lesson/ViewModeSelector";
 import Footer from "@/components/Footer";
@@ -195,16 +194,13 @@ function LessonPageContent() {
               </div>
             </div>
 
-            {/* ── RIGHT: View selector + Discussion + Playlist ── */}
+            {/* ── RIGHT: View selector + Playlist ── */}
             <div className={`lp-right-col${isDesktop ? " lp-right-sticky" : ""}`}>
-              <div className="lp-card" style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+              <div className="lp-card" style={{ marginBottom: 12 }}>
                 {/* View mode tabs */}
                 <ViewModeSelector />
-
-                {/* Discussion */}
-                <DiscussionPanel lessonId={lesson.id} />
               </div>
-
+ 
               {/* Playlist */}
               <LessonPlaylist currentLessonId={lesson.id} />
             </div>
