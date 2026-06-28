@@ -166,7 +166,6 @@ function LessonPageContent() {
                 remainingViews={10}
                 totalViews={10}
                 duration={lesson.duration}
-                videoUrl={lesson.videoUrl || ""}
                 quizPoints={QUIZ_POINTS}
               />
 
