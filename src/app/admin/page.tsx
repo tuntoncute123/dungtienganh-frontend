@@ -181,24 +181,6 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  const handleSeedDatabase = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/seed`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        msg.success("Đã nạp dữ liệu mock thành công!");
-        await loadAllData();
-      } else {
-        msg.error("Lỗi khi nạp dữ liệu mock");
-      }
-    } catch (e) {
-      msg.error("Lỗi kết nối tới server");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     loadAllData();
@@ -973,7 +955,6 @@ export default function AdminPage() {
           </div>
           <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
             <Button type="primary" size={isMobile ? "small" : "middle"} onClick={loadAllData} icon={<DatabaseOutlined />}>{isMobile ? "Đồng bộ" : "Đồng bộ DB"}</Button>
-            <Button type="primary" danger size={isMobile ? "small" : "middle"} onClick={handleSeedDatabase} icon={<DatabaseOutlined />} loading={loading}>{isMobile ? "Seed" : "Nạp dữ liệu Mock (Seed)"}</Button>
           </Space>
         </Header>
 
