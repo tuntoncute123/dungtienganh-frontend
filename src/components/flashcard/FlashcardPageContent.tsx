@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Row, 
   Col, 
@@ -195,9 +195,12 @@ const initialDecks: FlashcardDeck[] = [
   }
 ];
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 export default function FlashcardPageContent() {
   const { message } = App.useApp();
-  const [decks, setDecks] = useState<FlashcardDeck[]>(initialDecks);
+  const [decks, setDecks] = useState<FlashcardDeck[]>([]);
+  const [loading, setLoading] = useState(true);
   const [sourceType, setSourceType] = useState<"system" | "custom">("system");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -212,6 +215,25 @@ export default function FlashcardPageContent() {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const [form] = Form.useForm();
+
+  const fetchDecks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/flashcards`);
+      if (res.ok) {
+        const data = await res.json();
+        setDecks(data);
+      }
+    } catch (e) {
+      console.error("Lỗi khi tải bộ thẻ:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDecks();
+  }, []);
 
   // Filtered decks list
   const filteredDecks = decks.filter(deck => {
@@ -238,8 +260,8 @@ export default function FlashcardPageContent() {
   };
 
   // Open deck to study
-  const handleOpenStudy = (deck: FlashcardDeck) => {
-    const deckCards = mockCardsDatabase[deck.id] || [
+  const handleOpenStudy = (deck: any) => {
+    const deckCards = deck.cards && deck.cards.length > 0 ? deck.cards : [
       { front: `Từ vựng mẫu 1 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 1" },
       { front: `Từ vựng mẫu 2 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 2" },
       { front: `Từ vựng mẫu 3 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 3" },
@@ -252,7 +274,7 @@ export default function FlashcardPageContent() {
   };
 
   // Handle deck creation
-  const handleCreateDeck = (values: any) => {
+  const handleCreateDeck = async (values: any) => {
     const categoryLabels: Record<string, string> = {
       vocabulary: "Từ vựng",
       idiom: "Thành ngữ",
@@ -262,23 +284,34 @@ export default function FlashcardPageContent() {
       mixed: "Tổng hợp"
     };
 
-    const newDeck: FlashcardDeck = {
-      id: Date.now().toString(),
-      category: values.category,
-      categoryLabel: categoryLabels[values.category] || "Tổng hợp",
-      title: values.title,
-      cardCount: values.cardCount || 10,
-      isLocked: false,
-      type: "custom"
-    };
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/flashcards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: values.category,
+          categoryLabel: categoryLabels[values.category] || "Tổng hợp",
+          title: values.title,
+          isLocked: false,
+          type: "custom",
+          cards: [
+            { front: "Example word", back: "Từ ví dụ mẫu" }
+          ]
+        }),
+      });
 
-    setDecks([newDeck, ...decks]);
-    setSourceType("custom"); // Switch to custom tab to view the new deck
-    setSelectedCategory(null);
-    setCurrentPage(1);
-    setIsCreateOpen(false);
-    form.resetFields();
-    message.success("Tạo bộ thẻ mới thành công!");
+      if (res.ok) {
+        message.success("Tạo bộ thẻ mới thành công!");
+        setIsCreateOpen(false);
+        form.resetFields();
+        fetchDecks();
+        setSourceType("custom");
+      } else {
+        message.error("Lỗi khi tạo bộ thẻ");
+      }
+    } catch (e) {
+      message.error("Lỗi kết nối");
+    }
   };
 
   return (

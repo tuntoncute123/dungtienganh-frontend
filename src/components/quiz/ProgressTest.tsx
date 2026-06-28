@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Modal, App, Tooltip } from "antd";
+import { Modal, App, Tooltip, Spin } from "antd";
 import {
   ArrowLeftOutlined,
   CheckOutlined,
@@ -28,6 +28,8 @@ interface Question {
     C: string;
     D: string;
   };
+  correctAnswer?: string;
+  explanation?: string;
 }
 
 const QUESTIONS_PART5: Question[] = [
@@ -303,6 +305,8 @@ const CORRECT_ANSWERS: Record<number, string | string[]> = {
   51: "B"
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 export default function ProgressTest() {
   const { message } = App.useApp();
   const router = useRouter();
@@ -312,6 +316,13 @@ export default function ProgressTest() {
   const [resultVisible, setResultVisible] = useState<boolean>(false);
   const [confirmSubmitVisible, setConfirmSubmitVisible] = useState<boolean>(false);
   const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
+
+  const [examId, setExamId] = useState<string | null>(null);
+  const [dynamicExam, setDynamicExam] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [dynamicQuestions, setDynamicQuestions] = useState<Question[]>([]);
+  const [dynamicCorrectAnswers, setDynamicCorrectAnswers] = useState<Record<number, string | string[]>>({});
+
   const [scoreData, setScoreData] = useState({
     correctCount: 0,
     incorrectCount: 0,
@@ -326,7 +337,7 @@ export default function ProgressTest() {
     }));
   };
 
-  // Load draft on mount
+  // Load draft and dynamic exam on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("progress_test_draft_v2");
@@ -337,9 +348,46 @@ export default function ProgressTest() {
     } catch (e) {
       console.error("Failed to load draft", e);
     }
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      setExamId(id);
+      if (id) {
+        setLoading(true);
+        fetch(`${API_BASE_URL}/api/exams?id=${id}`)
+          .then((res) => {
+            if (res.ok) return res.json();
+            throw new Error("Exam not found");
+          })
+          .then((data) => {
+            setDynamicExam(data);
+            if (data.questions && data.questions.length > 0) {
+              setDynamicQuestions(data.questions);
+              const answersMap: Record<number, string | string[]> = {};
+              data.questions.forEach((q: any) => {
+                answersMap[q.number] = q.correctAnswer;
+              });
+              setDynamicCorrectAnswers(answersMap);
+            }
+          })
+          .catch((err) => {
+            console.error("Lỗi khi tải đề thi động:", err);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }
   }, []);
 
   const getPart5AnsweredCount = () => {
+    if (dynamicExam) {
+      return Object.keys(answers).filter(k => {
+        const num = parseInt(k);
+        return dynamicQuestions.some(q => q.number === num) && answers[num] !== "";
+      }).length;
+    }
     let count = 0;
     for (let i = 1; i <= 20; i++) {
       if (answers[i] && answers[i].trim() !== "") count++;
@@ -348,6 +396,7 @@ export default function ProgressTest() {
   };
 
   const getPart6AnsweredCount = () => {
+    if (dynamicExam) return 0;
     let count = 0;
     for (let i = 21; i <= 32; i++) {
       if (answers[i] && answers[i].trim() !== "") count++;
@@ -356,6 +405,7 @@ export default function ProgressTest() {
   };
 
   const getPart7AnsweredCount = () => {
+    if (dynamicExam) return 0;
     let count = 0;
     for (let i = 33; i <= 51; i++) {
       if (answers[i] && answers[i].trim() !== "") count++;
@@ -367,16 +417,17 @@ export default function ProgressTest() {
   const answeredPart6 = getPart6AnsweredCount();
   const answeredPart7 = getPart7AnsweredCount();
 
-  const totalQuestions = 51;
-  const totalAnsweredCount = answeredPart5 + answeredPart6 + answeredPart7;
-  const progressPercent = (totalAnsweredCount / totalQuestions) * 100;
+  const totalQuestions = dynamicExam ? dynamicQuestions.length : 51;
+  const totalAnsweredCount = dynamicExam ? answeredPart5 : (answeredPart5 + answeredPart6 + answeredPart7);
+  const progressPercent = totalQuestions > 0 ? (totalAnsweredCount / totalQuestions) * 100 : 0;
 
   // Locking rules
   const isPart5Unlocked = true;
-  const isPart6Unlocked = isSubmitted || (answeredPart5 === 20);
-  const isPart7Unlocked = isSubmitted || (isPart6Unlocked && answeredPart6 === 12);
+  const isPart6Unlocked = dynamicExam ? false : (isSubmitted || (answeredPart5 === 20));
+  const isPart7Unlocked = dynamicExam ? false : (isSubmitted || (isPart6Unlocked && answeredPart6 === 12));
 
   const handlePartClick = (partNum: 5 | 6 | 7) => {
+    if (dynamicExam) return;
     if (partNum === 5) {
       setCurrentPart(5);
     } else if (partNum === 6) {
@@ -469,27 +520,33 @@ export default function ProgressTest() {
     const userAns = answers[qNumber];
     if (!userAns) return false;
 
-    if (qNumber >= 1 && qNumber <= 20) {
-      return userAns === CORRECT_ANSWERS[qNumber];
-    } else if (qNumber >= 21 && qNumber <= 32) {
-      const acceptable = CORRECT_ANSWERS[qNumber] as string[];
-      return acceptable.includes(userAns.trim().toLowerCase());
-    } else {
-      return userAns === CORRECT_ANSWERS[qNumber];
+    const targetAnswers = dynamicExam ? dynamicCorrectAnswers : CORRECT_ANSWERS;
+    const correctVal = targetAnswers[qNumber];
+    if (!correctVal) return false;
+
+    if (Array.isArray(correctVal)) {
+      return correctVal.map(c => c.trim().toLowerCase()).includes(userAns.trim().toLowerCase());
     }
+    return userAns.trim().toLowerCase() === correctVal.trim().toLowerCase();
   };
 
   const doSubmit = () => {
     let correct = 0;
-    for (let i = 1; i <= totalQuestions; i++) {
-      if (isQuestionCorrect(i)) {
-        correct++;
+    if (dynamicExam) {
+      dynamicQuestions.forEach(q => {
+        if (isQuestionCorrect(q.number)) correct++;
+      });
+    } else {
+      for (let i = 1; i <= totalQuestions; i++) {
+        if (isQuestionCorrect(i)) {
+          correct++;
+        }
       }
     }
 
     const incorrect = totalAnsweredCount - correct;
     const unanswered = totalQuestions - totalAnsweredCount;
-    const scoreVal = Math.round((correct / totalQuestions) * 100);
+    const scoreVal = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
 
     setScoreData({
       correctCount: correct,
@@ -522,6 +579,29 @@ export default function ProgressTest() {
   };
 
   const renderExplanationBox = (qNum: number) => {
+    if (dynamicExam) {
+      const q = dynamicQuestions.find(item => item.number === qNum);
+      if (!isSubmitted || !q || !q.explanation) return null;
+      const isExpanded = expandedExplanations[qNum] !== false;
+      return (
+        <div className={styles.explanationBox} onClick={() => toggleExplanation(qNum)}>
+          <div className={styles.explanationHeader} style={{ cursor: "pointer" }}>
+            <span className={styles.explanationTitle}>
+              <InfoCircleOutlined style={{ marginRight: 8 }} />
+              Giải thích đáp án
+            </span>
+            <span>{isExpanded ? <CaretUpOutlined /> : <CaretDownOutlined />}</span>
+          </div>
+          {isExpanded && (
+            <div onClick={(e) => e.stopPropagation()} style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+              <p>{q.explanation}</p>
+              <p style={{ color: "#cc4125", fontWeight: "bold" }}>⇒ Đáp án đúng: {q.correctAnswer}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     const explanation = EXPLANATIONS[qNum];
     if (!isSubmitted || !explanation) return null;
 
@@ -638,12 +718,21 @@ export default function ProgressTest() {
   };
 
   // Determine current question array
-  const currentQuestions =
-    currentPart === 5
+  const currentQuestions = dynamicExam
+    ? dynamicQuestions
+    : (currentPart === 5
       ? QUESTIONS_PART5
       : currentPart === 6
       ? QUESTIONS_PART6
-      : QUESTIONS_PART7;
+      : QUESTIONS_PART7);
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f3f4f6" }}>
+        <Spin size="large" tip="Đang tải dữ liệu đề thi..." />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.quizLayout}>
@@ -663,7 +752,7 @@ export default function ProgressTest() {
         </div>
 
         <div className={styles.headerCenter}>
-          <h3 className={styles.headerTitle}>[Reading] Progress test</h3>
+          <h3 className={styles.headerTitle}>{dynamicExam ? dynamicExam.title : "[Reading] Progress test"}</h3>
         </div>
 
         <div className={styles.headerRight}>
@@ -692,8 +781,19 @@ export default function ProgressTest() {
       {/* Main Content Area */}
       <div className={styles.quizBody}>
         <div className={styles.quizContentCard}>
+          {/* Dynamic Exam Header */}
+          {dynamicExam && (
+            <div className={styles.partHeader}>
+              <h4 className={styles.partTitle}>Đề thi trắc nghiệm</h4>
+              <p className={styles.partDescription}>
+                Đề: {dynamicExam.title} | Thời gian làm bài: {dynamicExam.duration} phút.
+              </p>
+              <div className={styles.divider} />
+            </div>
+          )}
+
           {/* Part 5 Info */}
-          {currentPart === 5 && (
+          {!dynamicExam && currentPart === 5 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 5</h4>
               <p className={styles.partDescription}>
@@ -706,7 +806,7 @@ export default function ProgressTest() {
           )}
 
           {/* Part 6 Info */}
-          {currentPart === 6 && (
+          {!dynamicExam && currentPart === 6 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 6 - Gap Filling</h4>
               <p className={styles.partDescription}>
@@ -718,7 +818,7 @@ export default function ProgressTest() {
           )}
 
           {/* Part 7 Info */}
-          {currentPart === 7 && (
+          {!dynamicExam && currentPart === 7 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 7</h4>
               <p className={styles.partDescription}>
@@ -735,9 +835,15 @@ export default function ProgressTest() {
             <span className={styles.iconWrap}>
               <QuestionCircleOutlined />
             </span>
-            {currentPart === 5 && <span>Questions 1 - 20</span>}
-            {currentPart === 6 && <span>Questions 21 - 32</span>}
-            {currentPart === 7 && <span>Questions 33 - 51</span>}
+            {dynamicExam ? (
+              <span>Danh sách: {totalQuestions} câu hỏi</span>
+            ) : (
+              <>
+                {currentPart === 5 && <span>Questions 1 - 20</span>}
+                {currentPart === 6 && <span>Questions 21 - 32</span>}
+                {currentPart === 7 && <span>Questions 33 - 51</span>}
+              </>
+            )}
           </div>
 
           <h4 className={styles.subTitleText}>
@@ -938,60 +1044,75 @@ export default function ProgressTest() {
         </div>
 
         <div className={styles.footerCenter}>
-          <button 
-            className={`${styles.chevronBtn} ${currentPart > 5 ? styles.chevronBtnActive : ""}`}
-            onClick={handlePrevPart}
-            disabled={currentPart === 5}
-          >
-            <LeftOutlined />
-          </button>
+          {!dynamicExam && (
+            <button 
+              className={`${styles.chevronBtn} ${currentPart > 5 ? styles.chevronBtnActive : ""}`}
+              onClick={handlePrevPart}
+              disabled={currentPart === 5}
+            >
+              <LeftOutlined />
+            </button>
+          )}
 
           <div className={styles.paginationTrack}>
-            {/* Part 5 Navigation Card */}
-            <div
-              className={`${styles.paginationCard} ${currentPart === 5 ? styles.paginationCardActive : ""}`}
-              onClick={() => handlePartClick(5)}
-            >
-              <h5 className={styles.paginationCardTitle}>Part 5</h5>
-              <p className={styles.paginationCardProgress}>
-                {answeredPart5}/20 Questions
-              </p>
-            </div>
-
-            {/* Part 6 Navigation Card */}
-            <Tooltip title={!isPart6Unlocked ? "Cần hoàn thành 20 câu hỏi của Part 5" : "Part 6 - Gap Filling"}>
-              <div
-                className={`${styles.paginationCard} ${currentPart === 6 ? styles.paginationCardActive : ""} ${!isPart6Unlocked ? styles.paginationCardDisabled : ""}`}
-                onClick={() => handlePartClick(6)}
-              >
-                <h5 className={styles.paginationCardTitle}>Part 6</h5>
+            {dynamicExam ? (
+              <div className={`${styles.paginationCard} ${styles.paginationCardActive}`}>
+                <h5 className={styles.paginationCardTitle}>Đề thi trắc nghiệm</h5>
                 <p className={styles.paginationCardProgress}>
-                  {answeredPart6}/12 Questions
+                  {totalAnsweredCount}/{totalQuestions} câu đã làm
                 </p>
               </div>
-            </Tooltip>
+            ) : (
+              <>
+                {/* Part 5 Navigation Card */}
+                <div
+                  className={`${styles.paginationCard} ${currentPart === 5 ? styles.paginationCardActive : ""}`}
+                  onClick={() => handlePartClick(5)}
+                >
+                  <h5 className={styles.paginationCardTitle}>Part 5</h5>
+                  <p className={styles.paginationCardProgress}>
+                    {answeredPart5}/20 Questions
+                  </p>
+                </div>
 
-            {/* Part 7 Navigation Card */}
-            <Tooltip title={!isPart7Unlocked ? "Cần hoàn thành 12 câu hỏi của Part 6" : "Part 7"}>
-              <div
-                className={`${styles.paginationCard} ${currentPart === 7 ? styles.paginationCardActive : ""} ${!isPart7Unlocked ? styles.paginationCardDisabled : ""}`}
-                onClick={() => handlePartClick(7)}
-              >
-                <h5 className={styles.paginationCardTitle}>Part 7</h5>
-                <p className={styles.paginationCardProgress}>
-                  {answeredPart7}/19 Questions
-                </p>
-              </div>
-            </Tooltip>
+                {/* Part 6 Navigation Card */}
+                <Tooltip title={!isPart6Unlocked ? "Cần hoàn thành 20 câu hỏi của Part 5" : "Part 6 - Gap Filling"}>
+                  <div
+                    className={`${styles.paginationCard} ${currentPart === 6 ? styles.paginationCardActive : ""} ${!isPart6Unlocked ? styles.paginationCardDisabled : ""}`}
+                    onClick={() => handlePartClick(6)}
+                  >
+                    <h5 className={styles.paginationCardTitle}>Part 6</h5>
+                    <p className={styles.paginationCardProgress}>
+                      {answeredPart6}/12 Questions
+                    </p>
+                  </div>
+                </Tooltip>
+
+                {/* Part 7 Navigation Card */}
+                <Tooltip title={!isPart7Unlocked ? "Cần hoàn thành 12 câu hỏi của Part 6" : "Part 7"}>
+                  <div
+                    className={`${styles.paginationCard} ${currentPart === 7 ? styles.paginationCardActive : ""} ${!isPart7Unlocked ? styles.paginationCardDisabled : ""}`}
+                    onClick={() => handlePartClick(7)}
+                  >
+                    <h5 className={styles.paginationCardTitle}>Part 7</h5>
+                    <p className={styles.paginationCardProgress}>
+                      {answeredPart7}/19 Questions
+                    </p>
+                  </div>
+                </Tooltip>
+              </>
+            )}
           </div>
 
-          <button 
-            className={`${styles.chevronBtn} ${currentPart < 7 ? styles.chevronBtnActive : ""}`}
-            onClick={handleNextPart}
-            disabled={currentPart === 7}
-          >
-            <RightOutlined />
-          </button>
+          {!dynamicExam && (
+            <button 
+              className={`${styles.chevronBtn} ${currentPart < 7 ? styles.chevronBtnActive : ""}`}
+              onClick={handleNextPart}
+              disabled={currentPart === 7}
+            >
+              <RightOutlined />
+            </button>
+          )}
         </div>
       </div>
 

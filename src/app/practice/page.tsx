@@ -26,62 +26,25 @@ interface PracticeTest {
   disabled?: boolean;
 }
 
-const PRACTICE_TESTS_DATA: PracticeTest[] = [
-  {
-    id: "ielts-reading-biomimicry",
-    title: "IELTS Academic Reading: Biomimicry (Passage 2)",
-    skill: "Reading",
-    timeLimit: "20 phút",
-    questionsCount: 13,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1782387428-1-khoa-he_21a6149e.jpg",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    category: "ielts",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "ielts-listening-test-1",
-    title: "IELTS Listening Academic Mock Test - Test 1",
-    skill: "Listening",
-    timeLimit: "30 phút",
-    questionsCount: 40,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1782388127-1_f3a86a69.jpg",
-    isHot: false,
-    category: "ielts",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "toeic-reading-part-5",
-    title: "Luyện đề thi TOEIC Reading: Part 5 & Part 6 (Chuyên đề 01)",
-    skill: "Reading",
-    timeLimit: "45 phút",
-    questionsCount: 46,
-    difficulty: "Khó",
-    thumbnail: "/assets/1782388373-2_9d3976ca.png",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    category: "toeic",
-    href: "/progress-test",
-    disabled: false,
-  },
-  {
-    id: "thpt-tieng-anh-2026",
-    title: "Đề thi thử Tốt nghiệp THPT Quốc gia 2026 - Môn Tiếng Anh (Đề số 1)",
-    skill: "Tổng hợp",
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Khó",
-    thumbnail: "/assets/1775702977-94-thuml-_08f07fd3.jpg",
-    isHot: false,
-    category: "thpt",
-    href: "#",
-    disabled: true,
-  },
-];
+import { useEffect } from "react";
+import { Spin } from "antd";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+interface PracticeTest {
+  id: string;
+  title: string;
+  skill: string;
+  timeLimit: string;
+  questionsCount: number;
+  difficulty: "Dễ" | "Trung bình" | "Khó";
+  thumbnail: string;
+  isHot: boolean;
+  hotIcon?: string;
+  category: "all" | "ielts" | "toeic" | "thpt";
+  href: string;
+  disabled?: boolean;
+}
 
 const CATEGORIES = [
   { key: "all", label: "Tất cả" },
@@ -99,9 +62,45 @@ export default function PracticePage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+  
+  const [tests, setTests] = useState<PracticeTest[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
+
+  const fetchPracticeTests = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exams?category=practice`);
+      if (res.ok) {
+        const data = await res.json();
+        const formatted = data.map((item: any, idx: number) => ({
+          id: item.id,
+          title: item.title,
+          skill: item.skill || "Reading",
+          timeLimit: `${item.duration} phút`,
+          questionsCount: item.cardCount || (item.questions ? item.questions.length : 0),
+          difficulty: item.difficulty || "Trung bình",
+          thumbnail: item.thumbnail || "/assets/1782388373-2_9d3976ca.png",
+          isHot: idx % 2 === 0,
+          hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
+          category: item.examCategory || (idx % 3 === 0 ? "toeic" : idx % 3 === 1 ? "ielts" : "thpt"),
+          href: `/progress-test?id=${item.id}`,
+          disabled: false
+        }));
+        setTests(formatted);
+      }
+    } catch (e) {
+      console.error("Lỗi khi tải đề luyện tập:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPracticeTests();
+  }, []);
 
   const handleMenuClick = () => {
     if (isDesktop) {
@@ -112,7 +111,7 @@ export default function PracticePage() {
   };
 
   // Filter logic
-  const filteredTests = PRACTICE_TESTS_DATA.filter((test) => {
+  const filteredTests = tests.filter((test) => {
     const matchesTab = activeTab === "all" || test.category === activeTab;
     const matchesSearch =
       test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,7 +205,11 @@ export default function PracticePage() {
 
                   {/* Practice Cards Content Area */}
                   <div className="list-test__content">
-                    {filteredTests.length > 0 ? (
+                    {loading ? (
+                      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0", width: "100%" }}>
+                        <Spin size="large" tip="Đang tải danh sách đề luyện tập..." />
+                      </div>
+                    ) : filteredTests.length > 0 ? (
                       <div className="list-category__course">
                         {filteredTests.map((test) => {
                           const isHovered = hoveredCardId === test.id;

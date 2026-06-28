@@ -28,147 +28,27 @@ interface SchoolExam {
   disabled?: boolean;
 }
 
-const SCHOOL_EXAMS_DATA: SchoolExam[] = [
-  {
-    id: "so-ha-noi-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT Hà Nội (Lần 1)",
-    source: "Sở GD&ĐT Hà Nội",
-    province: "Hà Nội",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Khó",
-    thumbnail: "/assets/1775031204-303-thuml_e0f5cdc2.jpg",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    region: "mien-bac",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "thpt-chuyen-ha-noi-amsterdam-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - THPT Chuyên Hà Nội - Amsterdam",
-    source: "THPT Chuyên HN-Amsterdam",
-    province: "Hà Nội",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Khó",
-    thumbnail: "/assets/1782387428-1-khoa-he_21a6149e.jpg",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    region: "mien-bac",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "so-hai-phong-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT Hải Phòng",
-    source: "Sở GD&ĐT Hải Phòng",
-    province: "Hải Phòng",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1782388127-1_f3a86a69.jpg",
-    isHot: false,
-    region: "mien-bac",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "so-nghe-an-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT Nghệ An (Lần 1)",
-    source: "Sở GD&ĐT Nghệ An",
-    province: "Nghệ An",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1775702977-94-thuml-_08f07fd3.jpg",
-    isHot: false,
-    region: "mien-trung",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "thpt-chuyen-vinh-nghe-an-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - THPT Chuyên Đại học Vinh",
-    source: "THPT Chuyên Đại học Vinh",
-    province: "Nghệ An",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Khó",
-    thumbnail: "/assets/1782387742-1-khoa-ng_d576dea6.jpg",
-    isHot: false,
-    region: "mien-trung",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "so-da-nang-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT Đà Nẵng",
-    source: "Sở GD&ĐT Đà Nẵng",
-    province: "Đà Nẵng",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1782388335-2_0b3817c6.jpg",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    region: "mien-trung",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "so-ho-chi-minh-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT TP. Hồ Chí Minh (Lần 1)",
-    source: "Sở GD&ĐT TP. HCM",
-    province: "TP. HCM",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Khó",
-    thumbnail: "/assets/1782388373-2_9d3976ca.png",
-    isHot: true,
-    hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-    region: "mien-nam",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "thpt-nguyen-thuong-hien-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - THPT Nguyễn Thượng Hiền (TP.HCM)",
-    source: "THPT Nguyễn Thượng Hiền",
-    province: "TP. HCM",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Trung bình",
-    thumbnail: "/assets/1782388290-1_6121c985.png",
-    isHot: false,
-    region: "mien-nam",
-    href: "#",
-    disabled: true,
-  },
-  {
-    id: "so-can-tho-2026",
-    title: "Đề thi thử Tốt nghiệp THPT 2026 - Sở GD&ĐT Cần Thơ",
-    source: "Sở GD&ĐT Cần Thơ",
-    province: "Cần Thơ",
-    year: 2026,
-    timeLimit: "60 phút",
-    questionsCount: 50,
-    difficulty: "Dễ",
-    thumbnail: "/assets/1774865665-303-thuml_503b7a47.jpg",
-    isHot: false,
-    region: "mien-nam",
-    href: "#",
-    disabled: true,
-  },
-];
+import { useEffect } from "react";
+import { Spin } from "antd";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+interface SchoolExam {
+  id: string;
+  title: string;
+  source: string;         // Trường / Sở phát hành
+  province: string;       // Tỉnh/thành
+  year: number;
+  timeLimit: string;
+  questionsCount: number;
+  difficulty: "Dễ" | "Trung bình" | "Khó";
+  thumbnail: string;
+  isHot: boolean;
+  hotIcon?: string;
+  region: "all" | "mien-bac" | "mien-trung" | "mien-nam";
+  href: string;
+  disabled?: boolean;
+}
 
 const REGION_TABS = [
   { key: "all", label: "Tất cả" },
@@ -192,9 +72,48 @@ export default function SchoolExamsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+  
+  const [exams, setExams] = useState<SchoolExam[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
+
+  const fetchExams = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exams?category=school-exams`);
+      if (res.ok) {
+        const data = await res.json();
+        // Map backend exams to SchoolExam UI format
+        const formatted = data.map((item: any, idx: number) => ({
+          id: item.id,
+          title: item.title,
+          source: item.source || "Sở GD&ĐT",
+          province: item.province || "Toàn quốc",
+          year: item.year || 2026,
+          timeLimit: `${item.duration} phút`,
+          questionsCount: item.cardCount || (item.questions ? item.questions.length : 0),
+          difficulty: item.difficulty || "Trung bình",
+          thumbnail: item.thumbnail || "/assets/1782388373-2_9d3976ca.png",
+          isHot: idx < 3,
+          hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
+          region: item.region || (idx % 3 === 0 ? "mien-bac" : idx % 3 === 1 ? "mien-trung" : "mien-nam"),
+          href: `/progress-test?id=${item.id}`,
+          disabled: false
+        }));
+        setExams(formatted);
+      }
+    } catch (e) {
+      console.error("Lỗi khi tải đề thi thử:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExams();
+  }, []);
 
   const handleMenuClick = () => {
     if (isDesktop) {
@@ -204,7 +123,7 @@ export default function SchoolExamsPage() {
     }
   };
 
-  const filteredExams = SCHOOL_EXAMS_DATA.filter((exam) => {
+  const filteredExams = exams.filter((exam) => {
     const matchesTab = activeTab === "all" || exam.region === activeTab;
     const matchesSearch =
       exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -300,7 +219,11 @@ export default function SchoolExamsPage() {
 
                   {/* Cards Grid */}
                   <div className="list-test__content">
-                    {filteredExams.length > 0 ? (
+                    {loading ? (
+                      <div style={{ display: "flex", justifyContent: "center", padding: "40px 0", width: "100%" }}>
+                        <Spin size="large" tip="Đang tải danh sách đề thi..." />
+                      </div>
+                    ) : filteredExams.length > 0 ? (
                       <div className="list-category__course">
                         {filteredExams.map((exam) => {
                           const isHovered = hoveredCardId === exam.id;
