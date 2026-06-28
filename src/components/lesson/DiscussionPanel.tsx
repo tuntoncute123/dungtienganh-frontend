@@ -140,7 +140,7 @@ export default function DiscussionPanel({ lessonId }: DiscussionPanelProps) {
       <div className="lp-comments-list">
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 20 }}>
-            <Spin size="small" tip="Đang tải thảo luận..." />
+            <Spin size="small" description="Đang tải thảo luận..." />
           </div>
         ) : comments.length === 0 ? (
           <div style={{ textAlign: "center", padding: 20, color: "#64748b" }}>Chưa có bình luận nào. Hãy gửi câu hỏi đầu tiên!</div>

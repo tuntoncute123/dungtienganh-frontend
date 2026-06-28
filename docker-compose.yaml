@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: J9YtBkXrO39lOnY3Qpu5cPIt0s5MhRE3uDimqhDIFQo5ojktK7bTDdEcvVEdGZGS
       POSTGRES_DB: teacherdung
+    ports:
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

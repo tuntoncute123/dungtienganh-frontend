@@ -216,7 +216,7 @@ function StoryPageContent() {
             <div className="content-panel">
               {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
-                  <Spin size="large" tip="Đang tải Stories..." />
+                  <Spin size="large" description="Đang tải Stories..." />
                 </div>
               ) : storyId && activeStory ? (
                 <div className="story-detail-grid">

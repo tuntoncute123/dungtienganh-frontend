@@ -221,7 +221,7 @@ export default function SchoolExamsPage() {
                   <div className="list-test__content">
                     {loading ? (
                       <div style={{ display: "flex", justifyContent: "center", padding: "40px 0", width: "100%" }}>
-                        <Spin size="large" tip="Đang tải danh sách đề thi..." />
+                        <Spin size="large" description="Đang tải danh sách đề thi..." />
                       </div>
                     ) : filteredExams.length > 0 ? (
                       <div className="list-category__course">

@@ -24,7 +24,7 @@ export default function CourseCard({
     <Link href="/lesson" style={{ textDecoration: "none", color: "inherit" }}>
       <div className="course-card">
         {/* Thumbnail */}
-        <figure style={{ margin: 0, position: "relative", width: "100%", height: 143 }}>
+        <figure className="course-card-figure">
           <img
             src={image}
             alt={title}

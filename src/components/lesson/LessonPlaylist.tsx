@@ -36,7 +36,7 @@ export default function LessonPlaylist({ currentLessonId }: LessonPlaylistProps)
   if (loading) {
     return (
       <div className="lp-card lp-playlist" style={{ display: "flex", justifyContent: "center", padding: 20 }}>
-        <Spin size="small" tip="Đang tải danh sách..." />
+        <Spin size="small" description="Đang tải danh sách..." />
       </div>
     );
   }

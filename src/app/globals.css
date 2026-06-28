@@ -3740,3 +3740,464 @@ body {
   border-color: #94a3b8;
   color: #1e293b;
 }
+
+/* =============================================
+   Responsive Cards and Grids (Mobile 2 columns)
+   ============================================= */
+
+.course-card-figure {
+  margin: 0;
+  position: relative;
+  width: 100%;
+  height: 143px;
+}
+
+@media (max-width: 575px) {
+  /* 1. General list grid of exams/tests/courses */
+  .list-category__course {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* 2. CourseCard (.course-card) */
+  .course-card-figure {
+    height: 95px !important;
+  }
+  .course-thumbnail {
+    height: 95px !important;
+  }
+  .course-body {
+    padding: 8px 10px 10px !important;
+  }
+  .course-title {
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    min-height: 34px !important;
+    -webkit-line-clamp: 2 !important;
+  }
+  .course-meta {
+    margin-top: 6px !important;
+    gap: 2px !important;
+  }
+  .course-units {
+    font-size: 11px !important;
+  }
+  .course-exercises {
+    font-size: 11px !important;
+    gap: 2px !important;
+  }
+  .course-exercises img {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* 3. General card-course (.card-course in lists) */
+  .card-course__content {
+    padding: 8px !important;
+    gap: 6px !important;
+  }
+  .card-course__title {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    height: 32px !important; /* 2 lines of text */
+  }
+  .card-course__teacher {
+    gap: 4px !important;
+  }
+  .card-course__teacher-name {
+    font-size: 10px !important;
+  }
+  .item-teacher {
+    font-size: 10px !important;
+  }
+  .card-course__options img {
+    height: 14px !important;
+    width: 14px !important;
+  }
+  .card-course__info-group {
+    gap: 4px !important;
+    padding-top: 8px !important;
+    margin-top: auto !important;
+  }
+  .card-course__lesson-info {
+    font-size: 9.5px !important;
+    gap: 2px !important;
+  }
+  .card-course__lesson-info svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* 4. Flashcard Deck Card (.fc-deck-card) */
+  .fc-deck-card {
+    padding: 12px 8px !important;
+    min-height: 200px !important;
+  }
+  .fc-deck-badge {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .fc-deck-title {
+    font-size: 12.5px !important;
+    margin-bottom: 8px !important;
+    min-height: 48px !important;
+    margin-top: 2px !important;
+  }
+  .fc-deck-info {
+    margin-bottom: 12px !important;
+    font-size: 11px !important;
+  }
+  .fc-deck-footer {
+    gap: 4px !important;
+  }
+  .fc-footer-btn {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 12px !important;
+  }
+  .fc-lock-overlay .fc-lock-btn {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    height: auto !important;
+  }
+
+  /* 5. Story list grid */
+  .story-list-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* =============================================
+   Streak Popover & Dropdown Styles
+   ============================================= */
+
+/* Ant Design Popover overrides to style it cleanly */
+.streak-popover .ant-popover-inner {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 30px rgba(28, 42, 76, 0.12) !important;
+  border: 1px solid #ffe3c2 !important;
+}
+
+.streak-dropdown-container {
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  background: #fffbf5; /* Warm background */
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 16px;
+  position: relative;
+}
+
+.streak-fire-wrapper {
+  margin-bottom: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.streak-fire-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  animation: floatFire 3s ease-in-out infinite;
+}
+
+@keyframes floatFire {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.streak-count-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ff9305;
+  margin: 0 0 6px 0;
+  text-align: center;
+}
+
+.streak-sub-title {
+  color: #d97706;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.streak-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 147, 5, 0.1);
+  margin-bottom: 20px;
+}
+
+.streak-rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.streak-rule-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid #ff9305;
+  color: #ff9305;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.streak-rule-text {
+  color: #1e293b;
+  font-size: 13.5px;
+  font-weight: 550;
+  text-align: left;
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Milestones/Badges section */
+.streak-milestones-section {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.streak-milestones-title {
+  font-size: 13px;
+  font-weight: 750;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 147, 5, 0.1);
+  padding-bottom: 6px;
+}
+
+.streak-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.streak-badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.streak-badge-card.unlocked {
+  border-color: #ffd19a;
+  background: #fffaf0;
+  box-shadow: 0 4px 10px rgba(255, 147, 5, 0.05);
+}
+
+.streak-badge-card.locked {
+  opacity: 0.6;
+}
+
+.streak-badge-icon {
+  font-size: 26px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+}
+
+.streak-badge-card.locked .streak-badge-icon {
+  filter: grayscale(100%) blur(0.5px);
+}
+
+.streak-badge-target {
+  font-size: 12px;
+  font-weight: 750;
+  color: #1e293b;
+  margin: 0 0 2px 0;
+}
+
+.streak-badge-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.streak-badge-card.unlocked .streak-badge-status {
+  color: #34a853; /* Success color */
+}
+
+/* Lock/unlock icons overlay */
+.streak-lock-status-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+}
+
+/* Share button */
+.streak-share-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #ff9305 0%, #ff5e00 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 700 !important;
+  height: 42px !important;
+  border-radius: 24px !important;
+  font-size: 14.5px !important;
+  box-shadow: 0 4px 14px rgba(255, 94, 0, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.streak-share-btn:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(255, 94, 0, 0.35) !important;
+}
+
+/* Share Modal design */
+.streak-share-card-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  text-align: center;
+}
+
+.streak-share-card-preview {
+  width: 100%;
+  max-width: 320px;
+  background: linear-gradient(135deg, #1c2a4c 0%, #0c1424 100%);
+  border-radius: 20px;
+  padding: 28px 20px;
+  color: white;
+  box-shadow: 0 15px 35px rgba(12, 20, 36, 0.35);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 2px solid rgba(255, 147, 5, 0.3);
+}
+
+.streak-share-card-preview::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 147, 5, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.streak-share-logo {
+  height: 24px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.streak-share-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #ff9305;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.streak-share-username {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #fff;
+}
+
+.streak-share-badge-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #ff9305;
+  background: rgba(255, 147, 5, 0.15);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 147, 5, 0.3);
+}
+
+.streak-share-count-number {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ff9305;
+  text-shadow: 0 0 20px rgba(255, 147, 5, 0.3);
+  margin-bottom: 4px;
+}
+
+.streak-share-count-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.streak-share-footer-text {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+}
+
+@media (max-width: 359px) {
+  .streak-dropdown-container {
+    padding: 16px 12px !important;
+  }
+  .streak-count-title {
+    font-size: 20px !important;
+  }
+  .streak-sub-title {
+    font-size: 13.5px !important;
+    margin-bottom: 14px !important;
+  }
+  .streak-rules-list {
+    padding: 12px 8px !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  .streak-rule-text {
+    font-size: 12px !important;
+  }
+  .streak-milestones-title {
+    margin-bottom: 8px !important;
+  }
+  .streak-badge-target {
+    font-size: 10.5px !important;
+  }
+  .streak-badge-status {
+    font-size: 9px !important;
+  }
+  .streak-badge-icon {
+    font-size: 20px !important;
+  }
+  .streak-share-btn {
+    height: 38px !important;
+    font-size: 13px !important;
+  }
+}

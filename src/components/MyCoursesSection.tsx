@@ -51,10 +51,10 @@ export default function MyCoursesSection() {
         <p className="section-link">Xem tất cả</p>
       </div>
 
-      {/* Responsive grid: 1 col mobile, 2 col tablet, 3 col desktop */}
+      {/* Responsive grid: 2 col mobile, 2 col tablet, 3 col desktop */}
       <Row gutter={[20, 20]}>
         {COURSES.map((course) => (
-          <Col key={course.id} xs={24} sm={12} lg={8}>
+          <Col key={course.id} xs={12} sm={12} lg={8}>
             <CourseCard
               title={course.title}
               image={course.image}

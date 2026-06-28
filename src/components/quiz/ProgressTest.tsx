@@ -366,7 +366,11 @@ export default function ProgressTest() {
               setDynamicQuestions(data.questions);
               const answersMap: Record<number, string | string[]> = {};
               data.questions.forEach((q: any) => {
-                answersMap[q.number] = q.correctAnswer;
+                if (q.correctAnswer && q.correctAnswer.includes(" / ")) {
+                  answersMap[q.number] = q.correctAnswer.split(" / ").map((ans: string) => ans.trim());
+                } else {
+                  answersMap[q.number] = q.correctAnswer;
+                }
               });
               setDynamicCorrectAnswers(answersMap);
             }
@@ -729,7 +733,7 @@ export default function ProgressTest() {
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f3f4f6" }}>
-        <Spin size="large" tip="Đang tải dữ liệu đề thi..." />
+        <Spin size="large" description="Đang tải dữ liệu đề thi..." />
       </div>
     );
   }
@@ -859,7 +863,11 @@ export default function ProgressTest() {
 
               // RENDER PART 6 (GAP FILLING)
               if (currentPart === 6) {
-                const correctList = CORRECT_ANSWERS[q.number] as string[];
+                const targetAnswers = dynamicExam ? dynamicCorrectAnswers : CORRECT_ANSWERS;
+                const correctVal = targetAnswers[q.number];
+                const correctList = Array.isArray(correctVal)
+                  ? correctVal
+                  : (correctVal ? [correctVal] : []);
                 const isCorrect = isQuestionCorrect(q.number);
 
                 let inputClass = styles.inlineGapInput;

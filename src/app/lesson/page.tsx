@@ -83,7 +83,7 @@ function LessonPageContent() {
   if (loading) {
     return (
       <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <Spin size="large" tip="Đang tải bài giảng..." />
+        <Spin size="large" description="Đang tải bài giảng..." />
       </Layout>
     );
   }
@@ -172,7 +172,14 @@ function LessonPageContent() {
               {/* Homework */}
               <div className="lp-homework-bar">
                 <span className="lp-homework-label">Nhiệm vụ sau buổi học:</span>
-                <div className="lp-homework-tasks">
+                <div className="lp-homework-tasks" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {lesson.exerciseId && (
+                    <Link href={`/progress-test?id=${lesson.exerciseId}`}>
+                      <button className="lp-homework-task-btn" style={{ background: "#0071f9", color: "#ffffff", borderColor: "#0071f9", fontWeight: "600" }}>
+                        📝&nbsp;&nbsp;Làm bài tập ôn luyện đính kèm
+                      </button>
+                    </Link>
+                  )}
                   {HOMEWORK_TASKS.map((task) => (
                     <button key={task} className="lp-homework-task-btn">
                       📖&nbsp;&nbsp;{task}
@@ -211,7 +218,7 @@ export default function LessonPage() {
   return (
     <Suspense fallback={
       <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-        <Spin size="large" tip="Loading..." />
+        <Spin size="large" description="Loading..." />
       </Layout>
     }>
       <LessonPageContent />

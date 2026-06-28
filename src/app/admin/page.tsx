@@ -20,7 +20,9 @@ import {
   Row,
   Col,
   List,
-  App
+  App,
+  Grid,
+  Drawer
 } from "antd";
 import {
   PlayCircleOutlined,
@@ -33,7 +35,8 @@ import {
   DeleteOutlined,
   EditOutlined,
   DashboardOutlined,
-  DatabaseOutlined
+  DatabaseOutlined,
+  MenuOutlined
 } from "@ant-design/icons";
 
 const { Header, Content, Sider } = Layout;
@@ -45,6 +48,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 export default function AdminPage() {
   const { message: msg } = App.useApp();
   const [activeTab, setActiveTab] = useState<string>("lessons");
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Data states
   const [lessons, setLessons] = useState<any[]>([]);
@@ -69,6 +75,8 @@ export default function AdminPage() {
   const [isExamModalOpen, setIsExamModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState<any>(null);
 
+  const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
+
   // Upload helpers
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -77,6 +85,7 @@ export default function AdminPage() {
   const [storyForm] = Form.useForm();
   const [deckForm] = Form.useForm();
   const [examForm] = Form.useForm();
+  const [exerciseForm] = Form.useForm();
 
   // Fetching methods
   const fetchLessons = async () => {
@@ -167,6 +176,13 @@ export default function AdminPage() {
   // Handle custom upload trigger
   const handleUpload = async (file: File, callback: (url: string) => void) => {
     setUploadLoading(true);
+    const isVideo = file.type.startsWith("video/");
+    const loadingMessage = isVideo 
+      ? "Đang tải lên và nén video trên server (Quá trình này có thể mất vài phút, vui lòng không đóng trang)..." 
+      : "Đang tải tập tin lên...";
+    
+    msg.loading({ content: loadingMessage, key: "uploading", duration: 0 });
+    
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -176,13 +192,13 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        msg.success("Tải ảnh lên thành công!");
+        msg.success({ content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", key: "uploading" });
         callback(data.url);
       } else {
-        msg.error(data.error || "Tải ảnh lên thất bại");
+        msg.error({ content: data.error || "Tải lên thất bại", key: "uploading" });
       }
     } catch (error) {
-      msg.error("Có lỗi xảy ra khi upload");
+      msg.error({ content: "Có lỗi xảy ra khi upload", key: "uploading" });
     } finally {
       setUploadLoading(false);
     }
@@ -225,6 +241,93 @@ export default function AdminPage() {
         fetchLessons();
       } else {
         msg.error("Không thể xóa bài học");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  // Exercise CRUD for video lesson
+  const openExerciseModal = async () => {
+    const currentExerciseId = lessonForm.getFieldValue("exerciseId");
+    if (currentExerciseId) {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/exams?id=${currentExerciseId}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Map questions with qType
+          const mappedQuestions = (data.questions || []).map((q: any) => {
+            const hasOptions = q.options && (q.options.A || q.options.B || q.options.C || q.options.D);
+            return {
+              ...q,
+              qType: hasOptions ? "multiple-choice" : "gap-filling"
+            };
+          });
+          exerciseForm.setFieldsValue({
+            title: data.title,
+            duration: data.duration,
+            questions: mappedQuestions
+          });
+        }
+      } catch (e) {
+        msg.error("Lỗi khi tải bài tập cũ");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Empty modal
+      exerciseForm.resetFields();
+      exerciseForm.setFieldsValue({
+        title: `Bài tập: ${lessonForm.getFieldValue("title") || "Bài giảng mới"}`,
+        duration: 20,
+        questions: []
+      });
+    }
+    setIsExerciseModalOpen(true);
+  };
+
+  const saveExercise = async (values: any) => {
+    try {
+      const currentExerciseId = lessonForm.getFieldValue("exerciseId");
+      const isEdit = !!currentExerciseId;
+      const url = `${API_BASE_URL}/api/exams`;
+      const method = isEdit ? "PUT" : "POST";
+
+      const processedQuestions = (values.questions || []).map((q: any) => {
+        const isGapFilling = q.qType === "gap-filling";
+        return {
+          number: parseInt(q.number as any) || 1,
+          text: q.text || "",
+          options: isGapFilling ? {} : (q.options || {}),
+          correctAnswer: q.correctAnswer || "",
+          explanation: q.explanation || null
+        };
+      });
+
+      const body = {
+        title: values.title,
+        category: "progress-test", // Always save as progress-test for homework
+        duration: parseInt(values.duration as any) || 20,
+        questions: processedQuestions,
+        id: isEdit ? currentExerciseId : undefined
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        msg.success("Lưu bài tập đính kèm thành công!");
+        // Update the lesson form's exerciseId
+        lessonForm.setFieldsValue({ exerciseId: data.id });
+        setIsExerciseModalOpen(false);
+      } else {
+        const err = await res.json();
+        msg.error(err.error || "Không thể lưu bài tập");
       }
     } catch (e) {
       msg.error("Lỗi hệ thống");
@@ -338,7 +441,25 @@ export default function AdminPage() {
       const isEdit = !!editingExam;
       const url = `${API_BASE_URL}/api/exams`;
       const method = isEdit ? "PUT" : "POST";
-      const body = isEdit ? { ...values, id: editingExam.id } : values;
+      
+      const processedQuestions = (values.questions || []).map((q: any) => {
+        const isGapFilling = q.qType === "gap-filling";
+        return {
+          number: parseInt(q.number as any) || 1,
+          text: q.text || "",
+          options: isGapFilling ? {} : (q.options || {}),
+          correctAnswer: q.correctAnswer || "",
+          explanation: q.explanation || null
+        };
+      });
+
+      const body = {
+        title: values.title,
+        category: values.category,
+        duration: parseInt(values.duration as any) || 60,
+        questions: processedQuestions,
+        id: isEdit ? editingExam.id : undefined
+      };
 
       const res = await fetch(url, {
         method,
@@ -538,7 +659,13 @@ export default function AdminPage() {
               setEditingExam(record);
               const val = {
                 ...record,
-                questions: record.questions || []
+                questions: (record.questions || []).map((q: any) => {
+                  const hasOptions = q.options && (q.options.A || q.options.B || q.options.C || q.options.D);
+                  return {
+                    ...q,
+                    qType: hasOptions ? "multiple-choice" : "gap-filling"
+                  };
+                })
               };
               examForm.setFieldsValue(val);
               setIsExamModalOpen(true);
@@ -590,80 +717,112 @@ export default function AdminPage() {
       </div>
     );
   };
+  const adminMenu = (
+    <Menu
+      mode="inline"
+      selectedKeys={[activeTab]}
+      onClick={(e) => {
+        setActiveTab(e.key);
+        if (isMobile) setDrawerOpen(false);
+      }}
+      style={{ borderRight: 0, marginTop: isMobile ? 0 : 12 }}
+      items={[
+        { key: "lessons", icon: <PlayCircleOutlined />, label: "Bài học" },
+        { key: "comments", icon: <CommentOutlined />, label: "Bình luận" },
+        { key: "stories", icon: <InstagramOutlined />, label: "Stories" },
+        { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
+        { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
+      ]}
+    />
+  );
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      {/* Sidebar Sider */}
-      <Sider width={220} theme="light" style={{ borderRight: "1px solid #ebf0f4" }}>
-        <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid #ebf0f4" }}>
-          <div style={{ fontWeight: 800, fontSize: 16, color: "#0071f9" }}>TD-ADMIN PANEL</div>
-        </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[activeTab]}
-          onClick={(e) => setActiveTab(e.key)}
-          style={{ borderRight: 0, marginTop: 12 }}
-          items={[
-            { key: "lessons", icon: <PlayCircleOutlined />, label: "Bài học" },
-            { key: "comments", icon: <CommentOutlined />, label: "Bình luận" },
-            { key: "stories", icon: <InstagramOutlined />, label: "Stories" },
-            { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
-            { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
-          ]}
-        />
-      </Sider>
+      {/* Desktop Sidebar Sider */}
+      {!isMobile && (
+        <Sider width={220} theme="light" style={{ borderRight: "1px solid #ebf0f4" }}>
+          <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid #ebf0f4" }}>
+            <div style={{ fontWeight: 800, fontSize: 16, color: "#0071f9" }}>TD-ADMIN PANEL</div>
+          </div>
+          {adminMenu}
+        </Sider>
+      )}
+
+      {/* Mobile/Tablet Drawer Sidebar */}
+      {isMobile && (
+        <Drawer
+          title={<div style={{ fontWeight: 800, fontSize: 16, color: "#0071f9" }}>TD-ADMIN PANEL</div>}
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          styles={{ body: { padding: 0 } }}
+          width={220}
+        >
+          {adminMenu}
+        </Drawer>
+      )}
 
       {/* Main Content Area */}
       <Layout>
-        <Header style={{ background: "#fff", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #ebf0f4" }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#1e293b" }}>
-            {activeTab === "lessons" && "Quản lý Bài học video"}
-            {activeTab === "comments" && "Quản lý Bình luận khóa học"}
-            {activeTab === "stories" && "Quản lý Stories bảng tin"}
-            {activeTab === "flashcards" && "Quản lý Bộ thẻ Flashcard học tập"}
-            {activeTab === "exams" && "Quản lý Đề thi khảo sát & Đề thi thử"}
+        <Header style={{ background: "#fff", padding: isMobile ? "0 12px" : "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #ebf0f4", height: isMobile ? "auto" : 64, minHeight: 64, flexDirection: isMobile ? "column" : "row", paddingBottom: isMobile ? 12 : 0, paddingTop: isMobile ? 12 : 0 }}>
+          <div style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: isMobile ? "space-between" : "flex-start" }}>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined />}
+                onClick={() => setDrawerOpen(true)}
+                style={{ fontSize: 18, marginRight: 8 }}
+              />
+            )}
+            <div style={{ fontSize: isMobile ? 15 : 18, fontWeight: 700, color: "#1e293b", flexGrow: 1 }}>
+              {activeTab === "lessons" && (isMobile ? "Quản lý Bài học" : "Quản lý Bài học video")}
+              {activeTab === "comments" && (isMobile ? "Bình luận" : "Quản lý Bình luận khóa học")}
+              {activeTab === "stories" && (isMobile ? "Stories" : "Quản lý Stories bảng tin")}
+              {activeTab === "flashcards" && (isMobile ? "Bộ thẻ học" : "Quản lý Bộ thẻ Flashcard học tập")}
+              {activeTab === "exams" && (isMobile ? "Đề thi & Câu hỏi" : "Quản lý Đề thi khảo sát & Đề thi thử")}
+            </div>
           </div>
-          <Space>
-            <Button type="primary" onClick={loadAllData} icon={<DatabaseOutlined />}>Đồng bộ DB</Button>
-            <Button type="primary" danger onClick={handleSeedDatabase} icon={<DatabaseOutlined />} loading={loading}>Nạp dữ liệu Mock (Seed)</Button>
+          <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
+            <Button type="primary" size={isMobile ? "small" : "middle"} onClick={loadAllData} icon={<DatabaseOutlined />}>{isMobile ? "Đồng bộ" : "Đồng bộ DB"}</Button>
+            <Button type="primary" danger size={isMobile ? "small" : "middle"} onClick={handleSeedDatabase} icon={<DatabaseOutlined />} loading={loading}>{isMobile ? "Seed" : "Nạp dữ liệu Mock (Seed)"}</Button>
           </Space>
         </Header>
 
-        <Content style={{ padding: 24, background: "#f8fafc" }}>
+        <Content style={{ padding: isMobile ? 12 : 24, background: "#f8fafc" }}>
           {renderDashboardStats()}
 
           {/* Lessons view */}
           {activeTab === "lessons" && (
             <Card title="Danh sách Video bài giảng" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingLesson(null); lessonForm.resetFields(); setIsLessonModalOpen(true); }}>Thêm bài giảng mới</Button>}>
-              <Table dataSource={lessons} columns={lessonColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} />
+              <Table dataSource={lessons} columns={lessonColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
 
           {/* Comments view */}
           {activeTab === "comments" && (
             <Card title="Duyệt thảo luận của học viên">
-              <Table dataSource={comments} columns={commentColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} />
+              <Table dataSource={comments} columns={commentColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
 
           {/* Stories view */}
           {activeTab === "stories" && (
             <Card title="Stories đang hiển thị trên bảng tin" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingStory(null); storyForm.resetFields(); setIsStoryModalOpen(true); }}>Thêm Story</Button>}>
-              <Table dataSource={stories} columns={storyColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} />
+              <Table dataSource={stories} columns={storyColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
 
           {/* Flashcards view */}
           {activeTab === "flashcards" && (
             <Card title="Danh sách Bộ thẻ Flashcard từ vựng" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingDeck(null); deckForm.resetFields(); deckForm.setFieldsValue({ cards: [] }); setIsDeckModalOpen(true); }}>Tạo bộ thẻ</Button>}>
-              <Table dataSource={decks} columns={deckColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} />
+              <Table dataSource={decks} columns={deckColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
 
           {/* Exams view */}
           {activeTab === "exams" && (
             <Card title="Các bộ đề luyện tập & đề thi thử" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [] }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>}>
-              <Table dataSource={exams} columns={examColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} />
+              <Table dataSource={exams} columns={examColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
         </Content>
@@ -684,8 +843,55 @@ export default function AdminPage() {
           <Form.Item name="duration" label="Thời lượng" rules={[{ required: true, message: "Nhập thời lượng" }]}>
             <Input placeholder="Ví dụ: 45:00 hoặc 1:12:30" />
           </Form.Item>
-          <Form.Item name="videoUrl" label="Đường dẫn Video bài giảng">
-            <Input placeholder="URL của video (.mp4, vimeo, youtube)" />
+          <Form.Item name="videoUrl" label="Video bài giảng">
+            <Input.Group compact>
+              <Form.Item name="videoUrl" noStyle>
+                <Input style={{ width: "calc(100% - 120px)" }} placeholder="Tải video lên Cloudflare hoặc dán link" />
+              </Form.Item>
+              <Upload
+                beforeUpload={(file) => {
+                  const isVideo = file.type.startsWith("video/");
+                  if (!isVideo) {
+                    msg.error("Chỉ chấp nhận tệp video!");
+                    return false;
+                  }
+                  const isLt100M = file.size / 1024 / 1024 < 100;
+                  if (!isLt100M) {
+                    msg.warning("Video nặng hơn 100MB có thể tải lên lâu. Khuyên dùng Handbrake nén trước.");
+                  }
+                  handleUpload(file, (url) => lessonForm.setFieldsValue({ videoUrl: url }));
+                  return false;
+                }}
+                showUploadList={false}
+                accept="video/*"
+              >
+                <Button icon={<UploadOutlined />} style={{ width: 120 }} loading={uploadLoading}>Tải video</Button>
+              </Upload>
+            </Input.Group>
+          </Form.Item>
+
+          <Form.Item name="exerciseId" noStyle>
+            <Input type="hidden" />
+          </Form.Item>
+
+          <Form.Item label="Bài tập đính kèm (Luyện tập sau bài học)">
+            <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.exerciseId !== currentValues.exerciseId} noStyle>
+              {() => {
+                const currentExerciseId = lessonForm.getFieldValue("exerciseId");
+                return (
+                  <Space>
+                    {currentExerciseId ? (
+                      <Tag color="success">Đã soạn bài tập đính kèm ✅</Tag>
+                    ) : (
+                      <Tag color="warning">Chưa có bài tập ôn luyện ⚠️</Tag>
+                    )}
+                    <Button type="primary" size="small" onClick={openExerciseModal} icon={<PlusOutlined />}>
+                      {currentExerciseId ? "Chỉnh sửa bài tập" : "Soạn bài tập ôn luyện"}
+                    </Button>
+                  </Space>
+                );
+              }}
+            </Form.Item>
           </Form.Item>
           <Form.Item name="playlistId" label="Mã danh sách (Playlist ID)">
             <Input placeholder="playlist-grammar" />
@@ -706,6 +912,127 @@ export default function AdminPage() {
               </Upload>
             </Input.Group>
           </Form.Item>
+        </Form>
+      </Modal>      {/* Exercise Add/Edit Modal (Homework) */}
+      <Modal
+        title="Soạn bài tập ôn luyện (Luyện tập sau bài học)"
+        open={isExerciseModalOpen}
+        onCancel={() => setIsExerciseModalOpen(false)}
+        onOk={() => exerciseForm.submit()}
+        width={800}
+      >
+        <Form form={exerciseForm} layout="vertical" onFinish={saveExercise}>
+          <Row gutter={16}>
+            <Col xs={24} sm={18}>
+              <Form.Item name="title" label="Tiêu đề bộ bài tập" rules={[{ required: true, message: "Nhập tiêu đề bài tập" }]}>
+                <Input placeholder="Ví dụ: Bài tập ôn luyện Chuyên đề 1 - Danh từ" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6}>
+              <Form.Item name="duration" label="Thời gian làm bài (phút)" rules={[{ required: true, message: "Nhập số phút" }]}>
+                <InputNumber min={5} max={120} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.List name="questions">
+            {(fields, { add, remove }) => (
+              <Card size="small" title="Ngân hàng câu hỏi bài tập" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" } })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
+                <div style={{ maxHeight: 350, overflowY: "auto", paddingRight: 8 }}>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
+                      <Row gutter={8}>
+                        <Col xs={24} sm={4} md={3}>
+                          <Form.Item {...restField} name={[name, "number"]} label="Câu số" rules={[{ required: true }]}>
+                            <InputNumber style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={6} md={5}>
+                          <Form.Item {...restField} name={[name, "qType"]} label="Loại câu hỏi" initialValue="multiple-choice" rules={[{ required: true }]}>
+                            <Select>
+                              <Option value="multiple-choice">Trắc nghiệm</Option>
+                              <Option value="gap-filling">Điền từ (Gap Filling)</Option>
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={14} md={16}>
+                          <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
+                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                          prevValues.questions?.[name]?.qType !== currentValues.questions?.[name]?.qType
+                        }
+                      >
+                        {() => {
+                          const qType = exerciseForm.getFieldValue(["questions", name, "qType"]) || "multiple-choice";
+                          const isMC = qType === "multiple-choice";
+
+                          return (
+                            <>
+                              {isMC && (
+                                <Row gutter={8}>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "A"]} label="Lựa chọn A" rules={[{ required: true, message: "Nhập A" }]}>
+                                      <Input placeholder="Đáp án A" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "B"]} label="Lựa chọn B" rules={[{ required: true, message: "Nhập B" }]}>
+                                      <Input placeholder="Đáp án B" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "C"]} label="Lựa chọn C" rules={[{ required: true, message: "Nhập C" }]}>
+                                      <Input placeholder="Đáp án C" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "D"]} label="Lựa chọn D" rules={[{ required: true, message: "Nhập D" }]}>
+                                      <Input placeholder="Đáp án D" />
+                                    </Form.Item>
+                                  </Col>
+                                </Row>
+                              )}
+
+                              <Row gutter={8}>
+                                <Col xs={24} sm={8} md={6}>
+                                  {isMC ? (
+                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
+                                      <Select>
+                                        <Option value="A">A</Option>
+                                        <Option value="B">B</Option>
+                                        <Option value="C">C</Option>
+                                        <Option value="D">D</Option>
+                                      </Select>
+                                    </Form.Item>
+                                  ) : (
+                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng (Điền từ)" rules={[{ required: true, message: "Nhập đáp án đúng" }]}>
+                                      <Input placeholder="Ví dụ: went hoặc has gone / is going" />
+                                    </Form.Item>
+                                  )}
+                                </Col>
+                                <Col xs={24} sm={16} md={18}>
+                                  <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                    <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            </>
+                          );
+                        }}
+                      </Form.Item>
+                    </Card>
+                  ))}
+                  {fields.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8" }}>Chưa có câu hỏi nào. Nhấn 'Thêm câu hỏi' để khởi tạo đề.</div>}
+                </div>
+              </Card>
+            )}
+          </Form.List>
         </Form>
       </Modal>
 
@@ -768,12 +1095,12 @@ export default function AdminPage() {
       >
         <Form form={deckForm} layout="vertical" onFinish={saveDeck}>
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="title" label="Tiêu đề bộ thẻ" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
                 <Input placeholder="Ví dụ: Vocabulary Unit 1" />
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={6}>
               <Form.Item name="category" label="Danh mục (Phân loại)" rules={[{ required: true, message: "Chọn danh mục" }]}>
                 <Select onChange={(val) => {
                   const mapping: Record<string, string> = {
@@ -795,7 +1122,7 @@ export default function AdminPage() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={6}>
               <Form.Item name="categoryLabel" label="Nhãn hiển thị" rules={[{ required: true, message: "Nhãn hiển thị" }]}>
                 <Input placeholder="Ví dụ: Từ vựng" />
               </Form.Item>
@@ -803,7 +1130,7 @@ export default function AdminPage() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="type" label="Nguồn bộ đề (Loại)" rules={[{ required: true, message: "Chọn nguồn đề" }]}>
                 <Select>
                   <Option value="system">Hệ thống cấp (System)</Option>
@@ -811,7 +1138,7 @@ export default function AdminPage() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="isLocked" label="Khóa nội dung VIP?" rules={[{ required: true, message: "Xác nhận trạng thái khóa" }]}>
                 <Select>
                   <Option value={false}>Mở khóa miễn phí</Option>
@@ -826,23 +1153,31 @@ export default function AdminPage() {
               <Card size="small" title="Danh sách các thẻ từ vựng" extra={<Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>Thêm thẻ</Button>}>
                 <div style={{ maxHeight: 300, overflowY: "auto", paddingRight: 8 }}>
                   {fields.map(({ key, name, ...restField }) => (
-                    <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                      <Form.Item
-                        {...restField}
-                        name={[name, "front"]}
-                        rules={[{ required: true, message: "Nhập mặt trước" }]}
-                      >
-                        <Input placeholder="Mặt trước (Tiếng Anh)" style={{ width: 300 }} />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "back"]}
-                        rules={[{ required: true, message: "Nhập mặt sau" }]}
-                      >
-                        <Input placeholder="Mặt sau (Nghĩa Tiếng Việt)" style={{ width: 330 }} />
-                      </Form.Item>
-                      <DeleteOutlined onClick={() => remove(name)} style={{ color: "#f43f5e", cursor: "pointer", fontSize: 16 }} />
-                    </Space>
+                    <Row key={key} gutter={8} style={{ marginBottom: 8, display: "flex", alignItems: "center" }}>
+                      <Col xs={24} sm={11}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "front"]}
+                          rules={[{ required: true, message: "Nhập mặt trước" }]}
+                          style={{ marginBottom: isMobile ? 8 : 0 }}
+                        >
+                          <Input placeholder="Mặt trước (Tiếng Anh)" style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={21} sm={11}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, "back"]}
+                          rules={[{ required: true, message: "Nhập mặt sau" }]}
+                          style={{ marginBottom: 0 }}
+                        >
+                          <Input placeholder="Mặt sau (Nghĩa Tiếng Việt)" style={{ width: "100%" }} />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={3} sm={2} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <DeleteOutlined onClick={() => remove(name)} style={{ color: "#f43f5e", cursor: "pointer", fontSize: 16 }} />
+                      </Col>
+                    </Row>
                   ))}
                   {fields.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8" }}>Chưa có thẻ nào được thêm. Nhấn 'Thêm thẻ' để bắt đầu.</div>}
                 </div>
@@ -862,12 +1197,12 @@ export default function AdminPage() {
       >
         <Form form={examForm} layout="vertical" onFinish={saveExam}>
           <Row gutter={16}>
-            <Col span={14}>
+            <Col xs={24} md={14}>
               <Form.Item name="title" label="Tiêu đề đề thi" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
                 <Input placeholder="Ví dụ: Đề thi thử THPT Quốc gia 2026 - Sở Hà Nội" />
               </Form.Item>
             </Col>
-            <Col span={6}>
+            <Col xs={24} sm={14} md={6}>
               <Form.Item name="category" label="Phân loại" rules={[{ required: true, message: "Chọn phân loại" }]}>
                 <Select>
                   <Option value="school-exams">Đề thi thử THPT (Sở/Trường)</Option>
@@ -876,7 +1211,7 @@ export default function AdminPage() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={4}>
+            <Col xs={24} sm={10} md={4}>
               <Form.Item name="duration" label="Thời gian (phút)" rules={[{ required: true, message: "Nhập số phút" }]}>
                 <InputNumber min={5} max={180} style={{ width: "100%" }} />
               </Form.Item>
@@ -890,58 +1225,90 @@ export default function AdminPage() {
                   {fields.map(({ key, name, ...restField }) => (
                     <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
                       <Row gutter={8}>
-                        <Col span={4}>
+                        <Col xs={24} sm={4} md={3}>
                           <Form.Item {...restField} name={[name, "number"]} label="Câu số" rules={[{ required: true }]}>
                             <InputNumber style={{ width: "100%" }} />
                           </Form.Item>
                         </Col>
-                        <Col span={20}>
-                          <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
-                            <Input placeholder="Nhập câu hỏi (Ví dụ: The free clinic was founded...)" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      <Row gutter={8}>
-                        <Col span={6}>
-                          <Form.Item {...restField} name={[name, "options", "A"]} label="Lựa chọn A" rules={[{ required: true, message: "Nhập A" }]}>
-                            <Input placeholder="Đáp án A" />
-                          </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                          <Form.Item {...restField} name={[name, "options", "B"]} label="Lựa chọn B" rules={[{ required: true, message: "Nhập B" }]}>
-                            <Input placeholder="Đáp án B" />
-                          </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                          <Form.Item {...restField} name={[name, "options", "C"]} label="Lựa chọn C" rules={[{ required: true, message: "Nhập C" }]}>
-                            <Input placeholder="Đáp án C" />
-                          </Form.Item>
-                        </Col>
-                        <Col span={6}>
-                          <Form.Item {...restField} name={[name, "options", "D"]} label="Lựa chọn D" rules={[{ required: true, message: "Nhập D" }]}>
-                            <Input placeholder="Đáp án D" />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-
-                      <Row gutter={8}>
-                        <Col span={6}>
-                          <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
+                        <Col xs={24} sm={6} md={5}>
+                          <Form.Item {...restField} name={[name, "qType"]} label="Loại câu hỏi" initialValue="multiple-choice" rules={[{ required: true }]}>
                             <Select>
-                              <Option value="A">A</Option>
-                              <Option value="B">B</Option>
-                              <Option value="C">C</Option>
-                              <Option value="D">D</Option>
+                              <Option value="multiple-choice">Trắc nghiệm</Option>
+                              <Option value="gap-filling">Điền từ (Gap Filling)</Option>
                             </Select>
                           </Form.Item>
                         </Col>
-                        <Col span={18}>
-                          <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                            <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                        <Col xs={24} sm={14} md={16}>
+                          <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
+                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" />
                           </Form.Item>
                         </Col>
                       </Row>
+
+                      <Form.Item
+                        noStyle
+                        shouldUpdate={(prevValues, currentValues) =>
+                          prevValues.questions?.[name]?.qType !== currentValues.questions?.[name]?.qType
+                        }
+                      >
+                        {() => {
+                          const qType = examForm.getFieldValue(["questions", name, "qType"]) || "multiple-choice";
+                          const isMC = qType === "multiple-choice";
+
+                          return (
+                            <>
+                              {isMC && (
+                                <Row gutter={8}>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "A"]} label="Lựa chọn A" rules={[{ required: true, message: "Nhập A" }]}>
+                                      <Input placeholder="Đáp án A" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "B"]} label="Lựa chọn B" rules={[{ required: true, message: "Nhập B" }]}>
+                                      <Input placeholder="Đáp án B" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "C"]} label="Lựa chọn C" rules={[{ required: true, message: "Nhập C" }]}>
+                                      <Input placeholder="Đáp án C" />
+                                    </Form.Item>
+                                  </Col>
+                                  <Col xs={24} sm={12} md={6}>
+                                    <Form.Item {...restField} name={[name, "options", "D"]} label="Lựa chọn D" rules={[{ required: true, message: "Nhập D" }]}>
+                                      <Input placeholder="Đáp án D" />
+                                    </Form.Item>
+                                  </Col>
+                                </Row>
+                              )}
+
+                              <Row gutter={8}>
+                                <Col xs={24} sm={8} md={6}>
+                                  {isMC ? (
+                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
+                                      <Select>
+                                        <Option value="A">A</Option>
+                                        <Option value="B">B</Option>
+                                        <Option value="C">C</Option>
+                                        <Option value="D">D</Option>
+                                      </Select>
+                                    </Form.Item>
+                                  ) : (
+                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng (Điền từ)" rules={[{ required: true, message: "Nhập đáp án đúng" }]}>
+                                      <Input placeholder="Ví dụ: went hoặc has gone / is going" />
+                                    </Form.Item>
+                                  )}
+                                </Col>
+                                <Col xs={24} sm={16} md={18}>
+                                  <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                    <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                  </Form.Item>
+                                </Col>
+                              </Row>
+                            </>
+                          );
+                        }}
+                      </Form.Item>
                     </Card>
                   ))}
                   {fields.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8" }}>Chưa có câu hỏi nào. Nhấn 'Thêm câu hỏi' để khởi tạo đề.</div>}

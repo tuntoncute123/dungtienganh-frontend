@@ -342,7 +342,7 @@ export default function FlashcardPageContent() {
               <>
                 <Row gutter={[20, 20]}>
                   {paginatedDecks.map(deck => (
-                    <Col xs={24} sm={12} lg={12} xl={8} key={deck.id}>
+                    <Col xs={12} sm={12} lg={12} xl={8} key={deck.id}>
                       <FlashcardDeckCard 
                         deck={deck} 
                         onStudy={handleOpenStudy} 
