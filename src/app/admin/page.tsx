@@ -1460,8 +1460,15 @@ export default function AdminPage() {
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Nhập mật khẩu" }]}>
-                <Input.Password placeholder="Nhập mật khẩu..." />
+              <Form.Item
+                name="password"
+                label={editingUser ? "Mật khẩu hiện tại (có thể chỉnh sửa)" : "Mật khẩu"}
+                rules={[{ required: true, message: "Nhập mật khẩu" }]}
+              >
+                <Input
+                  placeholder={editingUser ? "Mật khẩu hiện tại đang hiển thị ở trên" : "Nhập mật khẩu..."}
+                  autoComplete="new-password"
+                />
               </Form.Item>
             </Col>
           </Row>
