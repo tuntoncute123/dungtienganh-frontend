@@ -68,6 +68,7 @@ export default function PracticePage() {
   const [loading, setLoading] = useState(true);
   const [allowedExams, setAllowedExams] = useState<string[]>([]);
   const [role, setRole] = useState<string>("student");
+  const [completedTests, setCompletedTests] = useState<Record<string, { score: number; correct: number; total: number }>>({});
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
@@ -104,12 +105,48 @@ export default function PracticePage() {
           disabled: false
         }));
         setTests(formatted);
+
+        // Check localStorage for completed tests
+        const completedMap: Record<string, { score: number; correct: number; total: number }> = {};
+        data.forEach((item: any) => {
+          try {
+            const saved = localStorage.getItem(`practice_completed_${item.id}`);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              completedMap[item.id] = {
+                score: parsed.score,
+                correct: parsed.correct,
+                total: parsed.total
+              };
+            }
+          } catch (e) {
+            // Ignore localStorage parse errors
+          }
+        });
+        setCompletedTests(completedMap);
       }
     } catch (e) {
       console.error("Lỗi khi tải đề luyện tập:", e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRetakeTest = (e: React.MouseEvent, href: string, testId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Clear the completed state for this test
+    try {
+      localStorage.removeItem(`practice_completed_${testId}`);
+    } catch (err) {
+      // Ignore
+    }
+    setCompletedTests((prev) => {
+      const updated = { ...prev };
+      delete updated[testId];
+      return updated;
+    });
+    router.push(href);
   };
 
   useEffect(() => {
@@ -357,24 +394,53 @@ export default function PracticePage() {
                               {/* Footer: Price (Empty/Free) & CTA */}
                               <div className="card-course__footer">
                                 <div className="card-course__price-sale">
-                                  <span style={{ fontSize: "14px", fontWeight: 700, color: "#13a62e" }}>
-                                    Miễn phí
-                                  </span>
+                                  {completedTests[test.id] ? (
+                                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#0071f9" }}>
+                                      Điểm: {completedTests[test.id].score}% ({completedTests[test.id].correct}/{completedTests[test.id].total} câu)
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#13a62e" }}>
+                                      Miễn phí
+                                    </span>
+                                  )}
                                 </div>
-                                <button
-                                  className={`btn card-course__cta${test.disabled ? " disabled" : ""}`}
-                                  style={test.disabled ? { background: isHovered ? "#d1d1d6" : "#e5e5ea", color: isHovered ? "#515154" : "#8a8a8e", cursor: "not-allowed" } : undefined}
-                                  onClick={(e) => {
-                                    if (test.disabled) {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                    } else {
-                                      router.push(test.href);
-                                    }
-                                  }}
-                                >
-                                  {test.disabled && isHovered ? "Sắp ra mắt" : "Luyện tập ngay"}
-                                </button>
+                                {completedTests[test.id] ? (
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <button
+                                      className="btn card-course__cta"
+                                      style={{ background: "#6b7280", color: "#fff", fontSize: "12px", padding: "6px 10px", flexShrink: 0 }}
+                                      onClick={(e) => handleRetakeTest(e, test.href, test.id)}
+                                    >
+                                      Làm lại
+                                    </button>
+                                    <button
+                                      className="btn card-course__cta"
+                                      style={{ background: "#f59e0b", color: "#fff", fontSize: "12px", padding: "6px 10px", flexShrink: 0 }}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        router.push(`${test.href}&review=true`);
+                                      }}
+                                    >
+                                      Xem chi tiết
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className={`btn card-course__cta${test.disabled ? " disabled" : ""}`}
+                                    style={test.disabled ? { background: isHovered ? "#d1d1d6" : "#e5e5ea", color: isHovered ? "#515154" : "#8a8a8e", cursor: "not-allowed" } : undefined}
+                                    onClick={(e) => {
+                                      if (test.disabled) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                      } else {
+                                        router.push(test.href);
+                                      }
+                                    }}
+                                  >
+                                    {test.disabled && isHovered ? "Sắp ra mắt" : "Luyện tập ngay"}
+                                  </button>
+                                )}
                               </div>
                             </a>
                           );

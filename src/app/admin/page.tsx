@@ -37,7 +37,8 @@ import {
   DashboardOutlined,
   DatabaseOutlined,
   MenuOutlined,
-  UserOutlined
+  UserOutlined,
+  CheckOutlined
 } from "@ant-design/icons";
 
 const COURSE_MAP: Record<string, string> = {
@@ -129,7 +130,7 @@ export default function AdminPage() {
 
   const fetchStories = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/stories`);
+      const res = await fetch(`${API_BASE_URL}/api/stories?admin=true`);
       const data = await res.json();
       if (res.ok) setStories(data);
     } catch (e: any) {
@@ -407,6 +408,24 @@ export default function AdminPage() {
     }
   };
 
+  const approveStory = async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/stories`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isApproved: true })
+      });
+      if (res.ok) {
+        msg.success("Duyệt story thành công!");
+        fetchStories();
+      } else {
+        msg.error("Không thể duyệt story");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
   // Comment Delete
   const deleteComment = async (id: string) => {
     try {
@@ -638,10 +657,39 @@ export default function AdminPage() {
     },
     { title: "Học viên", dataIndex: "name", key: "name" },
     {
+      title: "Loại Story",
+      dataIndex: "type",
+      key: "type",
+      render: (type: string) => {
+        if (type === "badge") return <Tag color="success">Huy hiệu</Tag>;
+        if (type === "post") return <Tag color="purple">Bài đăng</Tag>;
+        return <Tag color="blue">Tải ảnh lên</Tag>;
+      }
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "isApproved",
+      key: "isApproved",
+      render: (isApproved: boolean) => (
+        isApproved ? <Tag color="green">Đã duyệt ✅</Tag> : <Tag color="orange">Chờ duyệt ⏳</Tag>
+      )
+    },
+    {
       title: "Hành động",
       key: "actions",
       render: (_: any, record: any) => (
         <Space size="middle">
+          {!record.isApproved && (
+            <Button
+              type="primary"
+              style={{ backgroundColor: "#22c55e", borderColor: "#22c55e" }}
+              icon={<CheckOutlined />}
+              size="small"
+              onClick={() => approveStory(record.id)}
+            >
+              Duyệt
+            </Button>
+          )}
           <Button
             type="primary"
             icon={<EditOutlined />}
@@ -948,7 +996,7 @@ export default function AdminPage() {
 
           {/* Stories view */}
           {activeTab === "stories" && (
-            <Card title="Stories đang hiển thị trên bảng tin" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingStory(null); storyForm.resetFields(); setIsStoryModalOpen(true); }}>Thêm Story</Button>}>
+            <Card title="Stories đang hiển thị trên bảng tin" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingStory(null); storyForm.resetFields(); storyForm.setFieldsValue({ type: "upload", isApproved: false }); setIsStoryModalOpen(true); }}>Thêm Story</Button>}>
               <Table dataSource={stories} columns={storyColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
@@ -1229,6 +1277,20 @@ export default function AdminPage() {
                 <Button icon={<UploadOutlined />} style={{ width: 110 }}>Tải lên</Button>
               </Upload>
             </Input.Group>
+          </Form.Item>
+          <Form.Item name="type" label="Loại Story" initialValue="upload" rules={[{ required: true }]}>
+            <Select>
+              <Option value="upload">Tải ảnh lên (Cần duyệt)</Option>
+              <Option value="badge">Huy hiệu hệ thống (Tự động duyệt)</Option>
+              <Option value="post">Bài viết hệ thống (Tự động duyệt)</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="isApproved" label="Trạng thái duyệt" initialValue={false} rules={[{ required: true }]}>
+            <Select>
+              <Option value={true}>Đã duyệt ✅</Option>
+              <Option value={false}>Chờ duyệt ⏳</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

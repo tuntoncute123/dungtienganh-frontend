@@ -339,20 +339,46 @@ export default function ProgressTest() {
 
   // Load draft and dynamic exam on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("progress_test_draft_v2");
-      if (saved) {
-        setAnswers(JSON.parse(saved));
-        message.info("Đã khôi phục bài làm nháp gần nhất!");
-      }
-    } catch (e) {
-      console.error("Failed to load draft", e);
-    }
-
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
+      const isReviewMode = params.get("review") === "true";
       setExamId(id);
+
+      // In review mode, restore completed answers and show submitted state
+      if (isReviewMode && id) {
+        try {
+          const completedData = localStorage.getItem(`practice_completed_${id}`);
+          if (completedData) {
+            const parsed = JSON.parse(completedData);
+            if (parsed.answers) {
+              setAnswers(parsed.answers);
+            }
+            setScoreData({
+              correctCount: parsed.correct ?? 0,
+              incorrectCount: (parsed.total ?? 0) - (parsed.correct ?? 0),
+              unansweredCount: 0,
+              score: parsed.score ?? 0
+            });
+            setIsSubmitted(true);
+            setResultVisible(true);
+          }
+        } catch (e) {
+          console.error("Failed to restore completed data", e);
+        }
+      } else {
+        // Normal mode: load draft
+        try {
+          const saved = localStorage.getItem("progress_test_draft_v2");
+          if (saved) {
+            setAnswers(JSON.parse(saved));
+            message.info("Đã khôi phục bài làm nháp gần nhất!");
+          }
+        } catch (e) {
+          console.error("Failed to load draft", e);
+        }
+      }
+
       if (id) {
         setLoading(true);
         fetch(`${API_BASE_URL}/api/exams?id=${id}`)
@@ -565,6 +591,22 @@ export default function ProgressTest() {
 
     // Clear local storage draft upon submission
     localStorage.removeItem("progress_test_draft_v2");
+
+    // Save completed status for this exam so practice list can detect it
+    if (examId) {
+      try {
+        const completedKey = `practice_completed_${examId}`;
+        localStorage.setItem(completedKey, JSON.stringify({
+          score: scoreVal,
+          correct,
+          total: totalQuestions,
+          completedAt: new Date().toISOString(),
+          answers
+        }));
+      } catch (e) {
+        console.error("Failed to save completed status", e);
+      }
+    }
   };
 
   const handleRetake = () => {
