@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: teacherdung-postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: J9YtBkXrO39lOnY3Qpu5cPIt0s5MhRE3uDimqhDIFQo5ojktK7bTDdEcvVEdGZGS
+      POSTGRES_DB: teacherdung
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: ./teacherdung-backend
+      dockerfile: Dockerfile
+    container_name: teacherdung-nestjs-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:J9YtBkXrO39lOnY3Qpu5cPIt0s5MhRE3uDimqhDIFQo5ojktK7bTDdEcvVEdGZGS@db:5432/teacherdung?schema=public
+      CLOUDFLARE_R2_ACCESS_KEY_ID: ${CLOUDFLARE_R2_ACCESS_KEY_ID}
+      CLOUDFLARE_R2_SECRET_ACCESS_KEY: ${CLOUDFLARE_R2_SECRET_ACCESS_KEY}
+      CLOUDFLARE_R2_BUCKET_NAME: ${CLOUDFLARE_R2_BUCKET_NAME}
+      CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT}
+      CLOUDFLARE_R2_PUBLIC_URL: ${CLOUDFLARE_R2_PUBLIC_URL}
+    ports:
+      - '3001:3001'
+    volumes:
+      - shared_logs:/app/logs
+    depends_on:
+      - db
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teacherdung-nextjs-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: https://api.dungtienganh.com
+    ports:
+      - '3000:3000'
+    volumes:
+      - shared_logs:/app/public/logs
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
+  shared_logs:
