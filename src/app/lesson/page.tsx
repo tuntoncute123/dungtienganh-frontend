@@ -76,7 +76,6 @@ function LessonPageContent() {
     if (isDesktop) {
       setSidebarPinned((prev) => !prev);
     } else {
-      e => e.preventDefault();
       setDrawerOpen(true);
     }
   };
