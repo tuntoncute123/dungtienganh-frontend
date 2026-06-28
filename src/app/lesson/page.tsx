@@ -11,6 +11,7 @@ import LessonDocuments from "@/components/lesson/LessonDocuments";
 import DiscussionPanel from "@/components/lesson/DiscussionPanel";
 import LessonPlaylist from "@/components/lesson/LessonPlaylist";
 import ViewModeSelector from "@/components/lesson/ViewModeSelector";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -208,6 +209,9 @@ function LessonPageContent() {
               <LessonPlaylist currentLessonId={lesson.id} />
             </div>
           </div>
+        </div>
+        <div className="content-wrapper" style={{ padding: "0 20px" }}>
+          <Footer />
         </div>
       </Content>
     </Layout>

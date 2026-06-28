@@ -5,6 +5,7 @@ import { Layout, Grid, Drawer } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
 import FlashcardPageContent from "@/components/flashcard/FlashcardPageContent";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -60,6 +61,7 @@ export default function FlashcardPage() {
         <div className="main-scroll">
           <div className="content-wrapper" style={{ padding: "20px" }}>
             <FlashcardPageContent />
+            <Footer />
           </div>
         </div>
       </Content>

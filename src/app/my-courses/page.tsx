@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Layout, Grid, Drawer, Input } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -192,9 +193,22 @@ export default function MyCoursesPage() {
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [allowedCourses, setAllowedCourses] = useState<string[]>([]);
+  const [role, setRole] = useState<string>("student");
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("teacherdung_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setAllowedCourses(user.allowedCourses || []);
+        setRole(user.role || "student");
+      } catch (e) {}
+    }
+  }, []);
 
   const handleMenuClick = () => {
     if (isDesktop) {
@@ -206,6 +220,12 @@ export default function MyCoursesPage() {
 
   // Filter logic
   const filteredCourses = COURSES_DATA.filter((course) => {
+    // 1. Phân quyền học sinh
+    if (role === "student" && !allowedCourses.includes(course.id)) {
+      return false;
+    }
+
+    // 2. Lọc thông thường
     const matchesTab = activeTab === "all" || course.grade === activeTab;
     const matchesSearch =
       course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -479,6 +499,9 @@ export default function MyCoursesPage() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="content-wrapper" style={{ padding: "0 20px" }}>
+            <Footer />
           </div>
         </div>
       </Content>

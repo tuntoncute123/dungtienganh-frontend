@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Layout, Grid, Drawer } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -75,9 +76,22 @@ export default function SchoolExamsPage() {
   
   const [exams, setExams] = useState<SchoolExam[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allowedExams, setAllowedExams] = useState<string[]>([]);
+  const [role, setRole] = useState<string>("student");
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("teacherdung_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setAllowedExams(user.allowedExams || []);
+        setRole(user.role || "student");
+      } catch (e) {}
+    }
+  }, []);
 
   const fetchExams = async () => {
     setLoading(true);
@@ -124,6 +138,12 @@ export default function SchoolExamsPage() {
   };
 
   const filteredExams = exams.filter((exam) => {
+    // 1. Phân quyền học sinh
+    if (role === "student" && !allowedExams.includes(exam.id)) {
+      return false;
+    }
+
+    // 2. Lọc thông thường
     const matchesTab = activeTab === "all" || exam.region === activeTab;
     const matchesSearch =
       exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -399,6 +419,9 @@ export default function SchoolExamsPage() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="content-wrapper" style={{ padding: "0 20px" }}>
+            <Footer />
           </div>
         </div>
       </Content>

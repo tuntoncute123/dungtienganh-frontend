@@ -36,8 +36,22 @@ import {
   EditOutlined,
   DashboardOutlined,
   DatabaseOutlined,
-  MenuOutlined
+  MenuOutlined,
+  UserOutlined
 } from "@ant-design/icons";
+
+const COURSE_MAP: Record<string, string> = {
+  "toan-9-he-2k12": "TOÁN 9 | KHÓA HÈ 2K12",
+  "toan-12-l-nen-tang": "TOÁN 12 | KHOÁ [L] NỀN TẢNG 12 2027",
+  "toan-12-f-he-thong": "TOÁN 12 | KHOÁ [F] HỆ THỐNG NỀN TẢNG 11 2027",
+  "500-cau-chong-sai-ngu": "500 CÂU CHỐNG SAI NGU KINH ĐIỂN",
+  "tieng-anh-10-hk2": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 2 - HS 2K11",
+  "tieng-anh-11-hk2": "TIẾNG ANH 11 | KHOÁ HỌC KÌ 2 - HS 2K10",
+  "tieng-anh-10-hk1": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 1 - HS 2K11",
+  "tieng-anh-11-hk1": "TIẾNG ANH 11 | KHOÁ HỌC KÌ 1 - HS 2K10",
+  "tieng-anh-9-he-2k12": "TIẾNG ANH 9 | KHÓA HÈ 2K12",
+  "tieng-anh-9-ngu-phap": "TIẾNG ANH 9 | KHÓA NGỮ PHÁP TOÀN DIỆN"
+};
 
 const { Header, Content, Sider } = Layout;
 const { Option } = Select;
@@ -58,6 +72,7 @@ export default function AdminPage() {
   const [stories, setStories] = useState<any[]>([]);
   const [decks, setDecks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
 
   // Loading states
   const [loading, setLoading] = useState<boolean>(false);
@@ -75,6 +90,9 @@ export default function AdminPage() {
   const [isExamModalOpen, setIsExamModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState<any>(null);
 
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+
   const [isExerciseModalOpen, setIsExerciseModalOpen] = useState(false);
 
   // Upload helpers
@@ -86,6 +104,7 @@ export default function AdminPage() {
   const [deckForm] = Form.useForm();
   const [examForm] = Form.useForm();
   const [exerciseForm] = Form.useForm();
+  const [userForm] = Form.useForm();
 
   // Fetching methods
   const fetchLessons = async () => {
@@ -138,6 +157,16 @@ export default function AdminPage() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users`);
+      const data = await res.json();
+      if (res.ok) setUsers(data);
+    } catch (e: any) {
+      msg.error("Lỗi khi tải danh sách học sinh");
+    }
+  };
+
   const loadAllData = async () => {
     setLoading(true);
     await Promise.all([
@@ -145,7 +174,8 @@ export default function AdminPage() {
       fetchComments(),
       fetchStories(),
       fetchDecks(),
-      fetchExams()
+      fetchExams(),
+      fetchUsers()
     ]);
     setLoading(false);
   };
@@ -496,6 +526,50 @@ export default function AdminPage() {
     }
   };
 
+  // User CRUD
+  const saveUser = async (values: any) => {
+    try {
+      const isEdit = !!editingUser;
+      const url = `${API_BASE_URL}/api/users`;
+      const method = isEdit ? "PUT" : "POST";
+      const body = isEdit ? { ...values, id: editingUser.id } : values;
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        msg.success(`${isEdit ? "Cập nhật" : "Tạo mới"} học sinh thành công!`);
+        setIsUserModalOpen(false);
+        setEditingUser(null);
+        userForm.resetFields();
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || err.error || "Không thể lưu học sinh");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const deleteUser = async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        msg.success("Xóa tài khoản học sinh thành công!");
+        fetchUsers();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || "Không thể xóa học sinh");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
   // Columns definition
   const lessonColumns = [
     {
@@ -679,6 +753,71 @@ export default function AdminPage() {
     }
   ];
 
+  const userColumns = [
+    { title: "Tài khoản", dataIndex: "username", key: "username", render: (text: string) => <strong>{text}</strong> },
+    { title: "Họ và tên", dataIndex: "name", key: "name" },
+    { 
+      title: "Khóa học được học", 
+      dataIndex: "allowedCourses", 
+      key: "allowedCourses",
+      render: (allowed: string[]) => {
+        if (!allowed || allowed.length === 0) return <Tag color="default">Chưa phân quyền</Tag>;
+        return (
+          <Space size={[0, 4]} wrap>
+            {allowed.map(courseId => (
+              <Tag color="blue" key={courseId}>{COURSE_MAP[courseId] || courseId}</Tag>
+            ))}
+          </Space>
+        );
+      }
+    },
+    { 
+      title: "Đề thi được làm", 
+      dataIndex: "allowedExams", 
+      key: "allowedExams",
+      render: (allowed: string[]) => {
+        if (!allowed || allowed.length === 0) return <Tag color="default">Chưa phân quyền</Tag>;
+        return (
+          <Space size={[0, 4]} wrap>
+            {allowed.map(examId => {
+              const exam = exams.find(e => e.id === examId);
+              return <Tag color="purple" key={examId}>{exam ? exam.title : examId}</Tag>;
+            })}
+          </Space>
+        );
+      }
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            size="small"
+            onClick={() => {
+              setEditingUser(record);
+              userForm.setFieldsValue({
+                username: record.username,
+                name: record.name,
+                password: "",
+                allowedCourses: record.allowedCourses || [],
+                allowedExams: record.allowedExams || [],
+              });
+              setIsUserModalOpen(true);
+            }}
+          >
+            Sửa & Phân quyền
+          </Button>
+          <Popconfirm title="Xóa học sinh này?" onConfirm={() => deleteUser(record.id)}>
+            <Button type="primary" danger icon={<DeleteOutlined />} size="small" />
+          </Popconfirm>
+        </Space>
+      )
+    }
+  ];
+
   const renderDashboardStats = () => {
     return (
       <div style={{ marginBottom: 24 }}>
@@ -732,6 +871,7 @@ export default function AdminPage() {
         { key: "stories", icon: <InstagramOutlined />, label: "Stories" },
         { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
         { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
+        { key: "users", icon: <UserOutlined />, label: "Quản lý Học sinh" },
       ]}
     />
   );
@@ -780,6 +920,7 @@ export default function AdminPage() {
               {activeTab === "stories" && (isMobile ? "Stories" : "Quản lý Stories bảng tin")}
               {activeTab === "flashcards" && (isMobile ? "Bộ thẻ học" : "Quản lý Bộ thẻ Flashcard học tập")}
               {activeTab === "exams" && (isMobile ? "Đề thi & Câu hỏi" : "Quản lý Đề thi khảo sát & Đề thi thử")}
+              {activeTab === "users" && (isMobile ? "Quản lý Học sinh" : "Quản lý tài khoản Học sinh & Phân quyền")}
             </div>
           </div>
           <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
@@ -823,6 +964,13 @@ export default function AdminPage() {
           {activeTab === "exams" && (
             <Card title="Các bộ đề luyện tập & đề thi thử" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [] }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>}>
               <Table dataSource={exams} columns={examColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
+            </Card>
+          )}
+
+          {/* Users view */}
+          {activeTab === "users" && (
+            <Card title="Danh sách Học sinh & Phân quyền học tập" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingUser(null); userForm.resetFields(); userForm.setFieldsValue({ allowedCourses: [], allowedExams: [] }); setIsUserModalOpen(true); }}>Tạo tài khoản học sinh</Button>}>
+              <Table dataSource={users} columns={userColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
         </Content>
@@ -1316,6 +1464,52 @@ export default function AdminPage() {
               </Card>
             )}
           </Form.List>
+        </Form>
+      </Modal>
+
+      {/* User Add/Edit Modal */}
+      <Modal
+        title={editingUser ? "Chỉnh sửa tài khoản Học sinh & Phân quyền" : "Tạo tài khoản Học sinh mới"}
+        open={isUserModalOpen}
+        onCancel={() => { setIsUserModalOpen(false); setEditingUser(null); }}
+        onOk={() => userForm.submit()}
+        width={700}
+      >
+        <Form form={userForm} layout="vertical" onFinish={saveUser}>
+          <Row gutter={16}>
+            <Col xs={24} sm={12}>
+              <Form.Item name="username" label="Tên đăng nhập (Username)" rules={[{ required: true, message: "Nhập tài khoản" }]}>
+                <Input placeholder="Ví dụ: nguyenvananh" disabled={!!editingUser} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12}>
+              <Form.Item name="password" label={editingUser ? "Mật khẩu mới (Để trống nếu giữ nguyên)" : "Mật khẩu"} rules={[{ required: !editingUser, message: "Nhập mật khẩu" }]}>
+                <Input.Password placeholder="Nhập mật khẩu..." />
+              </Form.Item>
+            </Col>
+          </Row>
+          
+          <Form.Item name="name" label="Họ và tên học sinh" rules={[{ required: true, message: "Nhập họ tên" }]}>
+            <Input placeholder="Ví dụ: Nguyễn Văn Ánh" />
+          </Form.Item>
+
+          <Form.Item name="allowedCourses" label="Khóa học được học (Phân quyền)">
+            <Select mode="multiple" placeholder="Chọn khóa học được phép học..." style={{ width: "100%" }}>
+              {Object.entries(COURSE_MAP).map(([id, name]) => (
+                <Option key={id} value={id}>{name}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="allowedExams" label="Đề thi / Bài tập được làm (Phân quyền khóa luyện đề)">
+            <Select mode="multiple" placeholder="Chọn các đề thi được làm..." style={{ width: "100%" }}>
+              {exams.map(exam => (
+                <Option key={exam.id} value={exam.id}>
+                  {exam.title} ({exam.category === "school-exams" ? "Đề thi trường" : exam.category === "mock-test" ? "Thi thử" : "Luyện tập"})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
     </Layout>

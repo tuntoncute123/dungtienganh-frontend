@@ -5,6 +5,7 @@ import { Layout, Grid, Drawer } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
 import styles from "@/components/profile/profile.module.css";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -1051,6 +1052,9 @@ export default function ProfilePage() {
 
 
 
+          </div>
+          <div className="content-wrapper" style={{ padding: "0 40px" }}>
+            <Footer />
           </div>
         </div>
       </Content>

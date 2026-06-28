@@ -5,6 +5,7 @@ import { Layout, Drawer, Grid, Spin } from "antd";
 import { useSearchParams, useRouter } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -325,6 +326,7 @@ function StoryPageContent() {
                 <StoryListView router={router} stories={stories} />
               )}
             </div>
+            <Footer />
           </div>
         </div>
       </Content>

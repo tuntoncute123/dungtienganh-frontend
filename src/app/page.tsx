@@ -14,6 +14,7 @@ import LearningProfile from "@/components/LearningProfile";
 import StoryList from "@/components/StoryList";
 import HonorBoard from "@/components/HonorBoard";
 import TeacherIntro from "@/components/TeacherIntro";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -128,6 +129,9 @@ export default function HomePage() {
 
             {/* Giới thiệu giáo viên */}
             <TeacherIntro />
+
+            {/* Footer */}
+            <Footer />
           </div>
         </div>
       </Content>

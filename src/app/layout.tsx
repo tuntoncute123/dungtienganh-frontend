@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider, App } from "antd";
 import "./globals.css";
+import AuthGuard from "@/components/AuthGuard";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -47,7 +48,9 @@ export default function RootLayout({
             }}
           >
             <App>
-              {children}
+              <AuthGuard>
+                {children}
+              </AuthGuard>
             </App>
           </ConfigProvider>
         </AntdRegistry>

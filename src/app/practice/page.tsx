@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Layout, Grid, Drawer } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -65,9 +66,22 @@ export default function PracticePage() {
   
   const [tests, setTests] = useState<PracticeTest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allowedExams, setAllowedExams] = useState<string[]>([]);
+  const [role, setRole] = useState<string>("student");
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("teacherdung_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setAllowedExams(user.allowedExams || []);
+        setRole(user.role || "student");
+      } catch (e) {}
+    }
+  }, []);
 
   const fetchPracticeTests = async () => {
     setLoading(true);
@@ -112,6 +126,12 @@ export default function PracticePage() {
 
   // Filter logic
   const filteredTests = tests.filter((test) => {
+    // 1. Phân quyền học sinh
+    if (role === "student" && !allowedExams.includes(test.id)) {
+      return false;
+    }
+
+    // 2. Lọc thông thường
     const matchesTab = activeTab === "all" || test.category === activeTab;
     const matchesSearch =
       test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -383,6 +403,9 @@ export default function PracticePage() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="content-wrapper" style={{ padding: "0 20px" }}>
+            <Footer />
           </div>
         </div>
       </Content>

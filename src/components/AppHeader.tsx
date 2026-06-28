@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Popover, Modal, Button, message } from "antd";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const { useBreakpoint } = Grid;
 
@@ -22,12 +23,53 @@ interface AppHeaderProps {
 
 export default function AppHeader({ onMenuClick }: AppHeaderProps) {
   const screens = useBreakpoint();
+  const router = useRouter();
   const isMobile = !screens.sm;
   const isTablet = screens.sm && !screens.lg;
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
+
+  const [userName, setUserName] = useState("Huỳnh Tấn Toàn");
+  const [role, setRole] = useState("student");
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("teacherdung_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserName(user.name || user.username);
+        setRole(user.role);
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    message.success("Đăng xuất thành công!");
+    router.push("/login");
+  };
+
+  const avatarMenu = (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 150 }}>
+      <div style={{ fontWeight: 700, color: "#0f172a" }}>{userName}</div>
+      <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", fontWeight: 600 }}>
+        {role === "admin" ? "Giáo viên (Admin)" : "Học sinh"}
+      </div>
+      <hr style={{ border: 0, borderTop: "1px solid #f1f5f9", margin: "4px 0" }} />
+      {role === "admin" && (
+        <Link href="/admin">
+          <Button type="link" size="small" style={{ padding: 0, textAlign: "left", width: "100%", color: "#0071f9" }}>
+            Trang quản trị
+          </Button>
+        </Link>
+      )}
+      <Button type="primary" danger size="small" onClick={handleLogout} style={{ marginTop: 4 }} block>
+        Đăng xuất
+      </Button>
+    </div>
+  );
 
   const handleShareStory = () => {
     setSharing(true);
@@ -157,10 +199,16 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
           <span className="notif-badge">0</span>
         </button>
 
-        {/* Avatar */}
-        <div className="avatar-btn">
-          <img src={ICONS.avatar} alt="avatar Huỳnh Tấn Toàn" />
-        </div>
+        {/* Avatar with Dropdown */}
+        <Popover
+          content={avatarMenu}
+          trigger="click"
+          placement="bottomRight"
+        >
+          <div className="avatar-btn" style={{ cursor: "pointer" }}>
+            <img src={ICONS.avatar} alt="avatar" />
+          </div>
+        </Popover>
       </div>
 
       {/* Share to Story Modal */}
@@ -182,7 +230,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
             <img src={ICONS.logo} alt="logo" className="streak-share-logo" />
             <div style={{ position: "relative", zIndex: 2 }}>
               <img src={ICONS.avatar} alt="avatar" className="streak-share-avatar" />
-              <h4 className="streak-share-username">Huỳnh Tấn Toàn</h4>
+              <h4 className="streak-share-username">{userName}</h4>
               <div className="streak-share-badge-tag">Huy hiệu Đồng 🥉</div>
               
               <div className="streak-share-count-number">22</div>

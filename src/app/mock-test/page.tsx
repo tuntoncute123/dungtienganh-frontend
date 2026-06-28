@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Layout, Grid, Drawer } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
+import Footer from "@/components/Footer";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -73,6 +74,7 @@ export default function MockTestPage() {
             >
               Hệ thống phòng thi thử online đang được cập nhật...
             </div>
+            <Footer />
           </div>
         </div>
       </Content>
