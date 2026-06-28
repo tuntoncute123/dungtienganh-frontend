@@ -26,7 +26,6 @@ import {
 } from "antd";
 import {
   PlayCircleOutlined,
-  CommentOutlined,
   InstagramOutlined,
   BookOutlined,
   FileTextOutlined,
@@ -69,7 +68,6 @@ export default function AdminPage() {
 
   // Data states
   const [lessons, setLessons] = useState<any[]>([]);
-  const [comments, setComments] = useState<any[]>([]);
   const [stories, setStories] = useState<any[]>([]);
   const [decks, setDecks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
@@ -118,16 +116,6 @@ export default function AdminPage() {
     }
   };
 
-  const fetchComments = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/comments`);
-      const data = await res.json();
-      if (res.ok) setComments(data);
-    } catch (e: any) {
-      msg.error("Lỗi khi tải bình luận");
-    }
-  };
-
   const fetchStories = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/stories?admin=true`);
@@ -172,7 +160,6 @@ export default function AdminPage() {
     setLoading(true);
     await Promise.all([
       fetchLessons(),
-      fetchComments(),
       fetchStories(),
       fetchDecks(),
       fetchExams(),
@@ -426,21 +413,6 @@ export default function AdminPage() {
     }
   };
 
-  // Comment Delete
-  const deleteComment = async (id: string) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/comments?id=${id}`, { method: "DELETE" });
-      if (res.ok) {
-        msg.success("Xóa bình luận thành công!");
-        fetchComments();
-      } else {
-        msg.error("Không thể xóa bình luận");
-      }
-    } catch (e) {
-      msg.error("Lỗi hệ thống");
-    }
-  };
-
   // Flashcards CRUD
   const saveDeck = async (values: any) => {
     try {
@@ -622,31 +594,6 @@ export default function AdminPage() {
     }
   ];
 
-  const commentColumns = [
-    { title: "Học viên", dataIndex: "userName", key: "userName" },
-    { title: "Nội dung", dataIndex: "content", key: "content" },
-    { 
-      title: "Bài học", 
-      dataIndex: "lesson", 
-      key: "lesson",
-      render: (lesson: any) => lesson?.title || <Tag color="warning">Chưa gán</Tag>
-    },
-    {
-      title: "Ngày bình luận",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date: string) => new Date(date).toLocaleString("vi-VN")
-    },
-    {
-      title: "Hành động",
-      key: "actions",
-      render: (_: any, record: any) => (
-        <Popconfirm title="Xóa bình luận này?" onConfirm={() => deleteComment(record.id)}>
-          <Button type="primary" danger icon={<DeleteOutlined />} size="small" />
-        </Popconfirm>
-      )
-    }
-  ];
 
   const storyColumns = [
     {
@@ -870,31 +817,25 @@ export default function AdminPage() {
     return (
       <div style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]}>
-          <Col xs={12} sm={8} md={4}>
+          <Col xs={12} sm={12} md={6}>
             <Card style={{ textAlign: "center", borderLeft: "4px solid #0071f9" }}>
               <div style={{ fontSize: 13, color: "#64748b" }}>Bài học</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{lessons.length}</div>
             </Card>
           </Col>
-          <Col xs={12} sm={8} md={4}>
-            <Card style={{ textAlign: "center", borderLeft: "4px solid #f43f5e" }}>
-              <div style={{ fontSize: 13, color: "#64748b" }}>Bình luận</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{comments.length}</div>
-            </Card>
-          </Col>
-          <Col xs={12} sm={8} md={4}>
+          <Col xs={12} sm={12} md={6}>
             <Card style={{ textAlign: "center", borderLeft: "4px solid #10b981" }}>
               <div style={{ fontSize: 13, color: "#64748b" }}>Stories</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{stories.length}</div>
             </Card>
           </Col>
-          <Col xs={12} sm={8} md={4}>
+          <Col xs={12} sm={12} md={6}>
             <Card style={{ textAlign: "center", borderLeft: "4px solid #eab308" }}>
               <div style={{ fontSize: 13, color: "#64748b" }}>Bộ thẻ học</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{decks.length}</div>
             </Card>
           </Col>
-          <Col xs={12} sm={8} md={4}>
+          <Col xs={12} sm={12} md={6}>
             <Card style={{ textAlign: "center", borderLeft: "4px solid #a855f7" }}>
               <div style={{ fontSize: 13, color: "#64748b" }}>Bộ đề thi</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{exams.length}</div>
@@ -915,7 +856,6 @@ export default function AdminPage() {
       style={{ borderRight: 0, marginTop: isMobile ? 0 : 12 }}
       items={[
         { key: "lessons", icon: <PlayCircleOutlined />, label: "Bài học" },
-        { key: "comments", icon: <CommentOutlined />, label: "Bình luận" },
         { key: "stories", icon: <InstagramOutlined />, label: "Stories" },
         { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
         { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
@@ -964,7 +904,6 @@ export default function AdminPage() {
             )}
             <div style={{ fontSize: isMobile ? 15 : 18, fontWeight: 700, color: "#1e293b", flexGrow: 1 }}>
               {activeTab === "lessons" && (isMobile ? "Quản lý Bài học" : "Quản lý Bài học video")}
-              {activeTab === "comments" && (isMobile ? "Bình luận" : "Quản lý Bình luận khóa học")}
               {activeTab === "stories" && (isMobile ? "Stories" : "Quản lý Stories bảng tin")}
               {activeTab === "flashcards" && (isMobile ? "Bộ thẻ học" : "Quản lý Bộ thẻ Flashcard học tập")}
               {activeTab === "exams" && (isMobile ? "Đề thi & Câu hỏi" : "Quản lý Đề thi khảo sát & Đề thi thử")}
@@ -987,12 +926,7 @@ export default function AdminPage() {
             </Card>
           )}
 
-          {/* Comments view */}
-          {activeTab === "comments" && (
-            <Card title="Duyệt thảo luận của học viên">
-              <Table dataSource={comments} columns={commentColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
-            </Card>
-          )}
+          {/* Stories view */}
 
           {/* Stories view */}
           {activeTab === "stories" && (
