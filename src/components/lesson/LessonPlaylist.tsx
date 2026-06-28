@@ -1,51 +1,67 @@
 "use client";
 
-import React from "react";
-import {
-  PlayCircleOutlined,
-  FormOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { PlayCircleOutlined, FormOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
+import { Spin } from "antd";
 
-type ItemType = "video" | "quiz";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
-interface LessonItem {
-  id: string;
-  title: string;
-  type: ItemType;
-  active?: boolean;
+interface LessonPlaylistProps {
+  currentLessonId: string;
 }
 
-const LESSON_ITEMS: LessonItem[] = [
-  { id: "1", title: "Từ loại (Lý thuyết - Buổi 1)", type: "video", active: true },
-  { id: "2", title: "Thi Online: Danh từ", type: "quiz" },
-  { id: "3", title: "Từ loại (Lý thuyết - Buổi 2)", type: "video" },
-  { id: "4", title: "Thi online: Tính từ", type: "quiz" },
-  { id: "5", title: "Từ loại (Lý thuyết - Buổi 3)", type: "video" },
-  { id: "6", title: "Thi online: Trạng từ", type: "quiz" },
-];
+export default function LessonPlaylist({ currentLessonId }: LessonPlaylistProps) {
+  const router = useRouter();
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default function LessonPlaylist() {
+  useEffect(() => {
+    const fetchPlaylist = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/lessons`);
+        if (res.ok) {
+          const data = await res.json();
+          setLessons(data);
+        }
+      } catch (e) {
+        console.error("Lỗi khi tải danh sách bài học:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlaylist();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="lp-card lp-playlist" style={{ display: "flex", justifyContent: "center", padding: 20 }}>
+        <Spin size="small" tip="Đang tải danh sách..." />
+      </div>
+    );
+  }
+
   return (
     <div className="lp-card lp-playlist">
       <ul className="lp-playlist-list">
-        {LESSON_ITEMS.map((item, idx) => (
-          <li
-            key={item.id}
-            className={`lp-playlist-item${item.active ? " lp-playlist-item-active" : ""}${idx < LESSON_ITEMS.length - 1 ? " lp-playlist-item-border" : ""}`}
-          >
-            <span className="lp-playlist-icon">
-              {item.type === "video" ? (
-                <PlayCircleOutlined style={{ fontSize: 18, color: item.active ? "#f40c44" : "#9ca3af" }} />
-              ) : (
-                <FormOutlined style={{ fontSize: 18, color: "#9ca3af" }} />
-              )}
-            </span>
-            <span className={`lp-playlist-title${item.active ? " lp-playlist-title-active" : ""}`}>
-              {item.title}
-            </span>
-          </li>
-        ))}
+        {lessons.map((item, idx) => {
+          const isActive = item.id === currentLessonId;
+          return (
+            <li
+              key={item.id}
+              className={`lp-playlist-item${isActive ? " lp-playlist-item-active" : ""}${idx < lessons.length - 1 ? " lp-playlist-item-border" : ""}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => router.push(`/lesson?id=${item.id}`)}
+            >
+              <span className="lp-playlist-icon">
+                <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+              </span>
+              <span className={`lp-playlist-title${isActive ? " lp-playlist-title-active" : ""}`}>
+                {item.title}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

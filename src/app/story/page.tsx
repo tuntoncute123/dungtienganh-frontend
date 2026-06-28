@@ -1,31 +1,32 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { Layout, Drawer, Grid } from "antd";
+import { Layout, Drawer, Grid, Spin } from "antd";
 import { useSearchParams, useRouter } from "next/navigation";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
-import { STORIES, Story } from "@/data/stories";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 const DEFAULT_AVATAR = (name: string) =>
   `https://ui-avatars.com/api/?background=e1effe&color=0071f9&size=70&name=${encodeURIComponent(
-    name.split(" ").slice(-1)[0]
+    name ? name.split(" ").slice(-1)[0] : "U"
   )}`;
-
 
 interface StoryListViewProps {
   router: any;
+  stories: any[];
 }
 
-function StoryListView({ router }: StoryListViewProps) {
+function StoryListView({ router, stories }: StoryListViewProps) {
   const [visibleCount, setVisibleCount] = useState(14);
-  const hasMore = visibleCount < STORIES.length;
+  const hasMore = visibleCount < stories.length;
 
   const handleShowMore = () => {
-    setVisibleCount(STORIES.length);
+    setVisibleCount(stories.length);
   };
 
   return (
@@ -81,7 +82,7 @@ function StoryListView({ router }: StoryListViewProps) {
       <div className="story-block newest">
         <div className="title">Story mới nhất</div>
         <div className="story-list-grid">
-          {STORIES.slice(0, visibleCount).map((item) => {
+          {stories.slice(0, visibleCount).map((item) => {
             const avatarUrl = item.avatar || DEFAULT_AVATAR(item.name);
             return (
               <div key={item.id} className="story-grid-item">
@@ -139,9 +140,29 @@ function StoryPageContent() {
   const router = useRouter();
   
   const storyId = searchParams.get("id");
+
+  const [stories, setStories] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const loadStories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/stories`);
+        if (res.ok) {
+          const data = await res.json();
+          setStories(data);
+        }
+      } catch (err) {
+        console.error("Lỗi tải stories:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStories();
+  }, []);
   
   // Find current active story
-  const activeStory = STORIES.find((s) => s.id === storyId) || STORIES[0];
+  const activeStory = stories.find((s) => s.id === storyId) || stories[0];
 
   // Close drawer on screen resize to desktop
   useEffect(() => {
@@ -193,7 +214,11 @@ function StoryPageContent() {
         <div className="main-scroll">
           <div className="content-wrapper">
             <div className="content-panel">
-              {storyId ? (
+              {loading ? (
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
+                  <Spin size="large" tip="Đang tải Stories..." />
+                </div>
+              ) : storyId && activeStory ? (
                 <div className="story-detail-grid">
                   
                   {/* Left column - Active story */}
@@ -249,7 +274,7 @@ function StoryPageContent() {
                       </div>
 
                       <div className="story-suggest-list">
-                        {STORIES.map((item) => {
+                        {stories.map((item) => {
                           const isActive = item.id === activeStory.id;
                           const avatarUrl = item.avatar || DEFAULT_AVATAR(item.name);
                           return (
@@ -297,7 +322,7 @@ function StoryPageContent() {
 
                 </div>
               ) : (
-                <StoryListView router={router} />
+                <StoryListView router={router} stories={stories} />
               )}
             </div>
           </div>

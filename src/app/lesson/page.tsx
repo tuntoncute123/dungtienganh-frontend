@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { Layout, Grid, Drawer, Breadcrumb } from "antd";
-import { MenuOutlined, HomeOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, Suspense } from "react";
+import { Layout, Grid, Drawer, Breadcrumb, Spin } from "antd";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
@@ -14,6 +14,8 @@ import ViewModeSelector from "@/components/lesson/ViewModeSelector";
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const QUIZ_POINTS = [
   { label: "Quiz 1 41:26", percent: 74.4 },
@@ -30,19 +32,74 @@ const DOCUMENTS = [
 
 const HOMEWORK_TASKS = ["EZ Vocab"];
 
-export default function LessonPage() {
+function LessonPageContent() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const lessonId = searchParams.get("id") || "1";
+
+  const [lesson, setLesson] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/lessons?id=${lessonId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLesson(data);
+        } else {
+          // If not found, fallback to list and load the first one
+          const listRes = await fetch(`${API_BASE_URL}/api/lessons`);
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            if (listData.length > 0) {
+              setLesson(listData[0]);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Lỗi khi tải bài học:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLesson();
+  }, [lessonId]);
+
   const handleMenuClick = () => {
     if (isDesktop) {
       setSidebarPinned((prev) => !prev);
     } else {
+      e => e.preventDefault();
       setDrawerOpen(true);
     }
   };
+
+  if (loading) {
+    return (
+      <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <Spin size="large" tip="Đang tải bài giảng..." />
+      </Layout>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <div style={{ textAlign: "center" }}>
+          <h2>Không tìm thấy bài học nào.</h2>
+          <p>Vui lòng nạp dữ liệu mock từ trang admin hoặc đồng bộ db.</p>
+          <Link href="/admin"><span style={{ color: "#f40c44", fontWeight: "bold" }}>Về trang Admin</span></Link>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)" }}>
@@ -87,10 +144,10 @@ export default function LessonPage() {
                 { title: <Link href="/" style={{ color: "inherit" }}>Trang chủ</Link> },
                 { title: <Link href="/my-courses" style={{ color: "inherit" }}>Danh mục khoá học</Link> },
                 { title: <Link href="/my-courses" style={{ color: "inherit" }}>Ngữ pháp Ứng dụng (2027)</Link> },
-                { title: <Link href="/lesson" style={{ color: "inherit" }}>CHUYÊN ĐỀ 01: TỪ LOẠI | LÝ THUYẾT TRỌNG TÂM VÀ ỨNG DỤNG</Link> },
+                { title: <span style={{ color: "inherit" }}>CHUYÊN ĐỀ 01: TỪ LOẠI | LÝ THUYẾT TRỌNG TÂM VÀ ỨNG DỤNG</span> },
                 {
                   title: (
-                    <span style={{ color: "#f40c44" }}>Từ loại (Lý thuyết - Buổi 1)</span>
+                    <span style={{ color: "#f40c44" }}>{lesson.title}</span>
                   ),
                 },
               ]}
@@ -106,10 +163,11 @@ export default function LessonPage() {
             <div className="lp-left-col">
               {/* Video Player */}
               <VideoPlayer
-                title="Từ loại (Lý thuyết - Buổi 1)"
+                title={lesson.title}
                 remainingViews={10}
                 totalViews={10}
-                duration="55:40"
+                duration={lesson.duration}
+                videoUrl={lesson.videoUrl || ""}
                 quizPoints={QUIZ_POINTS}
               />
 
@@ -138,15 +196,27 @@ export default function LessonPage() {
                 <ViewModeSelector />
 
                 {/* Discussion */}
-                <DiscussionPanel />
+                <DiscussionPanel lessonId={lesson.id} />
               </div>
 
               {/* Playlist */}
-              <LessonPlaylist />
+              <LessonPlaylist currentLessonId={lesson.id} />
             </div>
           </div>
         </div>
       </Content>
     </Layout>
+  );
+}
+
+export default function LessonPage() {
+  return (
+    <Suspense fallback={
+      <Layout className="app-layout" style={{ background: "rgb(249, 245, 250)", display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <Spin size="large" tip="Loading..." />
+      </Layout>
+    }>
+      <LessonPageContent />
+    </Suspense>
   );
 }
