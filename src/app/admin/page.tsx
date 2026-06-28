@@ -778,7 +778,7 @@ export default function AdminPage() {
               userForm.setFieldsValue({
                 username: record.username,
                 name: record.name,
-                password: "",
+                password: record.plainPassword || "",
                 allowedCourses: record.allowedCourses || [],
                 allowedExams: record.allowedExams || [],
               });
@@ -1456,11 +1456,11 @@ export default function AdminPage() {
           <Row gutter={16}>
             <Col xs={24} sm={12}>
               <Form.Item name="username" label="Tên đăng nhập (Username)" rules={[{ required: true, message: "Nhập tài khoản" }]}>
-                <Input placeholder="Ví dụ: nguyenvananh" disabled={!!editingUser} />
+                <Input placeholder="Ví dụ: nguyenvananh" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="password" label={editingUser ? "Mật khẩu mới (Để trống nếu giữ nguyên)" : "Mật khẩu"} rules={[{ required: !editingUser, message: "Nhập mật khẩu" }]}>
+              <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: "Nhập mật khẩu" }]}>
                 <Input.Password placeholder="Nhập mật khẩu..." />
               </Form.Item>
             </Col>
