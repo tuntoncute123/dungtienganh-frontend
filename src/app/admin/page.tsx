@@ -854,6 +854,12 @@ export default function AdminPage() {
                 password: record.plainPassword || "",
                 allowedCourses: record.allowedCourses || [],
                 allowedExams: record.allowedExams || [],
+                targetOverall: record.targetOverall || "",
+                targetReading: record.targetReading || "",
+                targetListening: record.targetListening || "",
+                targetWriting: record.targetWriting || "",
+                targetSpeaking: record.targetSpeaking || "",
+                examDate: record.examDate || "",
               });
               setIsUserModalOpen(true);
             }}
@@ -1660,6 +1666,44 @@ export default function AdminPage() {
               ))}
             </Select>
           </Form.Item>
+
+          <div style={{ borderTop: "1px solid #f1f5f9", marginTop: 20, paddingTop: 15 }}>
+            <h4 style={{ marginBottom: 12, color: "#1e293b" }}>Mục tiêu học tập & Lịch thi</h4>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
+                <Form.Item name="targetOverall" label="Mục tiêu Overall (Điểm tổng)">
+                  <Input placeholder="Ví dụ: 7.5 hoặc 850 hoặc 9.0" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item name="examDate" label="Ngày dự thi (Exam Date)">
+                  <Input type="date" style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col xs={12} sm={6}>
+                <Form.Item name="targetReading" label="Mục tiêu Reading">
+                  <Input placeholder="Ví dụ: 7.5 hoặc 430" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="targetListening" label="Mục tiêu Listening">
+                  <Input placeholder="Ví dụ: 7.0 hoặc 420" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="targetWriting" label="Mục tiêu Writing">
+                  <Input placeholder="Ví dụ: 6.5" />
+                </Form.Item>
+              </Col>
+              <Col xs={12} sm={6}>
+                <Form.Item name="targetSpeaking" label="Mục tiêu Speaking">
+                  <Input placeholder="Ví dụ: 6.5" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
         </Form>
       </Modal>
     </Layout>
