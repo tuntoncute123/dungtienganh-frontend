@@ -34,6 +34,177 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
   const [userName, setUserName] = useState("Huỳnh Tấn Toàn");
   const [role, setRole] = useState("student");
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem("teacherdung_token");
+    if (!token) return;
+    setNotifLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.list || []);
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (e) {
+      console.error("Error fetching notifications:", e);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const token = localStorage.getItem("teacherdung_token");
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications/read?id=${id}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        setNotifications(prev => 
+          prev.map(n => n.id === id ? { ...n, isRead: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteNotif = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const token = localStorage.getItem("teacherdung_token");
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const deleted = notifications.find(n => n.id === id);
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        if (deleted && !deleted.isRead) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+        message.success("Đã xóa thông báo");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getTagColor = (type: string) => {
+    switch (type) {
+      case "success": return "#22c55e";
+      case "warning": return "#eab308";
+      case "alert": return "#ef4444";
+      default: return "#3b82f6";
+    }
+  };
+
+  const notificationPopoverContent = (
+    <div style={{ width: 320, padding: "4px 0" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 8px 8px 8px", borderBottom: "1px solid #f1f5f9" }}>
+        <span style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>Thông báo ({unreadCount} chưa đọc)</span>
+        <Button type="link" size="small" style={{ padding: 0, fontSize: 11 }} onClick={fetchNotifications}>Làm mới</Button>
+      </div>
+      
+      <div style={{ maxHeight: 300, overflowY: "auto", marginTop: 8 }}>
+        {notifLoading && notifications.length === 0 ? (
+          <div style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>Đang tải...</div>
+        ) : notifications.length === 0 ? (
+          <div style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>Bạn không có thông báo nào.</div>
+        ) : (
+          notifications.map((n) => (
+            <div 
+              key={n.id} 
+              style={{ 
+                padding: "10px 8px", 
+                borderBottom: "1px solid #f8fafc", 
+                backgroundColor: n.isRead ? "transparent" : "#f0f7ff",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+                cursor: "pointer",
+                transition: "background 0.2s"
+              }}
+              onClick={(e) => !n.isRead && handleMarkAsRead(n.id, e as any)}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: 24 }}>
+                <span style={{ 
+                  fontWeight: n.isRead ? 600 : 800, 
+                  fontSize: 12, 
+                  color: n.isRead ? "#475569" : "#0f172a" 
+                }}>
+                  <span style={{ 
+                    display: "inline-block", 
+                    width: 6, 
+                    height: 6, 
+                    borderRadius: "50%", 
+                    backgroundColor: getTagColor(n.type),
+                    marginRight: 6,
+                    verticalAlign: "middle"
+                  }} />
+                  {n.title}
+                </span>
+                
+                <span 
+                  style={{ 
+                    position: "absolute",
+                    top: 10,
+                    right: 8,
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    lineHeight: "12px"
+                  }}
+                  onClick={(e) => handleDeleteNotif(n.id, e)}
+                  title="Xóa thông báo"
+                >
+                  ✕
+                </span>
+              </div>
+              
+              <div style={{ fontSize: 11, color: "#475569", paddingLeft: 12 }}>
+                {n.content}
+              </div>
+              
+              <div style={{ fontSize: 10, color: "#94a3b8", paddingLeft: 12 }}>
+                {new Date(n.createdAt).toLocaleDateString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     const userStr = localStorage.getItem("teacherdung_user");
     if (userStr) {
@@ -193,11 +364,23 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
           </div>
         </Popover>
 
-        {/* Notification Bell */}
-        <button className="notification-btn" aria-label="Thông báo">
-          <img src={ICONS.bell} alt="bell" style={{ width: 16, height: 16 }} />
-          <span className="notif-badge">0</span>
-        </button>
+        {/* Notification Bell with Popover */}
+        <Popover
+          content={notificationPopoverContent}
+          trigger="click"
+          placement="bottomRight"
+          open={notifPopoverOpen}
+          onOpenChange={(open) => {
+            setNotifPopoverOpen(open);
+            if (open) fetchNotifications();
+          }}
+          overlayClassName="notification-popover"
+        >
+          <button className="notification-btn" aria-label="Thông báo">
+            <img src={ICONS.bell} alt="bell" style={{ width: 16, height: 16 }} />
+            {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
+          </button>
+        </Popover>
 
         {/* Avatar with Dropdown */}
         <Popover

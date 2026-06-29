@@ -37,7 +37,8 @@ import {
   DatabaseOutlined,
   MenuOutlined,
   UserOutlined,
-  CheckOutlined
+  CheckOutlined,
+  BellOutlined
 } from "@ant-design/icons";
 
 const COURSE_MAP: Record<string, string> = {
@@ -72,6 +73,8 @@ export default function AdminPage() {
   const [decks, setDecks] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifForm] = Form.useForm();
 
   // Loading states
   const [loading, setLoading] = useState<boolean>(false);
@@ -156,6 +159,66 @@ export default function AdminPage() {
     }
   };
 
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) setNotifications(data.list || []);
+    } catch (e: any) {
+      msg.error("Lỗi khi tải danh sách thông báo");
+    }
+  };
+
+  const saveNotification = async (values: any) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(values)
+      });
+
+      if (res.ok) {
+        msg.success("Gửi thông báo thành công!");
+        notifForm.resetFields();
+        fetchNotifications();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || "Không thể gửi thông báo");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/notifications?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        msg.success("Xóa thông báo thành công!");
+        fetchNotifications();
+      } else {
+        msg.error("Không thể xóa thông báo");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
   const loadAllData = async () => {
     setLoading(true);
     await Promise.all([
@@ -163,7 +226,8 @@ export default function AdminPage() {
       fetchStories(),
       fetchDecks(),
       fetchExams(),
-      fetchUsers()
+      fetchUsers(),
+      fetchNotifications()
     ]);
     setLoading(false);
   };
@@ -804,6 +868,56 @@ export default function AdminPage() {
     }
   ];
 
+  const notificationColumns = [
+    { title: "Tiêu đề", dataIndex: "title", key: "title" },
+    { title: "Nội dung", dataIndex: "content", key: "content" },
+    {
+      title: "Loại",
+      dataIndex: "type",
+      key: "type",
+      render: (type: string) => {
+        const conf: Record<string, string> = {
+          info: "Thông tin",
+          success: "Thành công",
+          warning: "Cảnh báo",
+          alert: "Khẩn cấp"
+        };
+        const colors: Record<string, string> = {
+          info: "blue",
+          success: "green",
+          warning: "orange",
+          alert: "red"
+        };
+        return <Tag color={colors[type] || "blue"}>{conf[type] || type}</Tag>;
+      }
+    },
+    {
+      title: "Người nhận",
+      dataIndex: "userId",
+      key: "recipient",
+      render: (_: string, record: any) => {
+        return record.user 
+          ? <span>{record.user.name} ({record.user.username})</span>
+          : <Tag color="cyan">Tất cả</Tag>;
+      }
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "isRead",
+      key: "isRead",
+      render: (read: boolean) => read ? <Tag color="green">Đã đọc</Tag> : <Tag color="orange">Chưa đọc</Tag>
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_: any, record: any) => (
+        <Popconfirm title="Xóa thông báo này?" onConfirm={() => deleteNotification(record.id)}>
+          <Button type="primary" danger icon={<DeleteOutlined />} size="small" />
+        </Popconfirm>
+      )
+    }
+  ];
+
   const renderDashboardStats = () => {
     return (
       <div style={{ marginBottom: 24 }}>
@@ -851,6 +965,7 @@ export default function AdminPage() {
         { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
         { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
         { key: "users", icon: <UserOutlined />, label: "Quản lý Học sinh" },
+        { key: "notifications", icon: <BellOutlined />, label: "Gửi thông báo" },
       ]}
     />
   );
@@ -899,6 +1014,7 @@ export default function AdminPage() {
               {activeTab === "flashcards" && (isMobile ? "Bộ thẻ học" : "Quản lý Bộ thẻ Flashcard học tập")}
               {activeTab === "exams" && (isMobile ? "Đề thi & Câu hỏi" : "Quản lý Đề thi khảo sát & Đề thi thử")}
               {activeTab === "users" && (isMobile ? "Quản lý Học sinh" : "Quản lý tài khoản Học sinh & Phân quyền")}
+              {activeTab === "notifications" && "Gửi thông báo & Quản lý Thông báo"}
             </div>
           </div>
           <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
@@ -944,6 +1060,48 @@ export default function AdminPage() {
             <Card title="Danh sách Học sinh & Phân quyền học tập" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingUser(null); userForm.resetFields(); userForm.setFieldsValue({ allowedCourses: [], allowedExams: [] }); setIsUserModalOpen(true); }}>Tạo tài khoản học sinh</Button>}>
               <Table dataSource={users} columns={userColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
+          )}
+
+          {/* Notifications view */}
+          {activeTab === "notifications" && (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} lg={8}>
+                <Card title="Tạo & Gửi thông báo mới">
+                  <Form form={notifForm} layout="vertical" onFinish={saveNotification}>
+                    <Form.Item name="title" label="Tiêu đề thông báo" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
+                      <Input placeholder="Ví dụ: Lịch nghỉ lễ / Cập nhật khóa học..." />
+                    </Form.Item>
+                    <Form.Item name="content" label="Nội dung chi tiết" rules={[{ required: true, message: "Nhập nội dung" }]}>
+                      <TextArea autoSize={{ minRows: 3, maxRows: 6 }} placeholder="Nội dung chi tiết gửi đến học viên..." />
+                    </Form.Item>
+                    <Form.Item name="type" label="Loại thông báo" initialValue="info" rules={[{ required: true }]}>
+                      <Select>
+                        <Option value="info">Thông tin (Info)</Option>
+                        <Option value="success">Thành công (Success)</Option>
+                        <Option value="warning">Cảnh báo (Warning)</Option>
+                        <Option value="alert">Khẩn cấp (Alert)</Option>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item name="userId" label="Gửi đến đối tượng" initialValue="all" rules={[{ required: true }]}>
+                      <Select placeholder="Chọn người nhận...">
+                        <Option value="all">Tất cả học sinh</Option>
+                        {users.filter(u => u.role !== "admin").map(u => (
+                          <Option key={u.id} value={u.id}>{u.name} ({u.username})</Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                    <Form.Item style={{ marginBottom: 0 }}>
+                      <Button type="primary" htmlType="submit" icon={<PlusOutlined />} block>Gửi thông báo</Button>
+                    </Form.Item>
+                  </Form>
+                </Card>
+              </Col>
+              <Col xs={24} lg={16}>
+                <Card title="Lịch sử thông báo đã gửi">
+                  <Table dataSource={notifications} columns={notificationColumns} rowKey="id" loading={loading} pagination={{ pageSize: 6 }} scroll={{ x: "max-content" }} />
+                </Card>
+              </Col>
+            </Row>
           )}
         </Content>
       </Layout>
