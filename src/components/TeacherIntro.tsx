@@ -35,7 +35,7 @@ export default function TeacherIntro() {
             <div className="teacher-intro__avatar-placeholder">
               <img
                 loading="lazy"
-                src="/assets/ceo_f668c601.png"
+                src="/assets/ceo_f668c601_v2.png"
                 alt="Teacher Avatar"
                 style={{ width: "100%", height: "auto", display: "block" }}
               />
