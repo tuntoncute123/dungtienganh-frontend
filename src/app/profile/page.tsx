@@ -1095,9 +1095,7 @@ export default function ProfilePage() {
 
 
           </div>
-          <div className="content-wrapper" style={{ padding: "0 40px" }}>
-            <Footer />
-          </div>
+          <Footer />
         </div>
       </Content>
     </Layout>

@@ -5,12 +5,6 @@ import { Layout, Drawer, Grid } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
 import GreetingSection from "@/components/GreetingSection";
-import DailyGoalCard from "@/components/DailyGoalCard";
-import RecentLessonCard from "@/components/RecentLessonCard";
-import StudyPlanCard from "@/components/StudyPlanCard";
-import MyCoursesSection from "@/components/MyCoursesSection";
-import TestPracticeCard from "@/components/TestPracticeCard";
-import LearningProfile from "@/components/LearningProfile";
 import StoryList from "@/components/StoryList";
 import HonorBoard from "@/components/HonorBoard";
 import TeacherIntro from "@/components/TeacherIntro";
@@ -83,56 +77,11 @@ export default function HomePage() {
             {/* Bảng Vàng */}
             <HonorBoard />
 
-            {/* Two-column layout dùng Ant Design breakpoint */}
-            <div className="page-columns">
-              {/* Left Column */}
-              <div className="page-col-main">
-                <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-                  {/* Daily Goal */}
-                  <DailyGoalCard />
 
-                  {/* Recent Lesson */}
-                  <div>
-                    <p className="section-title" style={{ marginBottom: 20 }}>
-                      Bài học gần nhất
-                    </p>
-                    <RecentLessonCard />
-                  </div>
-
-                  {/* Study Plan */}
-                  <div>
-                    <p className="section-title" style={{ marginBottom: 20 }}>
-                      Study Plan
-                    </p>
-                    <StudyPlanCard />
-                  </div>
-
-                  {/* My Courses */}
-                  <MyCoursesSection />
-
-                  {/* Test Practice */}
-                  <div>
-                    <div className="section-header">
-                      <p className="section-title">Test Practice</p>
-                      <p className="section-link">Xem tất cả</p>
-                    </div>
-                    <TestPracticeCard />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column — Learning Profile */}
-              <div className="page-col-side">
-                <LearningProfile />
-              </div>
-            </div>
-
-            {/* Giới thiệu giáo viên */}
             <TeacherIntro />
-
-            {/* Footer */}
-            <Footer />
           </div>
+          {/* Footer */}
+          <Footer />
         </div>
       </Content>
     </Layout>

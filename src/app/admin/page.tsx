@@ -616,6 +616,16 @@ export default function AdminPage() {
       render: (src: string) => src ? <img src={src} alt="lesson thumb" style={{ width: 64, height: 36, objectFit: "cover", borderRadius: 4 }} /> : <Tag color="default">N/A</Tag>
     },
     { title: "Tiêu đề bài học", dataIndex: "title", key: "title" },
+    {
+      title: "Loại bài học",
+      key: "type",
+      render: (_: any, record: any) => record.videoUrl ? <Tag color="blue">Video bài giảng</Tag> : <Tag color="magenta">Thi Online</Tag>
+    },
+    {
+      title: "Bài tập / Đề thi",
+      key: "exercise",
+      render: (_: any, record: any) => record.exerciseId ? <Tag color="green">Đã gán bài thi</Tag> : <Tag color="orange">Chưa có</Tag>
+    },
     { title: "Thời lượng", dataIndex: "duration", key: "duration" },
     {
       title: "Hành động",
@@ -1127,7 +1137,7 @@ export default function AdminPage() {
           <Form.Item name="duration" label="Thời lượng" rules={[{ required: true, message: "Nhập thời lượng" }]}>
             <Input placeholder="Ví dụ: 45:00 hoặc 1:12:30" />
           </Form.Item>
-          <Form.Item name="videoUrl" label="Video bài giảng">
+          <Form.Item name="videoUrl" label="Video bài giảng" help="Bỏ trống nếu đây là bài Thi Online (Hệ thống sẽ tự động hiển thị màn hình làm bài thi trắc nghiệm).">
             <Input.Group compact>
               <Form.Item name="videoUrl" noStyle>
                 <Input style={{ width: "calc(100% - 120px)" }} placeholder="Tải video lên Cloudflare hoặc dán link" />
@@ -1158,24 +1168,28 @@ export default function AdminPage() {
             <Input type="hidden" />
           </Form.Item>
 
-          <Form.Item label="Bài tập đính kèm (Luyện tập sau bài học)">
-            <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.exerciseId !== currentValues.exerciseId} noStyle>
-              {() => {
-                const currentExerciseId = lessonForm.getFieldValue("exerciseId");
-                return (
+          <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.videoUrl !== currentValues.videoUrl || prevValues.exerciseId !== currentValues.exerciseId} noStyle>
+            {() => {
+              const hasVideo = !!lessonForm.getFieldValue("videoUrl");
+              const currentExerciseId = lessonForm.getFieldValue("exerciseId");
+              const label = hasVideo ? "Bài tập đính kèm (Luyện tập sau bài học)" : "Nội dung đề thi trắc nghiệm (Thi Online)";
+              const statusTag = currentExerciseId ? (
+                <Tag color="success">{hasVideo ? "Đã soạn bài tập đính kèm ✅" : "Đã soạn câu hỏi cho đề thi ✅"}</Tag>
+              ) : (
+                <Tag color="warning">{hasVideo ? "Chưa có bài tập ôn luyện ⚠️" : "Chưa có câu hỏi cho đề thi ⚠️"}</Tag>
+              );
+              const btnText = currentExerciseId ? "Chỉnh sửa câu hỏi" : "Soạn câu hỏi đề thi";
+              return (
+                <Form.Item label={label}>
                   <Space>
-                    {currentExerciseId ? (
-                      <Tag color="success">Đã soạn bài tập đính kèm ✅</Tag>
-                    ) : (
-                      <Tag color="warning">Chưa có bài tập ôn luyện ⚠️</Tag>
-                    )}
+                    {statusTag}
                     <Button type="primary" size="small" onClick={openExerciseModal} icon={<PlusOutlined />}>
-                      {currentExerciseId ? "Chỉnh sửa bài tập" : "Soạn bài tập ôn luyện"}
+                      {btnText}
                     </Button>
                   </Space>
-                );
-              }}
-            </Form.Item>
+                </Form.Item>
+              );
+            }}
           </Form.Item>
           <Form.Item name="playlistId" label="Mã danh sách (Playlist ID)">
             <Input placeholder="playlist-grammar" />

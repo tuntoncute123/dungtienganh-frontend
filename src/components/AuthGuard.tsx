@@ -62,7 +62,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (!authorized && pathname !== "/login") {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f5f7fa" }}>
-        <Spin size="large" tip="Đang xác thực tài khoản..." />
+        <Spin size="large" description="Đang xác thực tài khoản..." />
       </div>
     );
   }

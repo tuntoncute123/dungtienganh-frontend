@@ -52,31 +52,19 @@ export default function TeacherIntro() {
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Có hơn <strong>40.000 học sinh</strong> 2K7, <strong>15.000 học sinh</strong> 2K6 và <strong>7000 học sinh</strong> 2K6 đã đăng ký khoá học.
+                  Tốt nghiệp loại giỏi ĐHSP TP.HCM, chuyên ngành Sư Phạm Tiếng Anh.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Trong kỳ thi THPTQG 2025, anh Kid có học sinh đạt điểm 10 Toán và hàng trăm học sinh đạt điểm 9+, hàng nghìn học sinh đạt điểm 8+.
+                  Giáo viên Tiếng Anh đã đồng hành cùng hơn <strong>10.000 học sinh</strong> 2K8 và có hơn <strong>5.000 học sinh</strong> đăng ký tham gia các khoá học.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Giáo viên có lượt xem <strong>livestream đạt TOP ĐẦU</strong> trên các nền tảng Facebook và Tiktok trong 3 năm liên tiếp 2023,2024,2025.
-                </li>
-                <li>
-                  <span className="teacher-intro__icon">
-                    <InfoCheckIcon />
-                  </span>
-                  <strong>Trao quỹ học bổng 800.000.000 Vnd</strong> dành cho học sinh 2K7 đạt thành tích cao trong kỳ thi THPTQG 2025.
-                </li>
-                <li>
-                  <span className="teacher-intro__icon">
-                    <InfoCheckIcon />
-                  </span>
-                  2 Năm liền trao <strong>tặng quỹ học bổng trị giá 20.000.000 Vnd</strong> cho học sinh trường THPT Xuân Đỉnh.
+                  Trong kỳ thi tuyển sinh 10, học sinh của cô đạt nhiều thành tích nổi bật với nhiều <strong>điểm 10 môn Tiếng Anh</strong>, cùng hàng trăm học sinh đạt từ <strong>9+</strong> và hàng nghìn học sinh đạt từ <strong>8+</strong>.
                 </li>
               </ul>
             </div>
@@ -89,25 +77,25 @@ export default function TeacherIntro() {
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Dạy đúng trọng tâm và chuẩn cấu trúc chương trình mới.
+                  Bám sát chuẩn kiến thức và định hướng chương trình giáo dục mới, tập trung vào những nội dung trọng tâm giúp học sinh học hiệu quả.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Năng động, sáng tạo, chi tiết, chậm rãi, phù hợp với tất cả các học sinh, đặc biệt là học sinh mất gốc.
+                  Phong cách giảng dạy nhiệt huyết, sáng tạo, chi tiết và dễ tiếp cận, phù hợp với nhiều trình độ, đặc biệt hỗ trợ tốt cho học sinh mất gốc hoặc cần củng cố nền tảng.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Đi sâu vào bản chất, rèn luyện tư duy để có thể xử lý bài toán linh hoạt, không máy móc.
+                  Chú trọng giúp học sinh hiểu bản chất ngôn ngữ, phát triển tư duy học tập và khả năng vận dụng linh hoạt thay vì học thuộc máy móc.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Kết hợp dạy Casio để bổ trợ đa dạng kiến thức và cách làm các bài toán.
+                  Kết hợp nhiều phương pháp học và mẹo làm bài hiệu quả, hỗ trợ học sinh mở rộng tư duy và nâng cao kỹ năng xử lý đề thi.
                 </li>
               </ul>
             </div>

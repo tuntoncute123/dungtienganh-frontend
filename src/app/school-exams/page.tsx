@@ -420,9 +420,7 @@ export default function SchoolExamsPage() {
               </div>
             </div>
           </div>
-          <div className="content-wrapper" style={{ padding: "0 20px" }}>
-            <Footer />
-          </div>
+          <Footer />
         </div>
       </Content>
     </Layout>

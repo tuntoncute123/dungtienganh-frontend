@@ -4207,12 +4207,40 @@ body {
    ============================================= */
 .app-footer {
   background-color: #ffffff;
-  border: 1px solid #f2f4f7;
-  border-radius: 16px;
+  border-top: 1px solid #f2f4f7;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
   padding: 48px 32px 24px 32px;
   margin-top: 48px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01), 0 10px 30px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.01), 0 -10px 30px rgba(0, 0, 0, 0.02);
+}
+
+/* Align with main-scroll padding to touch edges and bottom */
+.main-scroll .app-footer {
+  margin-left: -32px;
+  margin-right: -32px;
+  margin-bottom: -32px;
+}
+
+@media (max-width: 767px) {
+  .main-scroll .app-footer {
+    margin-left: -16px;
+    margin-right: -16px;
+    margin-bottom: -16px;
+  }
+  .app-footer {
+    padding: 32px 16px 20px 16px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .main-scroll .app-footer {
+    margin-left: -24px;
+    margin-right: -24px;
+    margin-bottom: -24px;
+  }
 }
 
 .footer-inner {

@@ -16,7 +16,6 @@ import {
   CaretDownOutlined,
   InfoCircleOutlined
 } from "@ant-design/icons";
-import { EXPLANATIONS } from "./explanations";
 import styles from "./quiz.module.css";
 
 interface Question {
@@ -28,282 +27,11 @@ interface Question {
     C: string;
     D: string;
   };
-  correctAnswer?: string;
+  correctAnswer?: string | string[];
   explanation?: string;
 }
 
-const QUESTIONS_PART5: Question[] = [
-  {
-    number: 1,
-    text: "The free clinic was founded by a group of doctors to give _____ for various medical conditions.",
-    options: { A: "treatment", B: "treat", C: "treated", D: "treating" }
-  },
-  {
-    number: 2,
-    text: "The artist sent _____ best pieces to the gallery to be reviewed by the owner.",
-    options: { A: "him", B: "himself", C: "his", D: "he" }
-  },
-  {
-    number: 3,
-    text: "The figures that accompany the financial statement should be _____ to the spending category.",
-    options: { A: "relevance", B: "relevantly", C: "more relevantly", D: "relevant" }
-  },
-  {
-    number: 4,
-    text: "The majority of occupants _____ live in Regal Towers are upset about the ongoing problems with their air conditioning systems.",
-    options: { A: "what", B: "where", C: "they", D: "who" }
-  },
-  {
-    number: 5,
-    text: "During the peak season, it is _____ to hire additional workers for the weekend shifts.",
-    options: { A: "necessitate", B: "necessarily", C: "necessary", D: "necessity" }
-  },
-  {
-    number: 6,
-    text: "The company _____ lowered its prices to outsell its competitors and attract more customers.",
-    options: { A: "strategy", B: "strategically", C: "strategies", D: "strategic" }
-  },
-  {
-    number: 7,
-    text: "For optimal safety on the road, avoid _____ the view of the rear window and side-view mirrors.",
-    options: { A: "obstructs", B: "obstructed", C: "obstruction", D: "obstructing" }
-  },
-  {
-    number: 8,
-    text: "The sprinklers for the lawn’s irrigation system are _____ controlled.",
-    options: { A: "mechanically", B: "mechanic", C: "mechanism", D: "mechanical" }
-  },
-  {
-    number: 9,
-    text: "The governmental department used to provide financial aid, but now it offers _____ services only.",
-    options: { A: "legal", B: "legalize", C: "legally", D: "legalizes" }
-  },
-  {
-    number: 10,
-    text: "Mr. Ross, _____ is repainting the interior of the lobby, was recommended by a friend of the building manager.",
-    options: { A: "himself", B: "he", C: "who", D: "which" }
-  },
-  {
-    number: 11,
-    text: "The upscale boutique Jane's Closet is known for selling the most stylish _____ for young professionals.",
-    options: { A: "accessorized", B: "accessorize", C: "accessorizes", D: "accessories" }
-  },
-  {
-    number: 12,
-    text: "The April edition of Fishing and More magazine looks _____ different from previous issues because of the new art editor.",
-    options: { A: "completed", B: "complete", C: "completely", D: "completing" }
-  },
-  {
-    number: 13,
-    text: "Due to the high volume of foot traffic, the shop must polish its floors more _____ than usual during the peak season.",
-    options: { A: "frequent", B: "frequented", C: "frequency", D: "frequently" }
-  },
-  {
-    number: 14,
-    text: "Ms. Stevenson contacted the real estate agent _____ name and phone number appeared on the advertisement.",
-    options: { A: "what", B: "which", C: "whose", D: "who" }
-  },
-  {
-    number: 15,
-    text: "Thanks to his experience, Mr. Warren is _____ capable of completing the job on his own.",
-    options: { A: "certainly", B: "certain", C: "certainty", D: "certify" }
-  },
-  {
-    number: 16,
-    text: "The notice indicated that a first-aid training course will be provided free of charge to _____ next month.",
-    options: { A: "residents", B: "residence", C: "residential", D: "resides" }
-  },
-  {
-    number: 17,
-    text: "The chef _____ prepares the entrée for a restaurant critic often comes out to greet him or her in person.",
-    options: { A: "whose", B: "what", C: "either", D: "who" }
-  },
-  {
-    number: 18,
-    text: "As long as there are no further delays, the factory will be fully _____ by June 18",
-    options: { A: "operational", B: "operate", C: "operates", D: "operation" }
-  },
-  {
-    number: 19,
-    text: "The restaurant has a _____ decorated room that is perfect for hosting children's parties.",
-    options: { A: "cheerful", B: "cheerfully", C: "cheerfulness", D: "cheer" }
-  },
-  {
-    number: 20,
-    text: "Despite having some problems with the sound system during the performance, the concert was an _____ experience for everyone.",
-    options: { A: "enjoyable", B: "enjoyment", C: "enjoys", D: "enjoyably" }
-  }
-];
 
-const QUESTIONS_PART6: Question[] = [
-  { number: 21, text: "Please submit your expense reports _____ the end of the month." },
-  { number: 22, text: "The committee will _____ the proposal tomorrow morning." },
-  { number: 23, text: "All visitors must _____ at the front desk upon arrival." },
-  { number: 24, text: "The marketing department is planning a new _____ for the product." },
-  { number: 25, text: "We are pleased to announce the _____ of our new branch office." },
-  { number: 26, text: "Please confirm your _____ by replying to this email." },
-  { number: 27, text: "The new software is designed to _____ productivity." },
-  { number: 28, text: "We apologize for any _____ this delay may cause." },
-  { number: 29, text: "Employees are encouraged to share their _____ during the meeting." },
-  { number: 30, text: "The contract must be signed by both _____ to be valid." },
-  { number: 31, text: "Mr. Smith is _____ for managing the sales team." },
-  { number: 32, text: "We look forward to _____ you in the near future." }
-];
-
-const QUESTIONS_PART7: Question[] = [
-  {
-    number: 33,
-    text: "The manager praised the team for _____ completing the project on time.",
-    options: { A: "successful", B: "successfully", C: "success", D: "succeed" }
-  },
-  {
-    number: 34,
-    text: "Ms. Davis will present her research _____ the international conference.",
-    options: { A: "at", B: "on", C: "of", D: "for" }
-  },
-  {
-    number: 35,
-    text: "The company plans to _____ its operations into European markets.",
-    options: { A: "expand", B: "expansion", C: "expansive", D: "expanded" }
-  },
-  {
-    number: 36,
-    text: "All employees are required to attend the safety training _____.",
-    options: { A: "seminar", B: "seminate", C: "seminally", D: "seminars" }
-  },
-  {
-    number: 37,
-    text: "The new policy will become _____ starting next Monday.",
-    options: { A: "effect", B: "effective", C: "effectively", D: "effectiveness" }
-  },
-  {
-    number: 38,
-    text: "Please double-check the figures before _____ the report.",
-    options: { A: "submit", B: "submitted", C: "submitting", D: "submission" }
-  },
-  {
-    number: 39,
-    text: "The customer service team is committed to resolving issues _____.",
-    options: { A: "prompt", B: "promptly", C: "promptness", D: "prompter" }
-  },
-  {
-    number: 40,
-    text: "Due to bad weather, the outdoor concert has been _____.",
-    options: { A: "cancel", B: "canceled", C: "cancelling", D: "cancellation" }
-  },
-  {
-    number: 41,
-    text: "The brochure provides _____ information about our services.",
-    options: { A: "detail", B: "detailed", C: "detailing", D: "details" }
-  },
-  {
-    number: 42,
-    text: "Ms. Carter was selected for the position because of her _____ experience.",
-    options: { A: "extensive", B: "extension", C: "extensively", D: "extend" }
-  },
-  {
-    number: 43,
-    text: "We need to hire an assistant who is _____ in both English and Spanish.",
-    options: { A: "fluent", B: "fluently", C: "fluency", D: "fluents" }
-  },
-  {
-    number: 44,
-    text: "The budget proposal must be approved by the board of _____.",
-    options: { A: "directors", B: "direct", C: "direction", D: "directly" }
-  },
-  {
-    number: 45,
-    text: "The construction of the new office building is ahead of _____.",
-    options: { A: "schedule", B: "scheduled", C: "scheduling", D: "schedules" }
-  },
-  {
-    number: 46,
-    text: "Customers can request a refund if they are not _____ with the product.",
-    options: { A: "satisfy", B: "satisfied", C: "satisfying", D: "satisfaction" }
-  },
-  {
-    number: 47,
-    text: "The guest speaker gave an _____ talk on leadership.",
-    options: { A: "inspire", B: "inspiring", C: "inspiration", D: "inspired" }
-  },
-  {
-    number: 48,
-    text: "We must find a way to reduce our _____ costs.",
-    options: { A: "operate", B: "operating", C: "operation", D: "operational" }
-  },
-  {
-    number: 49,
-    text: "The new product has received very _____ reviews from customers.",
-    options: { A: "positive", B: "positively", C: "positiveness", D: "positivity" }
-  },
-  {
-    number: 50,
-    text: "Please let us know if you need any _____ assistance.",
-    options: { A: "addition", B: "additional", C: "additionally", D: "additions" }
-  },
-  {
-    number: 51,
-    text: "The office will be closed on Friday in _____ of the national holiday.",
-    options: { A: "observe", B: "observance", C: "observant", D: "observes" }
-  }
-];
-
-const CORRECT_ANSWERS: Record<number, string | string[]> = {
-  // Part 5
-  1: "A",
-  2: "C",
-  3: "D",
-  4: "D",
-  5: "C",
-  6: "B",
-  7: "D",
-  8: "A",
-  9: "A",
-  10: "C",
-  11: "D",
-  12: "C",
-  13: "D",
-  14: "C",
-  15: "A",
-  16: "A",
-  17: "D",
-  18: "A",
-  19: "B",
-  20: "A",
-  // Part 6
-  21: ["by", "before"],
-  22: ["review", "discuss", "evaluate", "consider", "approve"],
-  23: ["register", "sign in", "report"],
-  24: ["campaign", "strategy", "launch", "plan"],
-  25: ["opening", "launch", "expansion", "establishment"],
-  26: ["attendance", "registration", "reservation", "participation", "booking"],
-  27: ["increase", "improve", "boost", "enhance", "raise"],
-  28: ["inconvenience", "trouble", "difficulty", "disruption"],
-  29: ["feedback", "ideas", "opinions", "thoughts", "suggestions"],
-  30: ["parties", "sides", "signatories"],
-  31: ["responsible", "accountable", "eligible"],
-  32: ["seeing", "meeting", "serving", "welcoming", "helping", "working with"],
-  // Part 7
-  33: "B",
-  34: "A",
-  35: "A",
-  36: "A",
-  37: "B",
-  38: "C",
-  39: "B",
-  40: "B",
-  41: "B",
-  42: "A",
-  43: "A",
-  44: "A",
-  45: "A",
-  46: "B",
-  47: "B",
-  48: "B",
-  49: "A",
-  50: "B",
-  51: "B"
-};
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -322,6 +50,8 @@ export default function ProgressTest() {
   const [loading, setLoading] = useState<boolean>(false);
   const [dynamicQuestions, setDynamicQuestions] = useState<Question[]>([]);
   const [dynamicCorrectAnswers, setDynamicCorrectAnswers] = useState<Record<number, string | string[]>>({});
+
+  const isMultiPartTest = !dynamicExam || dynamicExam.id === "reading-progress-test";
 
   const [scoreData, setScoreData] = useState({
     correctCount: 0,
@@ -342,13 +72,14 @@ export default function ProgressTest() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
+      const targetId = id || "reading-progress-test";
       const isReviewMode = params.get("review") === "true";
-      setExamId(id);
+      setExamId(targetId);
 
       // In review mode, restore completed answers and show submitted state
-      if (isReviewMode && id) {
+      if (isReviewMode && targetId) {
         try {
-          const completedData = localStorage.getItem(`practice_completed_${id}`);
+          const completedData = localStorage.getItem(`practice_completed_${targetId}`);
           if (completedData) {
             const parsed = JSON.parse(completedData);
             if (parsed.answers) {
@@ -379,9 +110,9 @@ export default function ProgressTest() {
         }
       }
 
-      if (id) {
+      if (targetId) {
         setLoading(true);
-        fetch(`${API_BASE_URL}/api/exams?id=${id}`)
+        fetch(`${API_BASE_URL}/api/exams?id=${targetId}`)
           .then((res) => {
             if (res.ok) return res.json();
             throw new Error("Exam not found");
@@ -392,7 +123,9 @@ export default function ProgressTest() {
               setDynamicQuestions(data.questions);
               const answersMap: Record<number, string | string[]> = {};
               data.questions.forEach((q: any) => {
-                if (q.correctAnswer && q.correctAnswer.includes(" / ")) {
+                if (q.correctAnswer && q.correctAnswer.includes("|")) {
+                  answersMap[q.number] = q.correctAnswer.split("|").map((ans: string) => ans.trim());
+                } else if (q.correctAnswer && q.correctAnswer.includes(" / ")) {
                   answersMap[q.number] = q.correctAnswer.split(" / ").map((ans: string) => ans.trim());
                 } else {
                   answersMap[q.number] = q.correctAnswer;
@@ -412,7 +145,7 @@ export default function ProgressTest() {
   }, []);
 
   const getPart5AnsweredCount = () => {
-    if (dynamicExam) {
+    if (!isMultiPartTest) {
       return Object.keys(answers).filter(k => {
         const num = parseInt(k);
         return dynamicQuestions.some(q => q.number === num) && answers[num] !== "";
@@ -426,7 +159,7 @@ export default function ProgressTest() {
   };
 
   const getPart6AnsweredCount = () => {
-    if (dynamicExam) return 0;
+    if (!isMultiPartTest) return 0;
     let count = 0;
     for (let i = 21; i <= 32; i++) {
       if (answers[i] && answers[i].trim() !== "") count++;
@@ -435,7 +168,7 @@ export default function ProgressTest() {
   };
 
   const getPart7AnsweredCount = () => {
-    if (dynamicExam) return 0;
+    if (!isMultiPartTest) return 0;
     let count = 0;
     for (let i = 33; i <= 51; i++) {
       if (answers[i] && answers[i].trim() !== "") count++;
@@ -447,17 +180,17 @@ export default function ProgressTest() {
   const answeredPart6 = getPart6AnsweredCount();
   const answeredPart7 = getPart7AnsweredCount();
 
-  const totalQuestions = dynamicExam ? dynamicQuestions.length : 51;
-  const totalAnsweredCount = dynamicExam ? answeredPart5 : (answeredPart5 + answeredPart6 + answeredPart7);
+  const totalQuestions = dynamicQuestions.length;
+  const totalAnsweredCount = !isMultiPartTest ? answeredPart5 : (answeredPart5 + answeredPart6 + answeredPart7);
   const progressPercent = totalQuestions > 0 ? (totalAnsweredCount / totalQuestions) * 100 : 0;
 
   // Locking rules
   const isPart5Unlocked = true;
-  const isPart6Unlocked = dynamicExam ? false : (isSubmitted || (answeredPart5 === 20));
-  const isPart7Unlocked = dynamicExam ? false : (isSubmitted || (isPart6Unlocked && answeredPart6 === 12));
+  const isPart6Unlocked = !isMultiPartTest ? false : (isSubmitted || (answeredPart5 === 20));
+  const isPart7Unlocked = !isMultiPartTest ? false : (isSubmitted || (isPart6Unlocked && answeredPart6 === 12));
 
   const handlePartClick = (partNum: 5 | 6 | 7) => {
-    if (dynamicExam) return;
+    if (!isMultiPartTest) return;
     if (partNum === 5) {
       setCurrentPart(5);
     } else if (partNum === 6) {
@@ -550,7 +283,7 @@ export default function ProgressTest() {
     const userAns = answers[qNumber];
     if (!userAns) return false;
 
-    const targetAnswers = dynamicExam ? dynamicCorrectAnswers : CORRECT_ANSWERS;
+    const targetAnswers = dynamicCorrectAnswers;
     const correctVal = targetAnswers[qNumber];
     if (!correctVal) return false;
 
@@ -562,17 +295,9 @@ export default function ProgressTest() {
 
   const doSubmit = () => {
     let correct = 0;
-    if (dynamicExam) {
-      dynamicQuestions.forEach(q => {
-        if (isQuestionCorrect(q.number)) correct++;
-      });
-    } else {
-      for (let i = 1; i <= totalQuestions; i++) {
-        if (isQuestionCorrect(i)) {
-          correct++;
-        }
-      }
-    }
+    dynamicQuestions.forEach(q => {
+      if (isQuestionCorrect(q.number)) correct++;
+    });
 
     const incorrect = totalAnsweredCount - correct;
     const unanswered = totalQuestions - totalAnsweredCount;
@@ -625,19 +350,18 @@ export default function ProgressTest() {
   };
 
   const renderExplanationBox = (qNum: number) => {
-    if (dynamicExam) {
-      const q = dynamicQuestions.find(item => item.number === qNum);
-      if (!isSubmitted || !q || !q.explanation) return null;
-      const isExpanded = expandedExplanations[qNum] !== false;
-      return (
-        <div className={styles.explanationBox} onClick={() => toggleExplanation(qNum)}>
-          <div className={styles.explanationHeader} style={{ cursor: "pointer" }}>
-            <span className={styles.explanationTitle}>
-              <InfoCircleOutlined style={{ marginRight: 8 }} />
-              Giải thích đáp án
-            </span>
-            <span>{isExpanded ? <CaretUpOutlined /> : <CaretDownOutlined />}</span>
-          </div>
+    const q = dynamicQuestions.find(item => item.number === qNum);
+    if (!isSubmitted || !q || !q.explanation) return null;
+    const isExpanded = expandedExplanations[qNum] !== false;
+    return (
+      <div className={styles.explanationBox} onClick={() => toggleExplanation(qNum)}>
+        <div className={styles.explanationHeader} style={{ cursor: "pointer" }}>
+          <span className={styles.explanationTitle}>
+            <InfoCircleOutlined style={{ marginRight: 8 }} />
+            Giải thích đáp án
+          </span>
+          <span>{isExpanded ? <CaretUpOutlined /> : <CaretDownOutlined />}</span>
+        </div>
           {isExpanded && (
             <div onClick={(e) => e.stopPropagation()} style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
               <p>{q.explanation}</p>
@@ -648,108 +372,6 @@ export default function ProgressTest() {
       );
     }
 
-    const explanation = EXPLANATIONS[qNum];
-    if (!isSubmitted || !explanation) return null;
-
-    const isExpanded = expandedExplanations[qNum] !== false; // default is true
-    const correctOpt = CORRECT_ANSWERS[qNum];
-
-    return (
-      <div 
-        className={styles.explanationBox} 
-        onClick={() => toggleExplanation(qNum)}
-      >
-        <div className={styles.explanationHeader}>
-          <div className={styles.explanationHeaderLeft}>
-            <span className={styles.explanationTitle}>
-              <InfoCircleOutlined className={styles.infoIcon} style={{ marginRight: 8 }} />
-              Giải thích đáp án
-            </span>
-          </div>
-          <div className={styles.explanationHeaderRight}>
-            {isExpanded ? <CaretUpOutlined className={styles.caretIcon} /> : <CaretDownOutlined className={styles.caretIcon} />}
-          </div>
-        </div>
-
-        {isExpanded && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <div className={styles.explanationDivider} />
-            <div className={styles.explanationContent}>
-              <div className={styles.stepsSection}>
-                <p className={styles.stepsTitle}><strong>Trình tự làm bài</strong></p>
-                <ul style={{ margin: "8px 0", paddingLeft: "20px", listStyleType: "disc" }}>
-                  {explanation.steps.map((step, idx) => (
-                    <li key={idx} style={{ marginBottom: "6px" }}>{step}</li>
-                  ))}
-                </ul>
-                {explanation.note && (
-                  <p className={styles.noteText} style={{ margin: "12px 0", fontStyle: "italic", color: "#4b5563" }}>
-                    {explanation.note}
-                  </p>
-                )}
-                <p className={styles.finalAnswerText} style={{ margin: "12px 0 0 0", color: "#cc4125", fontWeight: "bold" }}>
-                  ⇒ {explanation.correctAnswerText}
-                </p>
-              </div>
-
-              <figure className={styles.tableFigure}>
-                <table className={styles.explanationTable}>
-                  <tbody>
-                    <tr>
-                      <td colSpan={2} className={styles.tableTopHeader}>
-                        <strong>Trình tự làm bài &amp; Dịch nghĩa</strong>
-                      </td>
-                    </tr>
-                    <tr>
-                      {/* Left Column - English */}
-                      <td className={styles.tableLeftCol}>
-                        <p style={{ fontWeight: 600, marginBottom: "8px" }}>{explanation.engSentence}</p>
-                        {explanation.engOptions && Object.entries(explanation.engOptions).map(([key, val]) => {
-                          const isCorrect = key === correctOpt;
-                          return (
-                            <p 
-                              key={key} 
-                              style={
-                                isCorrect 
-                                  ? { backgroundColor: "#ffd966", color: "#000000", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", margin: "4px 0" } 
-                                  : { margin: "4px 0", color: "#374151" }
-                              }
-                            >
-                              ({key}) {val}
-                            </p>
-                          );
-                        })}
-                      </td>
-
-                      {/* Right Column - Vietnamese */}
-                      <td className={styles.tableRightCol}>
-                        <p style={{ fontWeight: 600, marginBottom: "8px" }}>{explanation.vietSentence}</p>
-                        {explanation.vietOptions && Object.entries(explanation.vietOptions).map(([key, val]) => {
-                          const isCorrect = key === correctOpt;
-                          return (
-                            <p 
-                              key={key} 
-                              style={
-                                isCorrect 
-                                  ? { backgroundColor: "#ffd966", color: "#000000", fontWeight: "bold", padding: "2px 6px", borderRadius: "4px", margin: "4px 0" } 
-                                  : { margin: "4px 0", color: "#374151" }
-                              }
-                            >
-                              ({key}) {val}
-                            </p>
-                          );
-                        })}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </figure>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const handleGridItemClick = (qNumber: number) => {
     setResultVisible(false);
@@ -764,13 +386,13 @@ export default function ProgressTest() {
   };
 
   // Determine current question array
-  const currentQuestions = dynamicExam
+  const currentQuestions = !isMultiPartTest
     ? dynamicQuestions
     : (currentPart === 5
-      ? QUESTIONS_PART5
+      ? dynamicQuestions.filter(q => q.number >= 1 && q.number <= 20)
       : currentPart === 6
-      ? QUESTIONS_PART6
-      : QUESTIONS_PART7);
+      ? dynamicQuestions.filter(q => q.number >= 21 && q.number <= 32)
+      : dynamicQuestions.filter(q => q.number >= 33 && q.number <= 51));
 
   if (loading) {
     return (
@@ -828,7 +450,7 @@ export default function ProgressTest() {
       <div className={styles.quizBody}>
         <div className={styles.quizContentCard}>
           {/* Dynamic Exam Header */}
-          {dynamicExam && (
+          {!isMultiPartTest && dynamicExam && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Đề thi trắc nghiệm</h4>
               <p className={styles.partDescription}>
@@ -839,7 +461,7 @@ export default function ProgressTest() {
           )}
 
           {/* Part 5 Info */}
-          {!dynamicExam && currentPart === 5 && (
+          {isMultiPartTest && currentPart === 5 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 5</h4>
               <p className={styles.partDescription}>
@@ -852,7 +474,7 @@ export default function ProgressTest() {
           )}
 
           {/* Part 6 Info */}
-          {!dynamicExam && currentPart === 6 && (
+          {isMultiPartTest && currentPart === 6 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 6 - Gap Filling</h4>
               <p className={styles.partDescription}>
@@ -864,7 +486,7 @@ export default function ProgressTest() {
           )}
 
           {/* Part 7 Info */}
-          {!dynamicExam && currentPart === 7 && (
+          {isMultiPartTest && currentPart === 7 && (
             <div className={styles.partHeader}>
               <h4 className={styles.partTitle}>Part 7</h4>
               <p className={styles.partDescription}>
@@ -881,7 +503,7 @@ export default function ProgressTest() {
             <span className={styles.iconWrap}>
               <QuestionCircleOutlined />
             </span>
-            {dynamicExam ? (
+            {!isMultiPartTest ? (
               <span>Danh sách: {totalQuestions} câu hỏi</span>
             ) : (
               <>
@@ -905,7 +527,7 @@ export default function ProgressTest() {
 
               // RENDER PART 6 (GAP FILLING)
               if (currentPart === 6) {
-                const targetAnswers = dynamicExam ? dynamicCorrectAnswers : CORRECT_ANSWERS;
+                const targetAnswers = dynamicCorrectAnswers;
                 const correctVal = targetAnswers[q.number];
                 const correctList = Array.isArray(correctVal)
                   ? correctVal
@@ -971,7 +593,7 @@ export default function ProgressTest() {
 
               // RENDER PART 5 & PART 7 (MULTIPLE CHOICE)
               const selectedOpt = userAns;
-              const correctOpt = CORRECT_ANSWERS[q.number] as string;
+              const correctOpt = dynamicCorrectAnswers[q.number] as string;
 
               return (
                 <div
@@ -1094,7 +716,7 @@ export default function ProgressTest() {
         </div>
 
         <div className={styles.footerCenter}>
-          {!dynamicExam && (
+          {isMultiPartTest && (
             <button 
               className={`${styles.chevronBtn} ${currentPart > 5 ? styles.chevronBtnActive : ""}`}
               onClick={handlePrevPart}
@@ -1105,7 +727,7 @@ export default function ProgressTest() {
           )}
 
           <div className={styles.paginationTrack}>
-            {dynamicExam ? (
+            {!isMultiPartTest ? (
               <div className={`${styles.paginationCard} ${styles.paginationCardActive}`}>
                 <h5 className={styles.paginationCardTitle}>Đề thi trắc nghiệm</h5>
                 <p className={styles.paginationCardProgress}>
@@ -1154,7 +776,7 @@ export default function ProgressTest() {
             )}
           </div>
 
-          {!dynamicExam && (
+          {isMultiPartTest && (
             <button 
               className={`${styles.chevronBtn} ${currentPart < 7 ? styles.chevronBtnActive : ""}`}
               onClick={handleNextPart}

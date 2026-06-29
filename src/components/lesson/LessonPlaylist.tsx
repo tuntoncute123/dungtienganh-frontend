@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PlayCircleOutlined, FormOutlined } from "@ant-design/icons";
+import { PlayCircleOutlined, ClockCircleOutlined, FormOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { Spin } from "antd";
 
@@ -46,6 +46,7 @@ export default function LessonPlaylist({ currentLessonId }: LessonPlaylistProps)
       <ul className="lp-playlist-list">
         {lessons.map((item, idx) => {
           const isActive = item.id === currentLessonId;
+          const isTest = !item.videoUrl && !!item.exerciseId;
           return (
             <li
               key={item.id}
@@ -54,7 +55,11 @@ export default function LessonPlaylist({ currentLessonId }: LessonPlaylistProps)
               onClick={() => router.push(`/lesson?id=${item.id}`)}
             >
               <span className="lp-playlist-icon">
-                <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+                {isTest ? (
+                  <ClockCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+                ) : (
+                  <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+                )}
               </span>
               <span className={`lp-playlist-title${isActive ? " lp-playlist-title-active" : ""}`}>
                 {item.title}

@@ -61,8 +61,8 @@ export default function FlashcardPage() {
         <div className="main-scroll">
           <div className="content-wrapper" style={{ padding: "20px" }}>
             <FlashcardPageContent />
-            <Footer />
           </div>
+          <Footer />
         </div>
       </Content>
     </Layout>

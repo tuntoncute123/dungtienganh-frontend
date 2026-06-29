@@ -74,8 +74,8 @@ export default function MockTestPage() {
             >
               Hệ thống phòng thi thử online đang được cập nhật...
             </div>
-            <Footer />
           </div>
+          <Footer />
         </div>
       </Content>
     </Layout>

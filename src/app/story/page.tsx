@@ -326,8 +326,8 @@ function StoryPageContent() {
                 <StoryListView router={router} stories={stories} />
               )}
             </div>
-            <Footer />
           </div>
+          <Footer />
         </div>
       </Content>
     </Layout>
