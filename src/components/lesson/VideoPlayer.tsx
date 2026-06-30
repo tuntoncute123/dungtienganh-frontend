@@ -29,6 +29,7 @@ export default function VideoPlayer({
   quizPoints,
 }: VideoPlayerProps) {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+  const videoRef = React.useRef<HTMLVideoElement>(null);
 
   const getFullVideoUrl = (url?: string) => {
     if (!url) return "";
@@ -39,6 +40,54 @@ export default function VideoPlayer({
   };
 
   const finalVideoUrl = getFullVideoUrl(videoUrl);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !finalVideoUrl) return;
+
+    if (finalVideoUrl.includes(".m3u8")) {
+      let activeHls: any = null;
+
+      const loadHls = async () => {
+        if (typeof window !== "undefined") {
+          let HlsClass = (window as any).Hls;
+          if (!HlsClass) {
+            const script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
+            script.async = true;
+            document.body.appendChild(script);
+            await new Promise((resolve) => {
+              script.onload = () => {
+                HlsClass = (window as any).Hls;
+                resolve(null);
+              };
+            });
+          }
+
+          if (HlsClass) {
+            if (HlsClass.isSupported()) {
+              const hls = new HlsClass();
+              hls.loadSource(finalVideoUrl);
+              hls.attachMedia(video);
+              activeHls = hls;
+            } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+              video.src = finalVideoUrl;
+            }
+          }
+        }
+      };
+      loadHls();
+
+      return () => {
+        if (activeHls) {
+          activeHls.destroy();
+        }
+      };
+    } else {
+      video.src = finalVideoUrl;
+    }
+  }, [finalVideoUrl]);
+
   return (
     <div className="lp-card">
       {/* Title */}
@@ -59,7 +108,7 @@ export default function VideoPlayer({
       <div className="lp-video-wrap" style={{ height: finalVideoUrl ? "auto" : undefined }}>
         {finalVideoUrl ? (
           <video
-            src={finalVideoUrl}
+            ref={videoRef}
             controls
             style={{ width: "100%", maxHeight: "500px", borderRadius: 12, display: "block", background: "#000" }}
           />
