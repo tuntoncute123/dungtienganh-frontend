@@ -13,6 +13,7 @@ const PLAY_ICON = "/assets/5f41ca666790ad7191b8_d40728ed.svg";
 
 interface VideoPlayerProps {
   title: string;
+  videoUrl?: string;
   remainingViews: number;
   totalViews: number;
   duration: string;
@@ -21,11 +22,23 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({
   title,
+  videoUrl,
   remainingViews,
   totalViews,
   duration,
   quizPoints,
 }: VideoPlayerProps) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  const getFullVideoUrl = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    return `${API_BASE_URL}${url}`;
+  };
+
+  const finalVideoUrl = getFullVideoUrl(videoUrl);
   return (
     <div className="lp-card">
       {/* Title */}
@@ -43,61 +56,71 @@ export default function VideoPlayer({
       </div>
 
       {/* Video area */}
-      <div className="lp-video-wrap">
-        {/* Play button overlay */}
-        <div className="lp-video-overlay">
-          <div className="lp-play-btn">
-            <img src={PLAY_ICON} alt="Play" style={{ width: 80, height: 80 }} />
-          </div>
-          {/* Wave gradient at bottom */}
-          <div className="lp-video-wave" />
-        </div>
+      <div className="lp-video-wrap" style={{ height: finalVideoUrl ? "auto" : undefined }}>
+        {finalVideoUrl ? (
+          <video
+            src={finalVideoUrl}
+            controls
+            style={{ width: "100%", maxHeight: "500px", borderRadius: 12, display: "block", background: "#000" }}
+          />
+        ) : (
+          <>
+            {/* Play button overlay */}
+            <div className="lp-video-overlay">
+              <div className="lp-play-btn">
+                <img src={PLAY_ICON} alt="Play" style={{ width: 80, height: 80 }} />
+              </div>
+              {/* Wave gradient at bottom */}
+              <div className="lp-video-wave" />
+            </div>
 
-        {/* Thumbnail / video */}
-        <div className="lp-video-inner">
-          <div className="lp-video-bg" />
-        </div>
+            {/* Thumbnail / video */}
+            <div className="lp-video-inner">
+              <div className="lp-video-bg" />
+            </div>
 
-        {/* Progress bar */}
-        <div className="lp-progress-wrap">
-          <div className="lp-progress-track">
-            <div className="lp-progress-fill" style={{ width: "0%" }} />
-            <div className="lp-progress-bg" />
-            {quizPoints.map((q) => (
-              <div
-                key={q.label}
-                className="lp-quiz-dot"
-                style={{ left: `${q.percent}%` }}
-                aria-label={q.label}
-              />
-            ))}
-          </div>
-        </div>
+            {/* Progress bar */}
+            <div className="lp-progress-wrap">
+              <div className="lp-progress-track">
+                <div className="lp-progress-fill" style={{ width: "0%" }} />
+                <div className="lp-progress-bg" />
+                {quizPoints.map((q) => (
+                  <div
+                    key={q.label}
+                    className="lp-quiz-dot"
+                    style={{ left: `${q.percent}%` }}
+                    aria-label={q.label}
+                  />
+                ))}
+              </div>
+            </div>
 
-        {/* Controls */}
-        <div className="lp-controls">
-          <div className="lp-controls-left">
-            <button className="lp-ctrl-btn" aria-label="Phát">
-              <PlayCircleOutlined style={{ fontSize: 22, color: "white" }} />
-            </button>
-            <button className="lp-ctrl-btn lp-ctrl-btn-optional" aria-label="Tua lại 10s">
-              <RollbackOutlined style={{ fontSize: 22, color: "white" }} />
-            </button>
-            <button className="lp-ctrl-btn lp-ctrl-btn-optional" aria-label="Tua tiếp 10s">
-              <FastForwardOutlined style={{ fontSize: 22, color: "white" }} />
-            </button>
-            <button className="lp-ctrl-btn" aria-label="Tắt tiếng">
-              <SoundOutlined style={{ fontSize: 22, color: "white" }} />
-            </button>
-            <span className="lp-time">00:00 / {duration}</span>
-          </div>
-          <div className="lp-controls-right">
-            <span className="lp-speed">1 x</span>
-            <button className="lp-ctrl-btn" aria-label="Toàn màn hình">
-              <FullscreenOutlined style={{ fontSize: 22, color: "white" }} />
-            </button>
-          </div>
-        </div>
+            {/* Controls */}
+            <div className="lp-controls">
+              <div className="lp-controls-left">
+                <button className="lp-ctrl-btn" aria-label="Phát">
+                  <PlayCircleOutlined style={{ fontSize: 22, color: "white" }} />
+                </button>
+                <button className="lp-ctrl-btn lp-ctrl-btn-optional" aria-label="Tua lại 10s">
+                  <RollbackOutlined style={{ fontSize: 22, color: "white" }} />
+                </button>
+                <button className="lp-ctrl-btn lp-ctrl-btn-optional" aria-label="Tua tiếp 10s">
+                  <FastForwardOutlined style={{ fontSize: 22, color: "white" }} />
+                </button>
+                <button className="lp-ctrl-btn" aria-label="Tắt tiếng">
+                  <SoundOutlined style={{ fontSize: 22, color: "white" }} />
+                </button>
+                <span className="lp-time">00:00 / {duration}</span>
+              </div>
+              <div className="lp-controls-right">
+                <span className="lp-speed">1 x</span>
+                <button className="lp-ctrl-btn" aria-label="Toàn màn hình">
+                  <FullscreenOutlined style={{ fontSize: 22, color: "white" }} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Quiz marker row */}

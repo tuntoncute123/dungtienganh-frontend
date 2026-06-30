@@ -188,6 +188,7 @@ function LessonPageContent() {
                 <>
                   <VideoPlayer
                     title={lesson.title}
+                    videoUrl={lesson.videoUrl}
                     remainingViews={10}
                     totalViews={10}
                     duration={lesson.duration}

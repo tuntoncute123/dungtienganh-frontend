@@ -199,6 +199,8 @@ export default function MyCoursesPage() {
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
   useEffect(() => {
     const userStr = localStorage.getItem("teacherdung_user");
     if (userStr) {
@@ -208,7 +210,31 @@ export default function MyCoursesPage() {
         setRole(user.role || "student");
       } catch (e) {}
     }
-  }, []);
+
+    const fetchUserAndSync = async () => {
+      const token = localStorage.getItem("teacherdung_token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAllowedCourses(data.allowedCourses || []);
+          setRole(data.role || "student");
+          localStorage.setItem("teacherdung_user", JSON.stringify(data));
+        } else if (res.status === 401) {
+          localStorage.clear();
+          router.push("/login");
+        }
+      } catch (err) {
+        console.error("Lỗi khi đồng bộ thông tin học sinh từ server:", err);
+      }
+    };
+    fetchUserAndSync();
+  }, [router]);
 
   const handleMenuClick = () => {
     if (isDesktop) {

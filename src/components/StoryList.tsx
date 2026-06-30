@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 /* ── Types ─────────────────────────────────── */
 
@@ -73,12 +73,40 @@ function DiscoveryCard() {
 /* ── Main component ─────────────────────────── */
 
 export default function StoryList() {
+  const [stories, setStories] = useState<Story[]>([]);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/stories`);
+        if (res.ok) {
+          const data = await res.json();
+          const mappedStories = data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            avatar: item.avatar,
+            href: `/story?id=${item.id}`
+          }));
+          setStories(mappedStories.length > 0 ? mappedStories : STORIES);
+        } else {
+          setStories(STORIES);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải stories trang chủ:", err);
+        setStories(STORIES);
+      }
+    };
+    fetchStories();
+  }, []);
+
   return (
     <section className="story-section">
       <div className="story-scroll-wrapper">
         <div className="story-list">
           <CreateStoryCard />
-          {STORIES.map((story) => (
+          {stories.map((story) => (
             <StoryCard key={story.id} story={story} />
           ))}
           <DiscoveryCard />
