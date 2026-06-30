@@ -195,6 +195,7 @@ export default function MyCoursesPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [allowedCourses, setAllowedCourses] = useState<string[]>([]);
   const [role, setRole] = useState<string>("student");
+  const [courses, setCourses] = useState<Course[]>(COURSES_DATA);
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
@@ -202,6 +203,38 @@ export default function MyCoursesPage() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/courses`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const mappedCourses: Course[] = data.map((c: any) => ({
+              id: c.id,
+              href: `/courses/${c.id}`,
+              title: c.title,
+              is_hot: !!c.isHot,
+              hot_icon: c.hotIcon || "/assets/hotB9F-tCZm_3b836ae8.png",
+              thumbnail: c.thumbnail || "/assets/1780979822-khoa-he_db3bba6c.jpg",
+              teachers: Array.isArray(c.teachers) ? c.teachers : [],
+              options: ["video", "livestream"],
+              videos: c.videos || "0 Video",
+              exercises: c.exercises || "0 Bài tập",
+              exams: c.exams || "0 Bài thi",
+              price_main: c.priceMain || undefined,
+              price_sale: c.priceSale || undefined,
+              sale_tag: c.saleTag || undefined,
+              grade: c.grade as any,
+            }));
+            setCourses(mappedCourses);
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi khi fetch courses từ API:", err);
+      }
+    };
+    fetchCourses();
+
     const userStr = localStorage.getItem("teacherdung_user");
     if (userStr) {
       try {
@@ -234,7 +267,7 @@ export default function MyCoursesPage() {
       }
     };
     fetchUserAndSync();
-  }, [router]);
+  }, [router, API_BASE_URL]);
 
   const handleMenuClick = () => {
     if (isDesktop) {
@@ -245,7 +278,7 @@ export default function MyCoursesPage() {
   };
 
   // Filter logic
-  const filteredCourses = COURSES_DATA.filter((course) => {
+  const filteredCourses = courses.filter((course) => {
     // 1. Phân quyền học sinh
     if (role === "student" && !allowedCourses.includes(course.id)) {
       return false;

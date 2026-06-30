@@ -22,7 +22,8 @@ import {
   List,
   App,
   Grid,
-  Drawer
+  Drawer,
+  Checkbox
 } from "antd";
 import {
   PlayCircleOutlined,
@@ -38,14 +39,15 @@ import {
   MenuOutlined,
   UserOutlined,
   CheckOutlined,
-  BellOutlined
+  BellOutlined,
+  AppstoreOutlined
 } from "@ant-design/icons";
 
-const COURSE_MAP: Record<string, string> = {
+let COURSE_MAP: Record<string, string> = {
   "toan-9-he-2k12": "TOÁN 9 | KHÓA HÈ 2K12",
   "toan-12-l-nen-tang": "TOÁN 12 | KHOÁ [L] NỀN TẢNG 12 2027",
   "toan-12-f-he-thong": "TOÁN 12 | KHOÁ [F] HỆ THỐNG NỀN TẢNG 11 2027",
-  "500-cau-chong-sai-ngu": "500 CÂU CHỐNG SAI NGU KINH ĐIỂN",
+  "500-cau-chong-sai-ngu": "500 CÂU CHỐNG SAI NGU KỔNH ĐIỂN",
   "tieng-anh-10-hk2": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 2 - HS 2K11",
   "tieng-anh-11-hk2": "TIẾNG ANH 11 | KHOÁ HỌC KÌ 2 - HS 2K10",
   "tieng-anh-10-hk1": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 1 - HS 2K11",
@@ -75,6 +77,12 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notifForm] = Form.useForm();
+
+  // Course states
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [courseForm] = Form.useForm();
 
   // Loading states
   const [loading, setLoading] = useState<boolean>(false);
@@ -118,6 +126,158 @@ export default function AdminPage() {
       msg.error("Lỗi khi tải bài học");
     }
   };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/courses`);
+      const data = await res.json();
+      if (res.ok) {
+        setCourses(data);
+        if (Array.isArray(data)) {
+          data.forEach((c: any) => {
+            COURSE_MAP[c.id] = c.title;
+          });
+        }
+      }
+    } catch (e: any) {
+      msg.error("Lỗi khi tải khóa học");
+    }
+  };
+
+  const handleCourseSubmit = async (values: any) => {
+    try {
+      const payload = {
+        ...values,
+        teachers: values.teachers ? values.teachers.split(",").map((t: string) => t.trim()) : [],
+        isHot: !!values.isHot,
+      };
+
+      const url = `${API_BASE_URL}/api/courses`;
+      const method = editingCourse ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        msg.success(editingCourse ? "Cập nhật khóa học thành công!" : "Tạo khóa học thành công!");
+        setIsCourseModalOpen(false);
+        courseForm.resetFields();
+        setEditingCourse(null);
+        fetchCourses();
+      } else {
+        msg.error(data.message || "Có lỗi xảy ra");
+      }
+    } catch (e) {
+      msg.error("Lỗi kết nối");
+    }
+  };
+
+  const courseColumns = [
+    {
+      title: "Mã khóa học (ID)",
+      dataIndex: "id",
+      key: "id",
+      render: (text: string) => <Tag color="geekblue">{text}</Tag>,
+    },
+    {
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
+      render: (text: string) => <strong>{text}</strong>,
+    },
+    {
+      title: "Lớp",
+      dataIndex: "grade",
+      key: "grade",
+      render: (text: string) => <Tag color="purple">Lớp {text}</Tag>,
+    },
+    {
+      title: "Giáo viên",
+      dataIndex: "teachers",
+      key: "teachers",
+      render: (teachers: any) => {
+        const arr = Array.isArray(teachers) ? teachers : [];
+        if (arr.length === 0) return <span>Đang cập nhật</span>;
+        return arr.join(", ");
+      },
+    },
+    {
+      title: "Giá",
+      key: "price",
+      render: (_: any, record: any) => {
+        if (!record.priceMain) return <span style={{ color: "#16a34a" }}>Miễn phí</span>;
+        return (
+          <div>
+            <span style={{ textDecoration: "line-through", color: "#94a3b8", marginRight: 8 }}>{record.priceMain}đ</span>
+            {record.priceSale && <span style={{ color: "#ef4444", fontWeight: "bold" }}>{record.priceSale}đ</span>}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Thao tác",
+      key: "action",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Button
+            type="primary"
+            ghost
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditingCourse(record);
+              courseForm.setFieldsValue({
+                id: record.id,
+                title: record.title,
+                thumbnail: record.thumbnail,
+                teachers: Array.isArray(record.teachers) ? record.teachers.join(", ") : "",
+                videos: record.videos,
+                exercises: record.exercises,
+                exams: record.exams,
+                priceMain: record.priceMain,
+                priceSale: record.priceSale,
+                saleTag: record.saleTag,
+                grade: record.grade,
+                isHot: !!record.isHot,
+                hotIcon: record.hotIcon,
+              });
+              setIsCourseModalOpen(true);
+            }}
+          >
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Bạn có chắc chắn muốn xóa khóa học này?"
+            description="Các bài học trong khóa sẽ bị xóa gán khóa học (về không có khóa học) nhưng không bị mất."
+            onConfirm={async () => {
+              try {
+                const res = await fetch(`${API_BASE_URL}/api/courses?id=${record.id}`, {
+                  method: "DELETE",
+                });
+                if (res.ok) {
+                  msg.success("Xóa khóa học thành công!");
+                  fetchCourses();
+                } else {
+                  msg.error("Lỗi khi xóa khóa học");
+                }
+              } catch (e) {
+                msg.error("Lỗi hệ thống");
+              }
+            }}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button type="primary" danger ghost icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   const fetchStories = async () => {
     try {
@@ -227,7 +387,8 @@ export default function AdminPage() {
       fetchDecks(),
       fetchExams(),
       fetchUsers(),
-      fetchNotifications()
+      fetchNotifications(),
+      fetchCourses()
     ]);
     setLoading(false);
   };
@@ -976,6 +1137,7 @@ export default function AdminPage() {
       }}
       style={{ borderRight: 0, marginTop: isMobile ? 0 : 12 }}
       items={[
+        { key: "courses", icon: <AppstoreOutlined />, label: "Khóa học" },
         { key: "lessons", icon: <PlayCircleOutlined />, label: "Bài học" },
         { key: "stories", icon: <InstagramOutlined />, label: "Stories" },
         { key: "flashcards", icon: <BookOutlined />, label: "Bộ thẻ từ vựng" },
@@ -1025,6 +1187,7 @@ export default function AdminPage() {
               />
             )}
             <div style={{ fontSize: isMobile ? 15 : 18, fontWeight: 700, color: "#1e293b", flexGrow: 1 }}>
+              {activeTab === "courses" && (isMobile ? "Quản lý Khóa học" : "Quản lý Khóa học hệ thống")}
               {activeTab === "lessons" && (isMobile ? "Quản lý Bài học" : "Quản lý Bài học video")}
               {activeTab === "stories" && (isMobile ? "Stories" : "Quản lý Stories bảng tin")}
               {activeTab === "flashcards" && (isMobile ? "Bộ thẻ học" : "Quản lý Bộ thẻ Flashcard học tập")}
@@ -1040,6 +1203,13 @@ export default function AdminPage() {
 
         <Content style={{ padding: isMobile ? 12 : 24, background: "#f8fafc" }}>
           {renderDashboardStats()}
+
+          {/* Courses view */}
+          {activeTab === "courses" && (
+            <Card title="Danh sách Khóa học" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingCourse(null); courseForm.resetFields(); setIsCourseModalOpen(true); }}>Thêm khóa học mới</Button>}>
+              <Table dataSource={courses} columns={courseColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
+            </Card>
+          )}
 
           {/* Lessons view */}
           {activeTab === "lessons" && (
@@ -1191,8 +1361,15 @@ export default function AdminPage() {
               );
             }}
           </Form.Item>
-          <Form.Item name="playlistId" label="Mã danh sách (Playlist ID)">
-            <Input placeholder="playlist-grammar" />
+          <Form.Item name="playlistId" label="Chọn khóa học">
+            <Select placeholder="Chọn khóa học để gán bài giảng" allowClear>
+              <Select.Option value="">Không có khóa học</Select.Option>
+              {courses.map((c) => (
+                <Select.Option key={c.id} value={c.id}>
+                  {c.title}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item name="thumbnail" label="Ảnh thu nhỏ (Thumbnail Url)">
             <Input.Group compact>
@@ -1718,6 +1895,111 @@ export default function AdminPage() {
               </Col>
             </Row>
           </div>
+        </Form>
+      </Modal>
+
+      {/* Course Modal */}
+      <Modal
+        title={editingCourse ? "Cập nhật khóa học" : "Tạo khóa học mới"}
+        open={isCourseModalOpen}
+        onCancel={() => {
+          setIsCourseModalOpen(false);
+          courseForm.resetFields();
+          setEditingCourse(null);
+        }}
+        footer={null}
+      >
+        <Form form={courseForm} layout="vertical" onFinish={handleCourseSubmit}>
+          <Form.Item
+            name="id"
+            label="Mã khóa học (ID / Slug viết liền không dấu)"
+            rules={[{ required: true, message: "Vui lòng nhập ID khóa học" }]}
+          >
+            <Input disabled={!!editingCourse} placeholder="Ví dụ: tieng-anh-9-he-2k12" />
+          </Form.Item>
+
+          <Form.Item
+            name="title"
+            label="Tiêu đề khóa học"
+            rules={[{ required: true, message: "Vui lòng nhập tiêu đề" }]}
+          >
+            <Input placeholder="Ví dụ: TIẾNG ANH 9 | KHÓA HÈ 2K12" />
+          </Form.Item>
+
+          <Form.Item name="grade" label="Phân loại lớp học" rules={[{ required: true }]} initialValue="9">
+            <Select>
+              <Select.Option value="8">Lớp 8</Select.Option>
+              <Select.Option value="9">Lớp 9</Select.Option>
+              <Select.Option value="10">Lớp 10</Select.Option>
+              <Select.Option value="11">Lớp 11</Select.Option>
+              <Select.Option value="12">Lớp 12</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="teachers" label="Tên các giáo viên (cách nhau bằng dấu phẩy)">
+            <Input placeholder="Ví dụ: Cô Dung, Tổ Tiếng Anh" />
+          </Form.Item>
+
+          <Form.Item name="thumbnail" label="Ảnh đại diện khóa học (Thumbnail URL)">
+            <div style={{ display: "flex", gap: 8 }}>
+              <Form.Item name="thumbnail" noStyle>
+                <Input placeholder="Nhập URL ảnh hoặc upload..." style={{ width: "calc(100% - 110px)" }} />
+              </Form.Item>
+              <Upload
+                accept="image/*"
+                showUploadList={false}
+                beforeUpload={(file) => {
+                  handleUpload(file, (url) => {
+                    courseForm.setFieldsValue({ thumbnail: url });
+                  });
+                  return false;
+                }}
+              >
+                <Button icon={<UploadOutlined />} style={{ width: 110 }} loading={uploadLoading}>Tải lên</Button>
+              </Upload>
+            </div>
+          </Form.Item>
+
+          <Form.Item name="videos" label="Số lượng Video (văn bản hiển thị)">
+            <Input placeholder="Ví dụ: 12 Video" />
+          </Form.Item>
+
+          <Form.Item name="exercises" label="Số lượng Bài tập (văn bản hiển thị)">
+            <Input placeholder="Ví dụ: 0 Bài tập" />
+          </Form.Item>
+
+          <Form.Item name="exams" label="Số lượng Bài thi (văn bản hiển thị)">
+            <Input placeholder="Ví dụ: 5 Bài thi" />
+          </Form.Item>
+
+          <Form.Item name="priceMain" label="Giá gốc (văn bản hiển thị)">
+            <Input placeholder="Ví dụ: 300.000" />
+          </Form.Item>
+
+          <Form.Item name="priceSale" label="Giá khuyến mãi (văn bản hiển thị)">
+            <Input placeholder="Ví dụ: 200.000" />
+          </Form.Item>
+
+          <Form.Item name="saleTag" label="Nhãn giảm giá (nếu có)">
+            <Input placeholder="Ví dụ: 33%" />
+          </Form.Item>
+
+          <Form.Item name="isHot" valuePropName="checked" label="Khóa học nổi bật (Hot)?">
+            <Checkbox>Nổi bật</Checkbox>
+          </Form.Item>
+
+          <Form.Item name="hotIcon" label="Icon nổi bật (nếu có)">
+            <Input placeholder="URL icon" />
+          </Form.Item>
+
+          <Form.Item style={{ textAlign: "right", marginBottom: 0 }}>
+            <Space>
+              <Button onClick={() => setIsCourseModalOpen(false)}>Hủy</Button>
+              <Button type="primary" htmlType="submit">
+                Lưu
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Modal>
     </Layout>
