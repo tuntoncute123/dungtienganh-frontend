@@ -212,6 +212,7 @@ function StoryPageContent() {
 
       {/* Main Content */}
       <Content className="app-content">
+        <h1 className="sr-only">Đọc Truyện Chêm Tiếng Anh - Học Từ Vựng Tự Nhiên - TeacherDung</h1>
         <div className="main-scroll">
           <div className="content-wrapper">
             <div className="content-panel">

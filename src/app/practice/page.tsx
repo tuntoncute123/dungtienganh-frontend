@@ -210,6 +210,7 @@ export default function PracticePage() {
 
       {/* Main Content */}
       <Content className="app-content">
+        <h1 className="sr-only">Luyện Tập Trắc Nghiệm Tiếng Anh Online - TeacherDung</h1>
         <div className="main-scroll">
           <div className="list-category">
             <div className="container">

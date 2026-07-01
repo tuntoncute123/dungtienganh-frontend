@@ -72,9 +72,9 @@ export default function LoginPage() {
           <div className="login-logo-wrap">
             <img src="/logo.png" alt="Logo" className="login-logo" />
           </div>
-          <Title level={2} className="login-title">
+          <h1 className="login-title">
             TeacherDung
-          </Title>
+          </h1>
           <Text className="login-subtitle">
             Học tiếng Anh cùng cô Dung - Luyện thi TOEIC chuyên sâu
           </Text>

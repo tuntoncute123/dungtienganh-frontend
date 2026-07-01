@@ -60,7 +60,7 @@ export default function MockTestPage() {
         <div className="main-scroll">
           <div className="content-wrapper" style={{ padding: "40px 20px" }}>
             <h1 className="section-title" style={{ marginBottom: 20 }}>
-              Thi thử Ngay
+              Thi thử Tiếng Anh Online
             </h1>
             <div
               style={{

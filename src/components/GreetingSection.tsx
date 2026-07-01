@@ -55,7 +55,7 @@ export default function GreetingSection() {
         className="greeting-avatar"
       />
       <div>
-        <p className="greeting-name">Xin chào, {name}</p>
+        <h1 className="greeting-name">Xin chào, {name}</h1>
         <p className="greeting-sub">Cùng Cô Dung tiến bộ mỗi ngày nào!</p>
       </div>
     </div>

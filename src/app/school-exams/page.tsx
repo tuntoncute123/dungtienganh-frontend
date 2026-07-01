@@ -186,6 +186,7 @@ export default function SchoolExamsPage() {
 
       {/* Main Content */}
       <Content className="app-content">
+        <h1 className="sr-only">Luyện Đề Thi Thử Tiếng Anh THPT Quốc Gia - TeacherDung</h1>
         <div className="main-scroll">
           <div className="list-category">
             <div className="container">

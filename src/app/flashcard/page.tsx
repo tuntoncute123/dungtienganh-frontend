@@ -58,6 +58,7 @@ export default function FlashcardPage() {
 
       {/* ── Main Content ── */}
       <Content className="app-content">
+        <h1 className="sr-only">Học Từ Vựng Tiếng Anh Qua Flashcard - TeacherDung</h1>
         <div className="main-scroll">
           <div className="content-wrapper" style={{ padding: "20px" }}>
             <FlashcardPageContent />
