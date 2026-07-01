@@ -53,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "profile",
-    label: "Hồ sơ cá nhân",
+    label: "Tiến Độ Học Tập",
     icon: <UserOutlined />,
   },
 ];

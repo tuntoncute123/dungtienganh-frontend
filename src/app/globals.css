@@ -1218,7 +1218,7 @@ body {
 
   /* Last stat full width if odd */
   .honor-stat-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+    grid-column: span 1;
   }
 
   .honor-stats .hide-on-mobile {
@@ -2587,11 +2587,12 @@ body {
 }
 
 .teacher-intro__avatar-placeholder {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  background: #f8fafc;
+  /* Remove rounded/circular frame — show image as default */
+  border-radius: 0;
+  overflow: visible;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .teacher-intro__avatar-placeholder img {
@@ -4507,4 +4508,4 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 113, 249, 0.35) !important;
   opacity: 0.9;
-}
+}
