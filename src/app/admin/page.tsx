@@ -481,12 +481,24 @@ export default function AdminPage() {
         const res = await fetch(`${API_BASE_URL}/api/exams?id=${currentExerciseId}`);
         if (res.ok) {
           const data = await res.json();
-          // Map questions with qType
+          // Map questions with qType and parse multiple correct answers for gap-filling
           const mappedQuestions = (data.questions || []).map((q: any) => {
             const hasOptions = q.options && (q.options.A || q.options.B || q.options.C || q.options.D);
+            const isGapFilling = !hasOptions;
+            let correctAnswers = [""];
+            if (isGapFilling && q.correctAnswer) {
+              if (q.correctAnswer.includes("|")) {
+                correctAnswers = q.correctAnswer.split("|").map((ans: string) => ans.trim());
+              } else if (q.correctAnswer.includes(" / ")) {
+                correctAnswers = q.correctAnswer.split(" / ").map((ans: string) => ans.trim());
+              } else {
+                correctAnswers = [q.correctAnswer.trim()];
+              }
+            }
             return {
               ...q,
-              qType: hasOptions ? "multiple-choice" : "gap-filling"
+              qType: hasOptions ? "multiple-choice" : "gap-filling",
+              correctAnswers
             };
           });
           exerciseForm.setFieldsValue({
@@ -521,11 +533,20 @@ export default function AdminPage() {
 
       const processedQuestions = (values.questions || []).map((q: any) => {
         const isGapFilling = q.qType === "gap-filling";
+        let answerStr = "";
+        if (isGapFilling) {
+          const answers = (q.correctAnswers || [])
+            .filter((a: any) => typeof a === "string" && a.trim() !== "")
+            .map((a: string) => a.trim());
+          answerStr = answers.join("|");
+        } else {
+          answerStr = q.correctAnswer || "";
+        }
         return {
           number: parseInt(q.number as any) || 1,
           text: q.text || "",
           options: isGapFilling ? {} : (q.options || {}),
-          correctAnswer: q.correctAnswer || "",
+          correctAnswer: answerStr,
           explanation: q.explanation || null
         };
       });
@@ -672,11 +693,20 @@ export default function AdminPage() {
       
       const processedQuestions = (values.questions || []).map((q: any) => {
         const isGapFilling = q.qType === "gap-filling";
+        let answerStr = "";
+        if (isGapFilling) {
+          const answers = (q.correctAnswers || [])
+            .filter((a: any) => typeof a === "string" && a.trim() !== "")
+            .map((a: string) => a.trim());
+          answerStr = answers.join("|");
+        } else {
+          answerStr = q.correctAnswer || "";
+        }
         return {
           number: parseInt(q.number as any) || 1,
           text: q.text || "",
           options: isGapFilling ? {} : (q.options || {}),
-          correctAnswer: q.correctAnswer || "",
+          correctAnswer: answerStr,
           explanation: q.explanation || null
         };
       });
@@ -947,9 +977,21 @@ export default function AdminPage() {
                 ...record,
                 questions: (record.questions || []).map((q: any) => {
                   const hasOptions = q.options && (q.options.A || q.options.B || q.options.C || q.options.D);
+                  const isGapFilling = !hasOptions;
+                  let correctAnswers = [""];
+                  if (isGapFilling && q.correctAnswer) {
+                    if (q.correctAnswer.includes("|")) {
+                      correctAnswers = q.correctAnswer.split("|").map((ans: string) => ans.trim());
+                    } else if (q.correctAnswer.includes(" / ")) {
+                      correctAnswers = q.correctAnswer.split(" / ").map((ans: string) => ans.trim());
+                    } else {
+                      correctAnswers = [q.correctAnswer.trim()];
+                    }
+                  }
                   return {
                     ...q,
-                    qType: hasOptions ? "multiple-choice" : "gap-filling"
+                    qType: hasOptions ? "multiple-choice" : "gap-filling",
+                    correctAnswers
                   };
                 })
               };
@@ -1413,7 +1455,7 @@ export default function AdminPage() {
 
           <Form.List name="questions">
             {(fields, { add, remove }) => (
-              <Card size="small" title="Ngân hàng câu hỏi bài tập" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" } })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
+              <Card size="small" title="Ngân hàng câu hỏi bài tập" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" }, correctAnswers: [""] })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
                 <div style={{ maxHeight: 350, overflowY: "auto", paddingRight: 8 }}>
                   {fields.map(({ key, name, ...restField }) => (
                     <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
@@ -1476,27 +1518,82 @@ export default function AdminPage() {
                               )}
 
                               <Row gutter={8}>
-                                <Col xs={24} sm={8} md={6}>
-                                  {isMC ? (
-                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
-                                      <Select>
-                                        <Option value="A">A</Option>
-                                        <Option value="B">B</Option>
-                                        <Option value="C">C</Option>
-                                        <Option value="D">D</Option>
-                                      </Select>
-                                    </Form.Item>
-                                  ) : (
-                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng (Điền từ)" rules={[{ required: true, message: "Nhập đáp án đúng" }]}>
-                                      <Input placeholder="Ví dụ: went hoặc has gone / is going" />
-                                    </Form.Item>
-                                  )}
-                                </Col>
-                                <Col xs={24} sm={16} md={18}>
-                                  <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                    <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
-                                  </Form.Item>
-                                </Col>
+                                {isMC ? (
+                                  <>
+                                    <Col xs={24} sm={8} md={6}>
+                                      <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
+                                        <Select>
+                                          <Option value="A">A</Option>
+                                          <Option value="B">B</Option>
+                                          <Option value="C">C</Option>
+                                          <Option value="D">D</Option>
+                                        </Select>
+                                      </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={16} md={18}>
+                                      <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                      </Form.Item>
+                                    </Col>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Col xs={24} sm={12} md={10}>
+                                      <Form.List name={[name, "correctAnswers"]} initialValue={[""]}>
+                                        {(answerFields, { add: addAns, remove: removeAns }) => (
+                                          <div>
+                                            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500, color: 'rgba(0, 0, 0, 0.88)' }}>
+                                              Đáp án Đúng (Điền từ)
+                                            </label>
+                                            {answerFields.map((answerField, index) => (
+                                              <Row gutter={8} key={answerField.key} align="middle" style={{ marginBottom: 8 }}>
+                                                <Col flex="auto">
+                                                  <Form.Item
+                                                    {...answerField}
+                                                    noStyle
+                                                    rules={
+                                                      index === 0
+                                                        ? [{ required: true, message: "Nhập đáp án đúng" }]
+                                                        : []
+                                                    }
+                                                  >
+                                                    <Input placeholder={`Đáp án đúng ${index + 1}`} />
+                                                  </Form.Item>
+                                                </Col>
+                                                {index > 0 && (
+                                                  <Col flex="none">
+                                                    <Button
+                                                      type="text"
+                                                      danger
+                                                      onClick={() => removeAns(answerField.name)}
+                                                      icon={<DeleteOutlined />}
+                                                    />
+                                                  </Col>
+                                                )}
+                                              </Row>
+                                            ))}
+                                            {answerFields.length < 4 && (
+                                              <Button
+                                                type="dashed"
+                                                onClick={() => addAns("")}
+                                                icon={<PlusOutlined />}
+                                                size="small"
+                                                style={{ width: "100%", marginTop: 4 }}
+                                              >
+                                                Thêm đáp án đúng khác
+                                              </Button>
+                                            )}
+                                          </div>
+                                        )}
+                                      </Form.List>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={14}>
+                                      <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                      </Form.Item>
+                                    </Col>
+                                  </>
+                                )}
                               </Row>
                             </>
                           );
@@ -1710,7 +1807,7 @@ export default function AdminPage() {
 
           <Form.List name="questions">
             {(fields, { add, remove }) => (
-              <Card size="small" title="Ngân hàng câu hỏi trắc nghiệm" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" } })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
+              <Card size="small" title="Ngân hàng câu hỏi trắc nghiệm" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" }, correctAnswers: [""] })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
                 <div style={{ maxHeight: 350, overflowY: "auto", paddingRight: 8 }}>
                   {fields.map(({ key, name, ...restField }) => (
                     <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
@@ -1773,27 +1870,82 @@ export default function AdminPage() {
                               )}
 
                               <Row gutter={8}>
-                                <Col xs={24} sm={8} md={6}>
-                                  {isMC ? (
-                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
-                                      <Select>
-                                        <Option value="A">A</Option>
-                                        <Option value="B">B</Option>
-                                        <Option value="C">C</Option>
-                                        <Option value="D">D</Option>
-                                      </Select>
-                                    </Form.Item>
-                                  ) : (
-                                    <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng (Điền từ)" rules={[{ required: true, message: "Nhập đáp án đúng" }]}>
-                                      <Input placeholder="Ví dụ: went hoặc has gone / is going" />
-                                    </Form.Item>
-                                  )}
-                                </Col>
-                                <Col xs={24} sm={16} md={18}>
-                                  <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                    <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
-                                  </Form.Item>
-                                </Col>
+                                {isMC ? (
+                                  <>
+                                    <Col xs={24} sm={8} md={6}>
+                                      <Form.Item {...restField} name={[name, "correctAnswer"]} label="Đáp án Đúng" rules={[{ required: true, message: "Chọn đáp án đúng" }]}>
+                                        <Select>
+                                          <Option value="A">A</Option>
+                                          <Option value="B">B</Option>
+                                          <Option value="C">C</Option>
+                                          <Option value="D">D</Option>
+                                        </Select>
+                                      </Form.Item>
+                                    </Col>
+                                    <Col xs={24} sm={16} md={18}>
+                                      <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                      </Form.Item>
+                                    </Col>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Col xs={24} sm={12} md={10}>
+                                      <Form.List name={[name, "correctAnswers"]} initialValue={[""]}>
+                                        {(answerFields, { add: addAns, remove: removeAns }) => (
+                                          <div>
+                                            <label style={{ display: 'block', marginBottom: 8, fontWeight: 500, color: 'rgba(0, 0, 0, 0.88)' }}>
+                                              Đáp án Đúng (Điền từ)
+                                            </label>
+                                            {answerFields.map((answerField, index) => (
+                                              <Row gutter={8} key={answerField.key} align="middle" style={{ marginBottom: 8 }}>
+                                                <Col flex="auto">
+                                                  <Form.Item
+                                                    {...answerField}
+                                                    noStyle
+                                                    rules={
+                                                      index === 0
+                                                        ? [{ required: true, message: "Nhập đáp án đúng" }]
+                                                        : []
+                                                    }
+                                                  >
+                                                    <Input placeholder={`Đáp án đúng ${index + 1}`} />
+                                                  </Form.Item>
+                                                </Col>
+                                                {index > 0 && (
+                                                  <Col flex="none">
+                                                    <Button
+                                                      type="text"
+                                                      danger
+                                                      onClick={() => removeAns(answerField.name)}
+                                                      icon={<DeleteOutlined />}
+                                                    />
+                                                  </Col>
+                                                )}
+                                              </Row>
+                                            ))}
+                                            {answerFields.length < 4 && (
+                                              <Button
+                                                type="dashed"
+                                                onClick={() => addAns("")}
+                                                icon={<PlusOutlined />}
+                                                size="small"
+                                                style={{ width: "100%", marginTop: 4 }}
+                                              >
+                                                Thêm đáp án đúng khác
+                                              </Button>
+                                            )}
+                                          </div>
+                                        )}
+                                      </Form.List>
+                                    </Col>
+                                    <Col xs={24} sm={12} md={14}>
+                                      <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
+                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                      </Form.Item>
+                                    </Col>
+                                  </>
+                                )}
                               </Row>
                             </>
                           );
