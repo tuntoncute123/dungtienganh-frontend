@@ -364,7 +364,7 @@ export default function ProgressTest() {
         </div>
           {isExpanded && (
             <div onClick={(e) => e.stopPropagation()} style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-              <p>{q.explanation}</p>
+              <p style={{ whiteSpace: "pre-line" }}>{q.explanation}</p>
               <p style={{ color: "#cc4125", fontWeight: "bold" }}>⇒ Đáp án đúng: {q.correctAnswer}</p>
             </div>
           )}

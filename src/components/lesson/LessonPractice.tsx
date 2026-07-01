@@ -393,7 +393,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                   </div>
                   {expandedExplanations[q.number] && (
                     <div className={styles.explanationContent}>
-                      <p>{q.explanation}</p>
+                      <p style={{ whiteSpace: "pre-line" }}>{q.explanation}</p>
                       <p className={styles.correctAnswerText}>⇒ Đáp án đúng: {q.correctAnswer}</p>
                     </div>
                   )}
