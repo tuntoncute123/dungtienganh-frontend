@@ -1197,6 +1197,7 @@ export default function AdminPage() {
             </div>
           </div>
           <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
+            <Button href="/" size={isMobile ? "small" : "middle"}>Trang chủ</Button>
             <Button type="primary" size={isMobile ? "small" : "middle"} onClick={loadAllData} icon={<DatabaseOutlined />}>{isMobile ? "Đồng bộ" : "Đồng bộ DB"}</Button>
           </Space>
         </Header>
