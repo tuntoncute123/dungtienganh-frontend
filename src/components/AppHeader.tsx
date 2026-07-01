@@ -31,7 +31,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [sharing, setSharing] = useState(false);
 
-  const [userName, setUserName] = useState("Huỳnh Tấn Toàn");
+  const [userName, setUserName] = useState("Học sinh");
   const [role, setRole] = useState("student");
 
   const [notifications, setNotifications] = useState<any[]>([]);

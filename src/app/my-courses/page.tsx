@@ -383,7 +383,7 @@ export default function MyCoursesPage() {
                         {filteredCourses.map((course) => (
                           <a
                             key={course.id}
-                            href={course.href}
+                            href={`/lesson?courseId=${course.id}`}
                             className="card-course"
                           >
                             {/* Hot Tag badge */}
@@ -526,7 +526,7 @@ export default function MyCoursesPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  router.push("/lesson");
+                                  router.push(`/lesson?courseId=${course.id}`);
                                 }}
                               >
                                 Học thử ngay

@@ -28,9 +28,11 @@ function LessonPageContent() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const lessonId = searchParams.get("id") || "1";
+  const lessonId = searchParams.get("id");
+  const courseId = searchParams.get("courseId");
 
   const [lesson, setLesson] = useState<any>(null);
+  const [playlist, setPlaylist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const practiceRef = useRef<HTMLDivElement>(null);
 
@@ -69,31 +71,51 @@ function LessonPageContent() {
   }, [lesson, lessonId]);
 
   useEffect(() => {
-    const fetchLesson = async () => {
+    const fetchLessonAndPlaylist = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/api/lessons?id=${lessonId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setLesson(data);
+        // 1. Fetch playlist data
+        let playlistData: any[] = [];
+        if (courseId) {
+          const listRes = await fetch(`${API_BASE_URL}/api/lessons?playlistId=${courseId}`);
+          if (listRes.ok) {
+            playlistData = await listRes.json();
+          }
         } else {
-          // If not found, fallback to list and load the first one
           const listRes = await fetch(`${API_BASE_URL}/api/lessons`);
           if (listRes.ok) {
-            const listData = await listRes.json();
-            if (listData.length > 0) {
-              setLesson(listData[0]);
-            }
+            playlistData = await listRes.json();
+          }
+        }
+        setPlaylist(playlistData);
+
+        // 2. Identify the active lesson
+        if (lessonId) {
+          const res = await fetch(`${API_BASE_URL}/api/lessons?id=${lessonId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setLesson(data);
+          } else if (playlistData.length > 0) {
+            setLesson(playlistData[0]);
+          } else {
+            setLesson(null);
+          }
+        } else {
+          // If no lessonId is specified, play the first lesson in the playlist
+          if (playlistData.length > 0) {
+            setLesson(playlistData[0]);
+          } else {
+            setLesson(null);
           }
         }
       } catch (e) {
-        console.error("Lỗi khi tải bài học:", e);
+        console.error("Lỗi khi tải bài học và danh sách phát:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchLesson();
-  }, [lessonId]);
+    fetchLessonAndPlaylist();
+  }, [lessonId, courseId]);
 
   const handleMenuClick = () => {
     if (isDesktop) {
@@ -431,7 +453,7 @@ function LessonPageContent() {
               </div>
  
               {/* Playlist */}
-              <LessonPlaylist currentLessonId={lesson.id} />
+              <LessonPlaylist currentLessonId={lesson.id} lessons={playlist} courseId={courseId} />
             </div>
           </div>
         </div>

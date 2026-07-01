@@ -5,11 +5,11 @@ import React, { useState } from "react";
 /* ── Data ──────────────────────────────────── */
 
 const STATS = [
-  { value: 1, label: "Thủ khoa Toàn Quốc", color: "#f59e0b", bg: "#fef3c7" },
-  { value: 15, label: "Thủ khoa Tỉnh / Thành phố", color: "#0071f9", bg: "#e1effe" },
-  { value: 10, label: "Á khoa Tỉnh / Thành phố", color: "#7c3aed", bg: "#ede9fe" },
-  { value: 27, label: "Điểm 10 Tuyệt đối", color: "#059669", bg: "#d1fae5" },
-  { value: "2.348+", label: "Điểm 9.0 – 9.8", color: "#e20d2c", bg: "#fee2e2" },
+  { value: 1, label: "Thủ khoa Toàn Quốc", color: "#f59e0b", bg: "#fef3c7", hideOnMobile: true },
+  { value: 15, label: "Thủ khoa Tỉnh / Thành phố", color: "#0071f9", bg: "#e1effe", hideOnMobile: true },
+  { value: 10, label: "Á khoa Tỉnh / Thành phố", color: "#7c3aed", bg: "#ede9fe", hideOnMobile: true },
+  { value: 27, label: "Điểm 10 Tuyệt đối", color: "#059669", bg: "#d1fae5", hideOnMobile: false },
+  { value: "2.348+", label: "Điểm 9.0 – 9.8", color: "#e20d2c", bg: "#fee2e2", hideOnMobile: false },
 ];
 
 const DATA = [
@@ -56,14 +56,18 @@ export default function HonorBoard() {
         <div className="honor-crown">👑</div>
         <div>
           <h2 className="honor-title">VINH DANH BẢNG VÀNG MÙA THI 2024</h2>
-          <p className="honor-subtitle">Team Cô Mai Phương</p>
+          <p className="honor-subtitle">Team Cô Dung</p>
         </div>
       </div>
 
       {/* ── Statistics ── */}
       <div className="honor-stats">
         {STATS.map((stat) => (
-          <div key={stat.label} className="honor-stat-card" style={{ borderColor: stat.color }}>
+          <div
+            key={stat.label}
+            className={`honor-stat-card${stat.hideOnMobile ? " hide-on-mobile" : ""}`}
+            style={{ borderColor: stat.color }}
+          >
             <div className="honor-stat-value" style={{ color: stat.color }}>
               {stat.value}
             </div>
@@ -73,7 +77,7 @@ export default function HonorBoard() {
       </div>
 
       {/* ── Table (desktop) / Cards (mobile) ── */}
-      <div className="honor-table-wrap">
+      <div className={`honor-table-wrap ${showAll ? "show-all" : "show-limit"}`}>
         {/* Desktop table */}
         <table className="honor-table">
           <thead>
@@ -131,12 +135,19 @@ export default function HonorBoard() {
       </div>
 
       {/* ── Show more / less ── */}
-      {DATA.length > 10 && (
+      {DATA.length > 5 && (
         <button
           className="honor-show-more"
           onClick={() => setShowAll((p) => !p)}
         >
-          {showAll ? "Thu gọn ▲" : `Xem thêm ${DATA.length - 10} người ▼`}
+          {showAll ? (
+            "Thu gọn ▲"
+          ) : (
+            <>
+              <span className="show-more-desktop">Xem thêm {DATA.length - 10} người ▼</span>
+              <span className="show-more-mobile">Xem thêm {DATA.length - 5} người ▼</span>
+            </>
+          )}
         </button>
       )}
     </section>

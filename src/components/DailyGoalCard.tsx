@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ICONS = {
   studyPlan:
@@ -47,6 +47,20 @@ const TASKS: GoalTask[] = [
 ];
 
 export default function DailyGoalCard() {
+  const [name, setName] = useState("bạn");
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("teacherdung_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.name || user.username) {
+          setName(user.name || user.username);
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   return (
     <div className="daily-goal-card">
       {/* Title */}
@@ -57,7 +71,7 @@ export default function DailyGoalCard() {
         {/* Mascot Bubble */}
         <div className="mascot-bubble">
           <div className="mascot-bubble-text">
-            Bắt tay vào làm nhiệm vụ đầu tiên thôi Huỳnh Tấn Toàn ơi!
+            Bắt tay vào làm nhiệm vụ đầu tiên thôi {name} ơi!
           </div>
           <img
             src={ICONS.mascot}

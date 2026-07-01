@@ -1220,6 +1220,10 @@ body {
   .honor-stat-card:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
+
+  .honor-stats .hide-on-mobile {
+    display: none;
+  }
 }
 
 .honor-stat-card {
@@ -1367,6 +1371,11 @@ body {
     flex-direction: column;
     gap: 0;
   }
+
+  /* Khi chưa click xem thêm, chỉ hiển thị 5 card đầu trên di động */
+  .honor-table-wrap.show-limit .honor-cards .honor-card:nth-child(n+6) {
+    display: none;
+  }
 }
 
 .honor-card {
@@ -1434,6 +1443,19 @@ body {
 
 .honor-show-more:hover {
   background: #edf7ff;
+}
+
+.show-more-mobile {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .show-more-desktop {
+    display: none;
+  }
+  .show-more-mobile {
+    display: inline;
+  }
 }
 
 /* ── Mobile section padding ── */
