@@ -507,13 +507,21 @@ export default function MyCoursesPage() {
                             {/* Footer: Price details & CTA */}
                             <div className="card-course__footer">
                               <div className="card-course__price-sale">
-                                {course.price_main && (
+                                {course.price_sale ? (
+                                  // Nếu có giá khuyến mãi:
+                                  // Hiển thị giá khuyến mãi làm giá chính (nổi bật) và giá gốc bên dưới (gạch ngang)
                                   <div className="card-course__price">
-                                    <div className="price-main">{course.price_main}đ</div>
-                                    {course.price_sale && (
-                                      <div className="price-sale">{course.price_sale}đ</div>
-                                    )}
+                                    <div className="price-main">{course.price_sale}đ</div>
+                                    <div className="price-sale">{course.price_main}đ</div>
                                   </div>
+                                ) : (
+                                  // Nếu không có giá khuyến mãi:
+                                  // Hiển thị giá gốc làm giá chính (nổi bật)
+                                  course.price_main && (
+                                    <div className="card-course__price">
+                                      <div className="price-main">{course.price_main}đ</div>
+                                    </div>
+                                  )
                                 )}
                                 {course.sale_tag && (
                                   <span className="el-tag el-tag--danger el-tag--small el-tag--dark">
