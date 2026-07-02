@@ -205,7 +205,7 @@ function LessonPageContent() {
           <div className={`lp-main-grid${!isDesktop ? " lp-main-grid-mobile" : ""}`}>
             {/* ── LEFT: Video + docs + homework OR Thi Online ── */}
             <div className="lp-left-col">
-              {lesson.videoUrl ? (
+              {(lesson.videoUrl || !lesson.exerciseId) ? (
                 // --- REGULAR VIDEO LESSON VIEW ---
                 <>
                   <VideoPlayer

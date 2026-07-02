@@ -90,6 +90,8 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
 
     if (exerciseId) {
       fetchExam();
+    } else {
+      setLoading(false);
     }
   }, [exerciseId]);
 
@@ -105,7 +107,14 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
   }
 
   if (!exam || !exam.questions || exam.questions.length === 0) {
-    return null;
+    return (
+      <div className={styles.practiceCard} ref={ref}>
+        <div style={{ textAlign: "center", padding: "40px 20px", color: "#64748b" }}>
+          <InfoCircleOutlined style={{ fontSize: 32, marginBottom: 12, color: "#94a3b8" }} />
+          <p style={{ fontWeight: 500, fontSize: 15, margin: 0 }}>Chưa có câu hỏi hoặc đề thi ôn tập cho bài học này.</p>
+        </div>
+      </div>
+    );
   }
 
   const questions = exam.questions.sort((a, b) => a.number - b.number);

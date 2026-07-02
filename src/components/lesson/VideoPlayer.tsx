@@ -60,9 +60,11 @@ export default function VideoPlayer({
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
-          const progress = await res.json();
-          if (progress && progress.currentTime > 0) {
-            const seekTime = progress.currentTime;
+          const text = await res.text();
+          if (text && text.trim() !== "" && text !== "null") {
+            const progress = JSON.parse(text);
+            if (progress && progress.currentTime > 0) {
+              const seekTime = progress.currentTime;
             
             const onMetadataLoaded = () => {
               video.currentTime = seekTime;
@@ -77,6 +79,7 @@ export default function VideoPlayer({
               onMetadataLoaded();
             } else {
               video.addEventListener("loadedmetadata", onMetadataLoaded, { once: true });
+            }
             }
           }
         }
