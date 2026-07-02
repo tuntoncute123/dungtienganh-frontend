@@ -8,10 +8,12 @@ import {
   SoundOutlined,
   FullscreenOutlined,
 } from "@ant-design/icons";
+import { message } from "antd";
 
 const PLAY_ICON = "/assets/5f41ca666790ad7191b8_d40728ed.svg";
 
 interface VideoPlayerProps {
+  lessonId?: string;
   title: string;
   videoUrl?: string;
   remainingViews: number;
@@ -21,6 +23,7 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({
+  lessonId,
   title,
   videoUrl,
   remainingViews,
@@ -40,6 +43,116 @@ export default function VideoPlayer({
   };
 
   const finalVideoUrl = getFullVideoUrl(videoUrl);
+
+  const lastLoggedTimeRef = React.useRef<number>(0);
+
+  // Fetch progress and seek to saved position on load
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !lessonId || !finalVideoUrl) return;
+
+    const fetchAndSeek = async () => {
+      try {
+        const token = localStorage.getItem("teacherdung_token");
+        if (!token) return;
+
+        const res = await fetch(`${API_BASE_URL}/api/tracking/lesson-progress?lessonId=${lessonId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const progress = await res.json();
+          if (progress && progress.currentTime > 0) {
+            const seekTime = progress.currentTime;
+            
+            const onMetadataLoaded = () => {
+              video.currentTime = seekTime;
+              lastLoggedTimeRef.current = seekTime;
+              
+              const mins = Math.floor(seekTime / 60);
+              const secs = Math.floor(seekTime % 60).toString().padStart(2, '0');
+              message.success(`Đã khôi phục phát tiếp tại ${mins}:${secs} 🔄`);
+            };
+
+            if (video.readyState >= 1) {
+              onMetadataLoaded();
+            } else {
+              video.addEventListener("loadedmetadata", onMetadataLoaded, { once: true });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load video progress:", err);
+      }
+    };
+
+    fetchAndSeek();
+  }, [lessonId, finalVideoUrl, API_BASE_URL]);
+
+  // Track progress during playback
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !lessonId || !finalVideoUrl) return;
+
+    const trackProgress = async (currentTime: number, duration: number, isFinished = false) => {
+      try {
+        const token = localStorage.getItem("teacherdung_token");
+        if (!token) return;
+
+        const progressPercent = isFinished ? 100 : Math.round((currentTime / (duration || 1)) * 100);
+
+        await fetch(`${API_BASE_URL}/api/tracking/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            activityType: "video_progress",
+            targetId: lessonId,
+            metadata: {
+              currentTime: Math.floor(currentTime),
+              duration: Math.floor(duration),
+              progressPercent
+            }
+          })
+        });
+      } catch (e) {
+        console.error("Failed to save progress:", e);
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      const currentTime = video.currentTime;
+      const duration = video.duration || 0;
+      
+      // Send progress to server every 15 seconds
+      if (Math.abs(currentTime - lastLoggedTimeRef.current) >= 15) {
+        lastLoggedTimeRef.current = currentTime;
+        trackProgress(currentTime, duration);
+      }
+    };
+
+    const handleEnded = () => {
+      const duration = video.duration || 0;
+      trackProgress(duration, duration, true);
+    };
+
+    const handlePause = () => {
+      const currentTime = video.currentTime;
+      const duration = video.duration || 0;
+      trackProgress(currentTime, duration);
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("pause", handlePause);
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, [lessonId, finalVideoUrl, API_BASE_URL]);
 
   React.useEffect(() => {
     const video = videoRef.current;

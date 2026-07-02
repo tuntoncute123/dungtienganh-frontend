@@ -209,6 +209,7 @@ function LessonPageContent() {
                 // --- REGULAR VIDEO LESSON VIEW ---
                 <>
                   <VideoPlayer
+                    lessonId={lesson.id}
                     title={lesson.title}
                     videoUrl={lesson.videoUrl}
                     remainingViews={10}

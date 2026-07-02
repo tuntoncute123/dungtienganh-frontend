@@ -5,6 +5,7 @@ import { Layout, Drawer, Grid } from "antd";
 import AppHeader from "@/components/AppHeader";
 import AppSidebar from "@/components/AppSidebar";
 import GreetingSection from "@/components/GreetingSection";
+import RecentLessonsWidget from "@/components/RecentLessonsWidget";
 import StoryList from "@/components/StoryList";
 import HonorBoard from "@/components/HonorBoard";
 import TeacherIntro from "@/components/TeacherIntro";
@@ -70,6 +71,9 @@ export default function HomePage() {
           <div className="content-wrapper">
             {/* Greeting */}
             <GreetingSection />
+
+            {/* In Progress Lessons Widget */}
+            <RecentLessonsWidget />
 
             {/* Story List */}
             <StoryList />
