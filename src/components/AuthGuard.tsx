@@ -3,11 +3,19 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Spin } from "antd";
+import { useTracking } from "@/hooks/useTracking";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [authorized, setAuthorized] = useState(false);
+  const { trackActivity } = useTracking();
+
+  useEffect(() => {
+    if (authorized && pathname) {
+      trackActivity("page_view", pathname);
+    }
+  }, [authorized, pathname, trackActivity]);
 
   useEffect(() => {
     const checkAuth = () => {

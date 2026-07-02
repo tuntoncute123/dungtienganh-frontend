@@ -189,6 +189,25 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
       answers
     }));
 
+    // Sync to QuestDB
+    const token = localStorage.getItem("teacherdung_token");
+    if (token) {
+      fetch(`${API_BASE_URL}/api/tracking/practice`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          practiceId: exerciseId,
+          type: "exercise",
+          score: scoreVal,
+          correctCount: correct,
+          totalQuestions: totalQuestions
+        })
+      }).catch(err => console.error("Failed to sync exercise result to QuestDB", err));
+    }
+
     // Clear draft
     localStorage.removeItem(`practice_draft_${exerciseId}`);
     message.success("Nộp bài luyện tập thành công!");

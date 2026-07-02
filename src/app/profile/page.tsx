@@ -65,144 +65,187 @@ const CircularProgress: React.FC<CircularProgressProps> = ({ percent, color, siz
 };
 
 // SVG Line Charts
-const WeekChart: React.FC = () => (
-  <svg width="100%" height="240" viewBox="0 0 800 240" preserveAspectRatio="none" style={{ overflow: "visible" }}>
-    {/* Grid lines */}
-    <line x1="50" y1="30" x2="750" y2="30" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="70" x2="750" y2="70" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="110" x2="750" y2="110" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="150" x2="750" y2="150" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="190" x2="750" y2="190" stroke="#e5e7eb" strokeWidth="1.5" />
+const getPathData = (values: number[], xCoords: number[]) => {
+  return values
+    .map((val, idx) => {
+      const x = xCoords[idx] || 70;
+      const y = 230 - Math.min(100, Math.max(0, val)) * 2;
+      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+    })
+    .join(' ');
+};
 
-    {/* Y Axis labels */}
-    <text x="35" y="34" fill="#a3acc2" fontSize="11" textAnchor="end">100%</text>
-    <text x="35" y="74" fill="#a3acc2" fontSize="11" textAnchor="end">80%</text>
-    <text x="35" y="114" fill="#a3acc2" fontSize="11" textAnchor="end">60%</text>
-    <text x="35" y="154" fill="#a3acc2" fontSize="11" textAnchor="end">40%</text>
-    <text x="35" y="194" fill="#a3acc2" fontSize="11" textAnchor="end">20%</text>
+interface ChartDataPoint {
+  date: string;
+  flashcard: number;
+  theory: number;
+  exercise: number;
+  exam: number;
+}
 
-    {/* X Axis labels */}
-    <text x="70" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T2</text>
-    <text x="180" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T3</text>
-    <text x="290" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T4</text>
-    <text x="400" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T5</text>
-    <text x="510" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T6</text>
-    <text x="620" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T7</text>
-    <text x="730" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">CN</text>
+interface ChartProps {
+  data?: ChartDataPoint[];
+}
 
-    {/* Curves */}
-    {/* Flashcard (Green) */}
-    <path
-      d="M 70 150 L 180 160 L 290 120 L 400 90 L 510 70 L 620 50 L 730 40"
-      fill="none"
-      stroke="rgb(34, 197, 94)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Lý thuyết (Orange) */}
-    <path
-      d="M 70 190 L 180 180 L 290 170 L 400 150 L 510 120 L 620 100 L 730 80"
-      fill="none"
-      stroke="#f59e0b"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Bài tập (Blue) */}
-    <path
-      d="M 70 110 L 180 100 L 290 90 L 400 80 L 510 60 L 620 50 L 730 50"
-      fill="none"
-      stroke="rgb(59, 130, 246)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Kiểm tra (Purple) */}
-    <path
-      d="M 70 170 L 180 150 L 290 160 L 400 130 L 510 110 L 620 90 L 730 76"
-      fill="none"
-      stroke="rgb(139, 92, 246)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+const WeekChart: React.FC<ChartProps> = ({ data = [] }) => {
+  const defaultFlashcard = [40, 35, 55, 70, 80, 90, 95];
+  const defaultTheory = [20, 25, 30, 40, 55, 65, 75];
+  const defaultExercise = [60, 65, 70, 75, 85, 90, 90];
+  const defaultExam = [30, 40, 35, 50, 60, 70, 77];
 
-    {/* Data point circles for CN */}
-    <circle cx="730" cy="40" r="5" fill="rgb(34, 197, 94)" stroke="#fff" strokeWidth="2" />
-    <circle cx="730" cy="80" r="5" fill="#f59e0b" stroke="#fff" strokeWidth="2" />
-    <circle cx="730" cy="50" r="5" fill="rgb(59, 130, 246)" stroke="#fff" strokeWidth="2" />
-    <circle cx="730" cy="76" r="5" fill="rgb(139, 92, 246)" stroke="#fff" strokeWidth="2" />
-  </svg>
-);
+  const xCoords = [70, 180, 290, 400, 510, 620, 730];
 
-const MonthChart: React.FC = () => (
-  <svg width="100%" height="240" viewBox="0 0 800 240" preserveAspectRatio="none" style={{ overflow: "visible" }}>
-    {/* Grid lines */}
-    <line x1="50" y1="30" x2="750" y2="30" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="70" x2="750" y2="70" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="110" x2="750" y2="110" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="150" x2="750" y2="150" stroke="#f3f4f6" strokeWidth="1" />
-    <line x1="50" y1="190" x2="750" y2="190" stroke="#e5e7eb" strokeWidth="1.5" />
+  const getCurve = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVals: number[]) => {
+    if (!data || data.length < 7) {
+      return getPathData(defaultVals, xCoords);
+    }
+    const points = data.slice(-7);
+    const vals = points.map(p => {
+      if (type === 'flashcard') return Math.min(100, p.flashcard);
+      if (type === 'theory') return Math.min(100, p.theory * 10);
+      if (type === 'exercise') return Math.min(100, p.exercise * 50);
+      return Math.min(100, p.exam * 100);
+    });
+    while (vals.length < 7) {
+      vals.unshift(0);
+    }
+    return getPathData(vals, xCoords);
+  };
 
-    {/* Y Axis labels */}
-    <text x="35" y="34" fill="#a3acc2" fontSize="11" textAnchor="end">100%</text>
-    <text x="35" y="74" fill="#a3acc2" fontSize="11" textAnchor="end">80%</text>
-    <text x="35" y="114" fill="#a3acc2" fontSize="11" textAnchor="end">60%</text>
-    <text x="35" y="154" fill="#a3acc2" fontSize="11" textAnchor="end">40%</text>
-    <text x="35" y="194" fill="#a3acc2" fontSize="11" textAnchor="end">20%</text>
+  const getLastPoint = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVal: number) => {
+    if (!data || data.length === 0) return 230 - defaultVal * 2;
+    const last = data[data.length - 1];
+    let val = 0;
+    if (type === 'flashcard') val = Math.min(100, last.flashcard);
+    else if (type === 'theory') val = Math.min(100, last.theory * 10);
+    else if (type === 'exercise') val = Math.min(100, last.exercise * 50);
+    else val = Math.min(100, last.exam * 100);
+    return 230 - val * 2;
+  };
 
-    {/* X Axis labels */}
-    <text x="137.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 1</text>
-    <text x="312.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 2</text>
-    <text x="487.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 3</text>
-    <text x="662.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 4</text>
+  return (
+    <svg width="100%" height="240" viewBox="0 0 800 240" preserveAspectRatio="none" style={{ overflow: "visible" }}>
+      {/* Grid lines */}
+      <line x1="50" y1="30" x2="750" y2="30" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="70" x2="750" y2="70" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="110" x2="750" y2="110" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="150" x2="750" y2="150" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="190" x2="750" y2="190" stroke="#e5e7eb" strokeWidth="1.5" />
 
-    {/* Curves */}
-    {/* Flashcard (Green) */}
-    <path
-      d="M 137.5 150 L 312.5 120 L 487.5 80 L 662.5 50"
-      fill="none"
-      stroke="rgb(34, 197, 94)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Lý thuyết (Orange) */}
-    <path
-      d="M 137.5 180 L 312.5 160 L 487.5 110 L 662.5 82"
-      fill="none"
-      stroke="#f59e0b"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Bài tập (Blue) */}
-    <path
-      d="M 137.5 120 L 312.5 100 L 487.5 70 L 662.5 46"
-      fill="none"
-      stroke="rgb(59, 130, 246)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    {/* Kiểm tra (Purple) */}
-    <path
-      d="M 137.5 160 L 312.5 140 L 487.5 90 L 662.5 70"
-      fill="none"
-      stroke="rgb(139, 92, 246)"
-      strokeWidth="3.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+      {/* Y Axis labels */}
+      <text x="35" y="34" fill="#a3acc2" fontSize="11" textAnchor="end">100%</text>
+      <text x="35" y="74" fill="#a3acc2" fontSize="11" textAnchor="end">80%</text>
+      <text x="35" y="114" fill="#a3acc2" fontSize="11" textAnchor="end">60%</text>
+      <text x="35" y="154" fill="#a3acc2" fontSize="11" textAnchor="end">40%</text>
+      <text x="35" y="194" fill="#a3acc2" fontSize="11" textAnchor="end">20%</text>
 
-    {/* Data points for Week 4 */}
-    <circle cx="662.5" cy="50" r="5" fill="rgb(34, 197, 94)" stroke="#fff" strokeWidth="2" />
-    <circle cx="662.5" cy="82" r="5" fill="#f59e0b" stroke="#fff" strokeWidth="2" />
-    <circle cx="662.5" cy="46" r="5" fill="rgb(59, 130, 246)" stroke="#fff" strokeWidth="2" />
-    <circle cx="662.5" cy="70" r="5" fill="rgb(139, 92, 246)" stroke="#fff" strokeWidth="2" />
-  </svg>
-);
+      {/* X Axis labels */}
+      <text x="70" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T2</text>
+      <text x="180" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T3</text>
+      <text x="290" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T4</text>
+      <text x="400" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T5</text>
+      <text x="510" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T6</text>
+      <text x="620" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">T7</text>
+      <text x="730" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">CN</text>
+
+      {/* Curves */}
+      <path d={getCurve('flashcard', defaultFlashcard)} fill="none" stroke="rgb(34, 197, 94)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('theory', defaultTheory)} fill="none" stroke="#f59e0b" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('exercise', defaultExercise)} fill="none" stroke="rgb(59, 130, 246)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('exam', defaultExam)} fill="none" stroke="rgb(139, 92, 246)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* Data point circles for CN */}
+      <circle cx="730" cy={getLastPoint('flashcard', 95)} r="5" fill="rgb(34, 197, 94)" stroke="#fff" strokeWidth="2" />
+      <circle cx="730" cy={getLastPoint('theory', 75)} r="5" fill="#f59e0b" stroke="#fff" strokeWidth="2" />
+      <circle cx="730" cy={getLastPoint('exercise', 90)} r="5" fill="rgb(59, 130, 246)" stroke="#fff" strokeWidth="2" />
+      <circle cx="730" cy={getLastPoint('exam', 77)} r="5" fill="rgb(139, 92, 246)" stroke="#fff" strokeWidth="2" />
+    </svg>
+  );
+};
+
+const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
+  const defaultFlashcard = [40, 55, 75, 90];
+  const defaultTheory = [25, 35, 60, 74];
+  const defaultExercise = [55, 65, 80, 92];
+  const defaultExam = [35, 45, 70, 80];
+
+  const xCoords = [137.5, 312.5, 487.5, 662.5];
+
+  const getCurve = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVals: number[]) => {
+    if (!data || data.length < 28) {
+      return getPathData(defaultVals, xCoords);
+    }
+    const weeks = [0, 0, 0, 0];
+    const counts = [0, 0, 0, 0];
+
+    data.forEach((p, idx) => {
+      let weekIdx = Math.min(3, Math.floor(idx / 7));
+      let val = 0;
+      if (type === 'flashcard') val = Math.min(100, p.flashcard);
+      else if (type === 'theory') val = Math.min(100, p.theory * 10);
+      else if (type === 'exercise') val = Math.min(100, p.exercise * 50);
+      else val = Math.min(100, p.exam * 100);
+
+      weeks[weekIdx] += val;
+      counts[weekIdx]++;
+    });
+
+    const vals = weeks.map((sum, idx) => (counts[idx] > 0 ? Math.round(sum / counts[idx]) : 0));
+    return getPathData(vals, xCoords);
+  };
+
+  const getLastPoint = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVal: number) => {
+    if (!data || data.length < 28) return 230 - defaultVal * 2;
+    const lastWeek = data.slice(-7);
+    if (lastWeek.length === 0) return 230 - defaultVal * 2;
+    let sum = 0;
+    lastWeek.forEach(p => {
+      let val = 0;
+      if (type === 'flashcard') val = Math.min(100, p.flashcard);
+      else if (type === 'theory') val = Math.min(100, p.theory * 10);
+      else if (type === 'exercise') val = Math.min(100, p.exercise * 50);
+      else val = Math.min(100, p.exam * 100);
+      sum += val;
+    });
+    return 230 - (sum / lastWeek.length) * 2;
+  };
+
+  return (
+    <svg width="100%" height="240" viewBox="0 0 800 240" preserveAspectRatio="none" style={{ overflow: "visible" }}>
+      {/* Grid lines */}
+      <line x1="50" y1="30" x2="750" y2="30" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="70" x2="750" y2="70" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="110" x2="750" y2="110" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="150" x2="750" y2="150" stroke="#f3f4f6" strokeWidth="1" />
+      <line x1="50" y1="190" x2="750" y2="190" stroke="#e5e7eb" strokeWidth="1.5" />
+
+      {/* Y Axis labels */}
+      <text x="35" y="34" fill="#a3acc2" fontSize="11" textAnchor="end">100%</text>
+      <text x="35" y="74" fill="#a3acc2" fontSize="11" textAnchor="end">80%</text>
+      <text x="35" y="114" fill="#a3acc2" fontSize="11" textAnchor="end">60%</text>
+      <text x="35" y="154" fill="#a3acc2" fontSize="11" textAnchor="end">40%</text>
+      <text x="35" y="194" fill="#a3acc2" fontSize="11" textAnchor="end">20%</text>
+
+      {/* X Axis labels */}
+      <text x="137.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 1</text>
+      <text x="312.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 2</text>
+      <text x="487.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 3</text>
+      <text x="662.5" y="215" fill="#a3acc2" fontSize="11" textAnchor="middle">Tuần 4</text>
+
+      {/* Curves */}
+      <path d={getCurve('flashcard', defaultFlashcard)} fill="none" stroke="rgb(34, 197, 94)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('theory', defaultTheory)} fill="none" stroke="#f59e0b" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('exercise', defaultExercise)} fill="none" stroke="rgb(59, 130, 246)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={getCurve('exam', defaultExam)} fill="none" stroke="rgb(139, 92, 246)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+
+      {/* Data points for Week 4 */}
+      <circle cx="662.5" cy={getLastPoint('flashcard', 90)} r="5" fill="rgb(34, 197, 94)" stroke="#fff" strokeWidth="2" />
+      <circle cx="662.5" cy={getLastPoint('theory', 74)} r="5" fill="#f59e0b" stroke="#fff" strokeWidth="2" />
+      <circle cx="662.5" cy={getLastPoint('exercise', 92)} r="5" fill="rgb(59, 130, 246)" stroke="#fff" strokeWidth="2" />
+      <circle cx="662.5" cy={getLastPoint('exam', 80)} r="5" fill="rgb(139, 92, 246)" stroke="#fff" strokeWidth="2" />
+    </svg>
+  );
+};
 
 export default function ProfilePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -218,6 +261,7 @@ export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
+  const [dbStats, setDbStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Profile Edit states
@@ -313,6 +357,15 @@ export default function ProfilePage() {
           const examsData = await resExams.json();
           setExams(examsData);
         }
+
+        // Fetch QuestDB stats
+        const resDbStats = await fetch(`${API_BASE_URL}/api/tracking/stats?timeframe=${progressView}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (resDbStats.ok) {
+          const statsData = await resDbStats.json();
+          setDbStats(statsData);
+        }
       } catch (e) {
         console.error("Failed to fetch profile and stats", e);
       } finally {
@@ -320,7 +373,7 @@ export default function ProfilePage() {
       }
     };
     fetchProfileAndStats();
-  }, []);
+  }, [progressView]);
 
   const getExamDaysLeft = (examDateStr: string | null | undefined) => {
     if (!examDateStr) return "_ ngày";
@@ -497,10 +550,42 @@ export default function ProfilePage() {
     };
   };
 
-  const stats = getDynamicStats(timeframe);
+  const localStats = getDynamicStats(timeframe);
+  const stats = dbStats && dbStats.summary ? {
+    timeframeLabel: timeframe === "week" ? "Tuần này" : timeframe === "month" ? "Tháng này" : "Tổng",
+    
+    flashcardVal: (dbStats.summary.completedExercises * 8).toString(),
+    flashcardTotal: localStats.flashcardTotal,
+    flashcardPercent: Math.min(100, Math.round(((dbStats.summary.completedExercises * 8) / (parseInt(localStats.flashcardTotal) || 1)) * 100)) || localStats.flashcardPercent,
+    flashcardAccuracy: dbStats.summary.avgExerciseScore || localStats.flashcardAccuracy,
+    flashcardNew: timeframe === "week" ? `+ ${dbStats.summary.completedExercises * 2} từ mới` : timeframe === "month" ? `+ ${dbStats.summary.completedExercises * 5} từ mới` : `+ ${dbStats.summary.completedExercises * 5} từ thuộc`,
+
+    theoryVal: dbStats.summary.completedLessons.toString(),
+    theoryTotal: localStats.theoryTotal,
+    theoryPercent: Math.min(100, Math.round((dbStats.summary.completedLessons / (parseInt(localStats.theoryTotal) || 1)) * 100)) || localStats.theoryPercent,
+    theoryAccuracy: localStats.theoryAccuracy,
+    theoryNew: `+ ${dbStats.summary.completedLessons} video`,
+
+    hwVal: dbStats.summary.completedExercises.toString(),
+    hwTotal: localStats.hwTotal,
+    hwPercent: Math.min(100, Math.round((dbStats.summary.completedExercises / (parseInt(localStats.hwTotal) || 1)) * 100)) || localStats.hwPercent,
+    hwAccuracy: dbStats.summary.avgExerciseScore || localStats.hwAccuracy,
+    hwAvgScore: `${(dbStats.summary.avgExerciseScore / 10).toFixed(1)} điểm TB`,
+
+    testVal: (dbStats.summary.avgExamScore / 10).toFixed(1),
+    testMax: "10",
+    testAttempts: `${dbStats.summary.completedExams} lần thi`,
+    testPercent: Math.min(100, Math.round((dbStats.summary.completedExams / (exams.length || 1)) * 100)) || localStats.testPercent,
+    testMaxScore: (dbStats.summary.maxExamScore / 10).toFixed(1),
+
+    streakVal: localStats.streakVal,
+    streakMax: localStats.streakMax,
+    streakProgress: localStats.streakProgress,
+    streakPercent: localStats.streakPercent,
+  } : localStats;
 
   // Heatmap generation
-  const heatmapCells = [
+  const mockHeatmapCells = [
     0, 1, 3, 2, 0, 4, 1, // Tuần 1
     2, 0, 1, 3, 4, 0, 2, // Tuần 2
     0, 2, 4, 1, 3, 0, 1, // Tuần 3
@@ -517,6 +602,34 @@ export default function ProfilePage() {
     1, 2, 0, 3, 4, 0, 0, // Tuần 14
   ];
 
+  const getHeatmapCells = () => {
+    const cells = new Array(98).fill(0);
+    if (!dbStats || !dbStats.heatmap || dbStats.heatmap.length === 0) {
+      return mockHeatmapCells;
+    }
+
+    const heatmapMap = new Map<string, number>();
+    dbStats.heatmap.forEach((item: any) => {
+      heatmapMap.set(item.date, item.count);
+    });
+
+    const today = new Date();
+    for (let i = 0; i < 98; i++) {
+      const diffDays = 97 - i;
+      const targetDate = new Date(today.getTime() - diffDays * 24 * 60 * 60 * 1000);
+      const dateStr = targetDate.toISOString().split("T")[0];
+      const count = heatmapMap.get(dateStr) || 0;
+      
+      if (count === 0) cells[i] = 0;
+      else if (count <= 2) cells[i] = 1;
+      else if (count <= 5) cells[i] = 2;
+      else if (count <= 10) cells[i] = 3;
+      else cells[i] = 4;
+    }
+    return cells;
+  };
+
+  const heatmapCells = getHeatmapCells();
   const totalTrackedDays = 94;
   const activeDaysCount = heatmapCells.filter(level => level > 0).slice(0, totalTrackedDays).length;
   const activePercentage = Math.round((activeDaysCount / totalTrackedDays) * 100);
@@ -851,7 +964,7 @@ export default function ProfilePage() {
                   <div style={{ width: "100%" }}>
 
                     {/* Render live SVG line chart */}
-                    {progressView === "week" ? <WeekChart /> : <MonthChart />}
+                    {progressView === "week" ? <WeekChart data={dbStats?.chart} /> : <MonthChart data={dbStats?.chart} />}
 
                     {/* Legend block below the chart */}
                     <div style={{ marginTop: 16, fontSize: 12, padding: "8px 0" }}>

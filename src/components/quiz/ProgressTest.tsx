@@ -328,6 +328,25 @@ export default function ProgressTest() {
           completedAt: new Date().toISOString(),
           answers
         }));
+
+        // Sync to QuestDB
+        const token = localStorage.getItem("teacherdung_token");
+        if (token) {
+          fetch(`${API_BASE_URL}/api/tracking/practice`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              practiceId: examId,
+              type: "exam",
+              score: scoreVal,
+              correctCount: correct,
+              totalQuestions: totalQuestions
+            })
+          }).catch(err => console.error("Failed to sync exam result to QuestDB", err));
+        }
       } catch (e) {
         console.error("Failed to save completed status", e);
       }
