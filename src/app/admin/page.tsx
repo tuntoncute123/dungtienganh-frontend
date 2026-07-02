@@ -419,36 +419,70 @@ export default function AdminPage() {
       });
 
       try {
-        // Tải tuần tự từng chunk
-        for (let i = 0; i < totalChunks; i++) {
-          const start = i * CHUNK_SIZE;
+        // Tải song song các chunk với concurrency giới hạn (ví dụ: 3 luồng đồng thời)
+        const concurrency = 3;
+        let nextIndex = 0;
+        const activeUploads: Promise<void>[] = [];
+        const uploadedBytesArray = new Array(totalChunks).fill(0);
+
+        const uploadNext = async (): Promise<void> => {
+          if (nextIndex >= totalChunks) return;
+          const index = nextIndex++;
+
+          const start = index * CHUNK_SIZE;
           const end = Math.min(start + CHUNK_SIZE, file.size);
           const chunkBlob = file.slice(start, end);
-          
-          const formData = new FormData();
-          formData.append("file", chunkBlob, file.name);
-          formData.append("uploadId", uploadId);
-          formData.append("chunkIndex", i.toString());
+          const chunkSize = end - start;
 
-          const res = await fetch(`${API_BASE_URL}/api/upload/chunk`, {
-            method: "POST",
-            body: formData,
-          });
+          // Thực hiện tải lên với cơ chế tự động thử lại (retry) nếu gặp lỗi mạng
+          const performUpload = async (retryCount = 3): Promise<void> => {
+            try {
+              const formData = new FormData();
+              formData.append("file", chunkBlob, file.name);
+              formData.append("uploadId", uploadId);
+              formData.append("chunkIndex", index.toString());
 
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.error || `Lỗi khi tải lên phần ${i + 1}`);
-          }
+              const res = await fetch(`${API_BASE_URL}/api/upload/chunk`, {
+                method: "POST",
+                body: formData,
+              });
 
-          // Cập nhật phần trăm tiến trình tải
-          const bytesUploaded = end;
-          const percent = (bytesUploaded / file.size) * 100;
-          msg.loading({ 
-            content: `Đang tải lên: ${percent.toFixed(0)}% (${(bytesUploaded / 1024 / 1024).toFixed(1)}/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
-            key: "uploading", 
-            duration: 0 
-          });
+              if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `HTTP ${res.status}`);
+              }
+
+              uploadedBytesArray[index] = chunkSize;
+
+              // Tính toán tổng dung lượng đã tải lên
+              const totalUploaded = uploadedBytesArray.reduce((a, b) => a + b, 0);
+              const percent = (totalUploaded / file.size) * 100;
+              msg.loading({ 
+                content: `Đang tải lên: ${percent.toFixed(0)}% (${(totalUploaded / 1024 / 1024).toFixed(1)}/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
+                key: "uploading", 
+                duration: 0 
+              });
+
+            } catch (error: any) {
+              if (retryCount > 0) {
+                console.warn(`Retry chunk ${index} (attempts left: ${retryCount}):`, error);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                return performUpload(retryCount - 1);
+              }
+              throw new Error(`Lỗi tải lên phần ${index + 1}: ${error.message}`);
+            }
+          };
+
+          await performUpload();
+          return uploadNext();
+        };
+
+        // Kích hoạt các luồng song song
+        for (let i = 0; i < Math.min(concurrency, totalChunks); i++) {
+          activeUploads.push(uploadNext());
         }
+
+        await Promise.all(activeUploads);
 
         // Sau khi hoàn thành tải tất cả các chunk, tiến hành ghép file (Merge)
         msg.loading({ 
