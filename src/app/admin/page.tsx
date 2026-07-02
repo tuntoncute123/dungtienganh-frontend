@@ -60,6 +60,69 @@ const { Header, Content, Sider } = Layout;
 const { Option } = Select;
 const { TextArea } = Input;
 
+// Hỗ trợ tự động chuyển đổi text có định dạng (gạch chân, in đậm) từ Word/Clipboard thành thẻ <u> và <b> khi Paste
+const handlePasteRichText = (e: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const html = e.clipboardData.getData('text/html');
+  if (html) {
+    e.preventDefault();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    
+    const processNode = (node: Node): string => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.textContent || '';
+      }
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+        let content = '';
+        el.childNodes.forEach(child => {
+          content += processNode(child);
+        });
+        
+        const style = el.getAttribute('style') || '';
+        const isUnderlined = 
+          el.tagName === 'U' || 
+          style.includes('text-decoration: underline') || 
+          style.includes('text-decoration:underline') ||
+          el.className.includes('Underline');
+          
+        const isBold = 
+          el.tagName === 'B' || 
+          el.tagName === 'STRONG' || 
+          style.includes('font-weight: bold') || 
+          style.includes('font-weight:bold');
+
+        if (isUnderlined) {
+          content = `<u>${content}</u>`;
+        }
+        if (isBold) {
+          content = `<b>${content}</b>`;
+        }
+        return content;
+      }
+      return '';
+    };
+
+    let resultText = '';
+    doc.body.childNodes.forEach(node => {
+      resultText += processNode(node);
+    });
+
+    if (!resultText.trim()) {
+      resultText = e.clipboardData.getData('text/plain');
+    }
+
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const start = target.selectionStart || 0;
+    const end = target.selectionEnd || 0;
+    const currentValue = target.value;
+    const newValue = currentValue.substring(0, start) + resultText + currentValue.substring(end);
+    
+    target.value = newValue;
+    const event = new Event('input', { bubbles: true });
+    target.dispatchEvent(event);
+  }
+};
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function AdminPage() {
@@ -1548,7 +1611,7 @@ export default function AdminPage() {
                         </Col>
                         <Col xs={24} sm={14} md={16}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
-                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" />
+                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -1569,22 +1632,22 @@ export default function AdminPage() {
                                 <Row gutter={8}>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "A"]} label="Lựa chọn A" rules={[{ required: true, message: "Nhập A" }]}>
-                                      <Input placeholder="Đáp án A" />
+                                      <Input placeholder="Đáp án A" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "B"]} label="Lựa chọn B" rules={[{ required: true, message: "Nhập B" }]}>
-                                      <Input placeholder="Đáp án B" />
+                                      <Input placeholder="Đáp án B" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "C"]} label="Lựa chọn C" rules={[{ required: true, message: "Nhập C" }]}>
-                                      <Input placeholder="Đáp án C" />
+                                      <Input placeholder="Đáp án C" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "D"]} label="Lựa chọn D" rules={[{ required: true, message: "Nhập D" }]}>
-                                      <Input placeholder="Đáp án D" />
+                                      <Input placeholder="Đáp án D" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                 </Row>
@@ -1605,7 +1668,7 @@ export default function AdminPage() {
                                     </Col>
                                     <Col xs={24} sm={16} md={18}>
                                       <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." onPaste={handlePasteRichText} />
                                       </Form.Item>
                                     </Col>
                                   </>
@@ -1662,7 +1725,7 @@ export default function AdminPage() {
                                     </Col>
                                     <Col xs={24} sm={12} md={14}>
                                       <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." onPaste={handlePasteRichText} />
                                       </Form.Item>
                                     </Col>
                                   </>
@@ -1900,7 +1963,7 @@ export default function AdminPage() {
                         </Col>
                         <Col xs={24} sm={14} md={16}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
-                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" />
+                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -1921,22 +1984,22 @@ export default function AdminPage() {
                                 <Row gutter={8}>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "A"]} label="Lựa chọn A" rules={[{ required: true, message: "Nhập A" }]}>
-                                      <Input placeholder="Đáp án A" />
+                                      <Input placeholder="Đáp án A" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "B"]} label="Lựa chọn B" rules={[{ required: true, message: "Nhập B" }]}>
-                                      <Input placeholder="Đáp án B" />
+                                      <Input placeholder="Đáp án B" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "C"]} label="Lựa chọn C" rules={[{ required: true, message: "Nhập C" }]}>
-                                      <Input placeholder="Đáp án C" />
+                                      <Input placeholder="Đáp án C" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                   <Col xs={24} sm={12} md={6}>
                                     <Form.Item {...restField} name={[name, "options", "D"]} label="Lựa chọn D" rules={[{ required: true, message: "Nhập D" }]}>
-                                      <Input placeholder="Đáp án D" />
+                                      <Input placeholder="Đáp án D" onPaste={handlePasteRichText} />
                                     </Form.Item>
                                   </Col>
                                 </Row>
@@ -1957,7 +2020,7 @@ export default function AdminPage() {
                                     </Col>
                                     <Col xs={24} sm={16} md={18}>
                                       <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                        <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Giải thích vì sao chọn đáp án này..." onPaste={handlePasteRichText} />
                                       </Form.Item>
                                     </Col>
                                   </>
@@ -2014,7 +2077,7 @@ export default function AdminPage() {
                                     </Col>
                                     <Col xs={24} sm={12} md={14}>
                                       <Form.Item {...restField} name={[name, "explanation"]} label="Hướng dẫn giải thích đáp án chi tiết">
-                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." />
+                                        <TextArea autoSize={{ minRows: 2, maxRows: 6 }} placeholder="Giải thích vì sao chọn đáp án này..." onPaste={handlePasteRichText} />
                                       </Form.Item>
                                     </Col>
                                   </>
