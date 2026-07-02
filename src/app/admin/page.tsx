@@ -403,9 +403,9 @@ export default function AdminPage() {
     setUploadLoading(true);
     const isVideo = file.type.startsWith("video/");
     
-    // Ngưỡng dung lượng file để chuyển sang cơ chế chunk upload (ví dụ: >= 15MB)
-    const CHUNK_THRESHOLD = 15 * 1024 * 1024; 
-    const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB mỗi chunk
+    // Ngưỡng dung lượng file để chuyển sang cơ chế chunk upload (ví dụ: >= 50MB)
+    const CHUNK_THRESHOLD = 50 * 1024 * 1024; 
+    const CHUNK_SIZE = 40 * 1024 * 1024; // 40MB mỗi chunk
     
     if (file.size >= CHUNK_THRESHOLD) {
       // --- LUỒNG UPLOAD THEO TỪNG CHUNK (Dành cho file lớn >= 15MB) ---
