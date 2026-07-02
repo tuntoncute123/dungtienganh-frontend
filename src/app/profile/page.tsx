@@ -629,14 +629,13 @@ export default function ProfilePage() {
   const weeklyTotals = getWeeklyTotals();
 
   const renderRecentCalendars = () => {
-    if (!dbStats || !dbStats.heatmap || dbStats.heatmap.length === 0) {
-      return <div className={styles.textCenterMt8}>Không có dữ liệu học tập</div>;
-    }
-    
     const heatmapMap = new Map<string, number>();
-    dbStats.heatmap.forEach((item: any) => {
-      heatmapMap.set(item.date, item.count);
-    });
+    if (dbStats && dbStats.heatmap && dbStats.heatmap.length > 0) {
+      dbStats.heatmap.forEach((item: any) => {
+        heatmapMap.set(item.date, item.count);
+      });
+    }
+
 
     const today = new Date();
     const months = [];
