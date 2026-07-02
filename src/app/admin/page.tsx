@@ -402,159 +402,67 @@ export default function AdminPage() {
   const handleUpload = async (file: File, callback: (url: string) => void) => {
     setUploadLoading(true);
     const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
     
-    // Ngưỡng dung lượng file để chuyển sang cơ chế chunk upload (ví dụ: >= 50MB)
-    const CHUNK_THRESHOLD = 50 * 1024 * 1024; 
-    const CHUNK_SIZE = 40 * 1024 * 1024; // 40MB mỗi chunk
-    
-    if (file.size >= CHUNK_THRESHOLD) {
-      // --- LUỒNG UPLOAD THEO TỪNG CHUNK (Dành cho file lớn >= 15MB) ---
-      const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-      
+    // Nếu là file lớn (>= 15MB) HOẶC là video thì tải trực tiếp lên Cloudflare R2 (Bypass VPS)
+    if (!isImage && (isVideo || file.size >= 15 * 1024 * 1024)) {
       msg.loading({ 
-        content: `Bắt đầu tải lên: 0% (0/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
+        content: "Đang khởi tạo kết nối tải trực tiếp lên Cloudflare...", 
         key: "uploading", 
         duration: 0 
       });
 
       try {
-        // Tải song song các chunk với concurrency giới hạn (ví dụ: 3 luồng đồng thời)
-        const concurrency = 3;
-        let nextIndex = 0;
-        const activeUploads: Promise<void>[] = [];
-        const uploadedBytesArray = new Array(totalChunks).fill(0);
+        // 1. Lấy presigned URL từ backend
+        const presignedRes = await fetch(
+          `${API_BASE_URL}/api/upload/presigned-url?filename=${encodeURIComponent(file.name)}&mimetype=${encodeURIComponent(file.type || "application/octet-stream")}`
+        );
 
-        const uploadNext = async (): Promise<void> => {
-          if (nextIndex >= totalChunks) return;
-          const index = nextIndex++;
+        if (!presignedRes.ok) {
+          const errData = await presignedRes.json().catch(() => ({}));
+          throw new Error(errData.error || "Không thể khởi tạo liên kết tải lên");
+        }
 
-          const start = index * CHUNK_SIZE;
-          const end = Math.min(start + CHUNK_SIZE, file.size);
-          const chunkBlob = file.slice(start, end);
-          const chunkSize = end - start;
+        const { uploadUrl, fileUrl } = await presignedRes.json();
 
-          // Thực hiện tải lên với cơ chế tự động thử lại (retry) nếu gặp lỗi mạng
-          const performUpload = async (retryCount = 3): Promise<void> => {
-            try {
-              const formData = new FormData();
-              formData.append("file", chunkBlob, file.name);
-              formData.append("uploadId", uploadId);
-              formData.append("chunkIndex", index.toString());
+        // 2. Thực hiện PUT trực tiếp từ trình duyệt lên Cloudflare R2
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", uploadUrl, true);
+          xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
 
-              const res = await fetch(`${API_BASE_URL}/api/upload/chunk`, {
-                method: "POST",
-                body: formData,
-              });
-
-              if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error || `HTTP ${res.status}`);
-              }
-
-              uploadedBytesArray[index] = chunkSize;
-
-              // Tính toán tổng dung lượng đã tải lên
-              const totalUploaded = uploadedBytesArray.reduce((a, b) => a + b, 0);
-              const percent = (totalUploaded / file.size) * 100;
+          // Theo dõi tiến trình tải lên thời gian thực bằng XMLHttpRequest
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percent = (event.loaded / event.total) * 100;
               msg.loading({ 
-                content: `Đang tải lên: ${percent.toFixed(0)}% (${(totalUploaded / 1024 / 1024).toFixed(1)}/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
+                content: `Đang tải trực tiếp lên Cloudflare: ${percent.toFixed(0)}% (${(event.loaded / 1024 / 1024).toFixed(1)}/${(event.total / 1024 / 1024).toFixed(1)}MB)...`, 
                 key: "uploading", 
                 duration: 0 
               });
-
-            } catch (error: any) {
-              if (retryCount > 0) {
-                console.warn(`Retry chunk ${index} (attempts left: ${retryCount}):`, error);
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                return performUpload(retryCount - 1);
-              }
-              throw new Error(`Lỗi tải lên phần ${index + 1}: ${error.message}`);
             }
           };
 
-          await performUpload();
-          return uploadNext();
-        };
+          xhr.onload = () => {
+            if (xhr.status === 200 || xhr.status === 201) {
+              resolve();
+            } else {
+              reject(new Error(`Tải lên thất bại với mã trạng thái ${xhr.status}`));
+            }
+          };
 
-        // Kích hoạt các luồng song song
-        for (let i = 0; i < Math.min(concurrency, totalChunks); i++) {
-          activeUploads.push(uploadNext());
-        }
+          xhr.onerror = () => {
+            reject(new Error("Lỗi kết nối khi tải trực tiếp lên Cloudflare R2 (Vui lòng kiểm tra CORS)"));
+          };
 
-        await Promise.all(activeUploads);
-
-        // Sau khi hoàn thành tải tất cả các chunk, tiến hành ghép file (Merge)
-        msg.loading({ 
-          content: "Đang khởi tạo tiến trình ghép các phần video trên máy chủ...", 
-          key: "uploading", 
-          duration: 0 
+          xhr.send(file);
         });
 
-        const mergeRes = await fetch(`${API_BASE_URL}/api/upload/merge`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            uploadId,
-            filename: file.name,
-            mimetype: file.type || "application/octet-stream",
-            totalChunks,
-          }),
+        msg.success({ 
+          content: isVideo ? "Tải video lên Cloudflare thành công! 🎉" : "Tải lên thành công!", 
+          key: "uploading" 
         });
-
-        if (!mergeRes.ok) {
-          const mergeData = await mergeRes.json().catch(() => ({}));
-          throw new Error(mergeData.error || "Không thể khởi tạo tiến trình ghép file");
-        }
-
-        // Bắt đầu vòng lặp check status (polling)
-        let status = "processing";
-        let attempts = 0;
-        const maxAttempts = 150; // 5 phút tối đa (mỗi 2 giây check một lần)
-
-        while (status === "processing" || status === "merging" || status === "uploading") {
-          if (attempts >= maxAttempts) {
-            throw new Error("Quá thời gian chờ ghép và upload file (Timeout 5 phút)");
-          }
-
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          attempts++;
-
-          const statusRes = await fetch(`${API_BASE_URL}/api/upload/status/${uploadId}`);
-          if (!statusRes.ok) {
-            throw new Error("Lỗi khi kiểm tra trạng thái upload");
-          }
-
-          const statusData = await statusRes.json();
-          status = statusData.status;
-
-          if (status === "merging") {
-            msg.loading({ 
-              content: "Đang tiến hành ghép các phần video trên máy chủ...", 
-              key: "uploading", 
-              duration: 0 
-            });
-          } else if (status === "uploading") {
-            msg.loading({ 
-              content: "Đang tải video lên hệ thống lưu trữ Cloudflare R2...", 
-              key: "uploading", 
-              duration: 0 
-            });
-          } else if (status === "complete") {
-            msg.success({ 
-              content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", 
-              key: "uploading" 
-            });
-            callback(statusData.url);
-            return;
-          } else if (status === "error") {
-            throw new Error(statusData.error || "Lỗi xảy ra trong quá trình ghép/upload trên server");
-          } else if (status === "not_found") {
-            throw new Error("Không tìm thấy tiến trình upload trên máy chủ");
-          }
-        }
+        callback(fileUrl);
 
       } catch (error: any) {
         msg.error({ 
@@ -565,7 +473,7 @@ export default function AdminPage() {
         setUploadLoading(false);
       }
     } else {
-      // --- LUỒNG UPLOAD THÔNG THƯỜNG (Dành cho file < 15MB) ---
+      // --- LUỒNG UPLOAD QUA VPS (Dành cho ảnh hoặc file nhỏ < 15MB) ---
       const loadingMessage = isVideo 
         ? "Đang tải lên và nén video trên server (Quá trình này có thể mất vài phút, vui lòng không đóng trang)..." 
         : "Đang tải tập tin lên...";
