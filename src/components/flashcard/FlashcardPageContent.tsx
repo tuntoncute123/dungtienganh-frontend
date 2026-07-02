@@ -13,208 +13,73 @@ import {
   Button, 
   App,
   Empty,
-  Space
+  Space,
+  Tag
 } from "antd";
 import FlashcardHeaderActions from "./FlashcardHeaderActions";
 import FlashcardKnowledgeCard from "./FlashcardKnowledgeCard";
 import FlashcardFilters from "./FlashcardFilters";
-import FlashcardDeckCard, { FlashcardDeck } from "./FlashcardDeckCard";
-
-// Mock flashcards inside decks
-const mockCardsDatabase: Record<string, Array<{ front: string; back: string }>> = {
-  "1": [
-    { front: "Accumulate (v)", back: "Tích lũy, gom góp lại" },
-    { front: "Prevalent (adj)", back: "Phổ biến, thịnh hành" },
-    { front: "Compensate (v)", back: "Đền bù, bồi thường, đền đáp" },
-    { front: "Simultaneous (adj)", back: "Đồng thời, cùng một lúc" },
-    { front: "Inevitably (adv)", back: "Chắc chắn xảy ra, không thể tránh khỏi" }
-  ],
-  "2": [
-    { front: "Biodiversity (n)", back: "Đa dạng sinh học" },
-    { front: "Conservation (n)", back: "Sự bảo tồn" },
-    { front: "Vulnerable (adj)", back: "Dễ bị tổn thương, dễ gặp nguy hiểm" },
-    { front: "Deforestation (n)", back: "Nạn phá rừng" }
-  ],
-  "3": [
-    { front: "Incorrigible (adj)", back: "Không thể sửa đổi, cứng đầu" },
-    { front: "Meticulous (adj)", back: "Tỉ mỉ, kỹ càng, tỉ mẩn" },
-    { front: "Ambiguous (adj)", back: "Mơ hồ, nước đôi, khó hiểu" }
-  ],
-  "9": [
-    { front: "Piece of cake", back: "Dễ như ăn bánh, vô cùng đơn giản" },
-    { front: "Break a leg", back: "Chúc may mắn (thường dùng trong nghệ thuật)" },
-    { front: "Under the weather", back: "Cảm thấy hơi mệt, không được khỏe" }
-  ]
-};
-
-const initialDecks: FlashcardDeck[] = [
-  {
-    id: "1",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "KHÓA LIVE C - TỪ VỰNG ĐỌC HIỂU NÂNG CAO (P1)",
-    cardCount: 45,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "2",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "TỪ VỰNG THEO CHỦ ĐỀ (P1) - KHÓA LIVE C",
-    cardCount: 122,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "3",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "ĐỀ TUYỆT MẬT SỐ 3",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "4",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "ĐỀ TUYỆT MẬT 2",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "5",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "Ai",
-    cardCount: 1,
-    isLocked: true,
-    type: "system",
-  },
-  {
-    id: "6",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "ĐỀ TUYỆT MẬT 1",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "7",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "ĐỀ DỰ ĐOÁN SỐ 11",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "8",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "ĐỀ DỰ ĐOÁN SỐ 10",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "9",
-    category: "idiom",
-    categoryLabel: "Thành ngữ",
-    title: "THÀNH NGỮ THƯỜNG GẶP TRONG ĐỀ THI THPTQG",
-    cardCount: 50,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "10",
-    category: "idiom",
-    categoryLabel: "Thành ngữ",
-    title: "IDIOMS FOR IELTS SPEAKING BAND 7.0+",
-    cardCount: 80,
-    isLocked: true,
-    type: "system",
-  },
-  {
-    id: "11",
-    category: "phrasal_verb",
-    categoryLabel: "Cụm động từ",
-    title: "100 CỤM ĐỘNG TỪ ĐI VỚI 'TAKE', 'GET', 'GO'",
-    cardCount: 100,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "12",
-    category: "collocation",
-    categoryLabel: "Kết hợp từ",
-    title: "COLLOCATIONS CHỦ ĐỀ WORK & EDUCATION",
-    cardCount: 60,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "13",
-    category: "grammar",
-    categoryLabel: "Ngữ pháp",
-    title: "20 CHUYÊN ĐỀ NGỮ PHÁP TRỌNG TÂM",
-    cardCount: 200,
-    isLocked: false,
-    type: "system",
-  },
-  {
-    id: "14",
-    category: "mixed",
-    categoryLabel: "Tổng hợp",
-    title: "TỔNG HỢP KIẾN THỨC MÙA THI 2025",
-    cardCount: 150,
-    isLocked: false,
-    type: "system",
-  },
-  // Custom user-designed decks
-  {
-    id: "15",
-    category: "vocabulary",
-    categoryLabel: "Từ vựng",
-    title: "Từ vựng nâng cao Unit 1 - Tiếng Anh 12",
-    cardCount: 15,
-    isLocked: false,
-    type: "custom",
-  },
-  {
-    id: "16",
-    category: "idiom",
-    categoryLabel: "Thành ngữ",
-    title: "Thành ngữ tự học mỗi ngày",
-    cardCount: 8,
-    isLocked: false,
-    type: "custom",
-  }
-];
+import FlashcardDeckCard from "./FlashcardDeckCard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function FlashcardPageContent() {
   const { message } = App.useApp();
-  const [decks, setDecks] = useState<FlashcardDeck[]>([]);
+  const [decks, setDecks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sourceType, setSourceType] = useState<"system" | "custom">("system");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 6;
 
+  // LocalStorage states
+  const [favoriteDeckIds, setFavoriteDeckIds] = useState<string[]>([]);
+  const [deckProgress, setDeckProgress] = useState<Record<string, string[]>>({});
+
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isStudyOpen, setIsStudyOpen] = useState(false);
-  const [studyDeck, setStudyDeck] = useState<FlashcardDeck | null>(null);
+  const [studyDeck, setStudyDeck] = useState<any | null>(null);
   const [studyCards, setStudyCards] = useState<Array<{ front: string; back: string }>>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
+  // Quick Practice Quiz Modal State
+  const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+  const [practiceDeck, setPracticeDeck] = useState<any | null>(null);
+  const [quizQuestions, setQuizQuestions] = useState<Array<{
+    question: string;
+    answer: string;
+    options: string[];
+  }>>([]);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
+
+  // Info Modal State
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [infoDeck, setInfoDeck] = useState<any | null>(null);
+
   const [form] = Form.useForm();
+
+  // Load from LocalStorage
+  useEffect(() => {
+    const favs = localStorage.getItem("fc_favorites");
+    if (favs) {
+      try {
+        setFavoriteDeckIds(JSON.parse(favs));
+      } catch (e) {}
+    }
+
+    const prog = localStorage.getItem("fc_progress");
+    if (prog) {
+      try {
+        setDeckProgress(JSON.parse(prog));
+      } catch (e) {}
+    }
+  }, []);
 
   const fetchDecks = async () => {
     setLoading(true);
@@ -222,10 +87,17 @@ export default function FlashcardPageContent() {
       const res = await fetch(`${API_BASE_URL}/api/flashcards`);
       if (res.ok) {
         const data = await res.json();
-        setDecks(data);
+        if (Array.isArray(data)) {
+          setDecks(data);
+        } else {
+          setDecks([]);
+        }
+      } else {
+        setDecks([]);
       }
     } catch (e) {
       console.error("Lỗi khi tải bộ thẻ:", e);
+      setDecks([]);
     } finally {
       setLoading(false);
     }
@@ -237,8 +109,11 @@ export default function FlashcardPageContent() {
 
   // Filtered decks list
   const filteredDecks = decks.filter(deck => {
-    const matchesSource = deck.type === sourceType;
-    const matchesCategory = selectedCategory ? deck.category === selectedCategory : true;
+    const matchesCategory = selectedCategory === "favorites"
+      ? favoriteDeckIds.includes(deck.id)
+      : (selectedCategory ? deck.category === selectedCategory : true);
+
+    const matchesSource = selectedCategory === "favorites" ? true : (deck.type === sourceType);
     return matchesSource && matchesCategory;
   });
 
@@ -261,16 +136,158 @@ export default function FlashcardPageContent() {
 
   // Open deck to study
   const handleOpenStudy = (deck: any) => {
-    const deckCards = deck.cards && deck.cards.length > 0 ? deck.cards : [
-      { front: `Từ vựng mẫu 1 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 1" },
-      { front: `Từ vựng mẫu 2 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 2" },
-      { front: `Từ vựng mẫu 3 của bộ: ${deck.title}`, back: "Nghĩa của từ vựng mẫu 3" },
-    ];
+    const deckCards = deck.cards || [];
     setStudyDeck(deck);
     setStudyCards(deckCards);
     setActiveCardIndex(0);
     setIsFlipped(false);
     setIsStudyOpen(true);
+  };
+
+  // Mark card as Mastered / Not Mastered
+  const handleMarkCardMastery = (deckId: string, cardFront: string, mastered: boolean) => {
+    const currentMastered = deckProgress[deckId] || [];
+    let updatedMastered: string[];
+    if (mastered) {
+      if (!currentMastered.includes(cardFront)) {
+        updatedMastered = [...currentMastered, cardFront];
+      } else {
+        updatedMastered = currentMastered;
+      }
+    } else {
+      updatedMastered = currentMastered.filter(front => front !== cardFront);
+    }
+
+    const updated = {
+      ...deckProgress,
+      [deckId]: updatedMastered
+    };
+    setDeckProgress(updated);
+    localStorage.setItem("fc_progress", JSON.stringify(updated));
+
+    if (mastered) {
+      message.success("Đã thuộc thẻ! Tiến độ đã được cập nhật.");
+    } else {
+      message.info("Đã đánh dấu chưa thuộc.");
+    }
+
+    // Auto advance to next card with slight delay
+    if (activeCardIndex < studyCards.length - 1) {
+      setTimeout(() => {
+        setActiveCardIndex(prev => prev + 1);
+        setIsFlipped(false);
+      }, 300);
+    }
+  };
+
+  // Open deck for quick practice (Quiz)
+  const handleOpenPractice = (deck: any) => {
+    const cards = deck.cards || [];
+    if (cards.length === 0) {
+      message.warning("Bộ thẻ này chưa có thẻ từ vựng nào để luyện tập!");
+      return;
+    }
+
+    const allBacks = cards.map((c: any) => c.back);
+    
+    // Tự động gom thêm đáp án nhiễu từ các bộ thẻ khác có trong cơ sở dữ liệu để chống mock cứng
+    const allDatabaseBacks: string[] = [];
+    decks.forEach((d: any) => {
+      if (d.cards) {
+        d.cards.forEach((c: any) => {
+          if (c.back) allDatabaseBacks.push(c.back);
+        });
+      }
+    });
+
+    const fallbackOptions = ["Tích lũy, gom góp lại", "Đa dạng sinh học", "Sự bảo tồn", "Mơ hồ, nước đôi", "Tỉ mỉ, kỹ càng", "Dễ như ăn bánh"];
+
+    const questions = cards.map((card: any) => {
+      const correctAnswer = card.back;
+      let distractors = allBacks.filter((b: string) => b !== correctAnswer);
+      
+      if (distractors.length < 3) {
+        distractors = [...distractors, ...allDatabaseBacks.filter((b: string) => b !== correctAnswer)];
+      }
+      if (distractors.length < 3) {
+        distractors = [...distractors, ...fallbackOptions.filter(fo => fo !== correctAnswer)];
+      }
+
+      distractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 3);
+      const options = [correctAnswer, ...distractors].sort(() => 0.5 - Math.random());
+
+      return {
+        question: card.front,
+        answer: correctAnswer,
+        options
+      };
+    });
+
+    setPracticeDeck(deck);
+    setQuizQuestions(questions.sort(() => 0.5 - Math.random()));
+    setCurrentQuizIndex(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setScore(0);
+    setQuizFinished(false);
+    setIsPracticeOpen(true);
+  };
+
+  const handleSelectOption = (option: string) => {
+    if (isAnswered) return;
+    setSelectedOption(option);
+    setIsAnswered(true);
+    const correct = option === quizQuestions[currentQuizIndex].answer;
+    if (correct) {
+      setScore(prev => prev + 1);
+    }
+
+    setTimeout(() => {
+      if (currentQuizIndex < quizQuestions.length - 1) {
+        setCurrentQuizIndex(prev => prev + 1);
+        setSelectedOption(null);
+        setIsAnswered(false);
+      } else {
+        setQuizFinished(true);
+      }
+    }, 1500);
+  };
+
+  // Open deck details (Info)
+  const handleOpenInfo = (deck: any) => {
+    setInfoDeck(deck);
+    setIsInfoOpen(true);
+  };
+
+  // Toggle favorite status
+  const handleToggleFavorite = (deckId: string) => {
+    let updated: string[];
+    if (favoriteDeckIds.includes(deckId)) {
+      updated = favoriteDeckIds.filter(id => id !== deckId);
+      message.success("Đã bỏ bộ thẻ khỏi mục yêu thích!");
+    } else {
+      updated = [...favoriteDeckIds, deckId];
+      message.success("Đã lưu bộ thẻ vào mục yêu thích!");
+    }
+    setFavoriteDeckIds(updated);
+    localStorage.setItem("fc_favorites", JSON.stringify(updated));
+  };
+
+  // Reset Progress
+  const handleResetProgress = (deckId: string) => {
+    Modal.confirm({
+      title: "Làm mới tiến độ học tập",
+      content: "Bạn có chắc chắn muốn làm mới tiến độ học của bộ thẻ này? Trạng thái thuộc bài của các từ sẽ quay về ban đầu.",
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: () => {
+        const updated = { ...deckProgress };
+        delete updated[deckId];
+        setDeckProgress(updated);
+        localStorage.setItem("fc_progress", JSON.stringify(updated));
+        message.success("Đã đặt lại tiến độ bộ thẻ!");
+      }
+    });
   };
 
   // Handle deck creation
@@ -294,9 +311,7 @@ export default function FlashcardPageContent() {
           title: values.title,
           isLocked: false,
           type: "custom",
-          cards: [
-            { front: "Example word", back: "Từ ví dụ mẫu" }
-          ]
+          cards: []
         }),
       });
 
@@ -307,7 +322,8 @@ export default function FlashcardPageContent() {
         fetchDecks();
         setSourceType("custom");
       } else {
-        message.error("Lỗi khi tạo bộ thẻ");
+        const err = await res.json();
+        message.error(err.error || "Không thể tạo bộ thẻ");
       }
     } catch (e) {
       message.error("Lỗi kết nối");
@@ -341,14 +357,26 @@ export default function FlashcardPageContent() {
             {paginatedDecks.length > 0 ? (
               <>
                 <Row gutter={[20, 20]}>
-                  {paginatedDecks.map(deck => (
-                    <Col xs={12} sm={12} lg={12} xl={8} key={deck.id}>
-                      <FlashcardDeckCard 
-                        deck={deck} 
-                        onStudy={handleOpenStudy} 
-                      />
-                    </Col>
-                  ))}
+                  {paginatedDecks.map(deck => {
+                    const totalCards = deck.cards?.length || deck.cardCount || 1;
+                    const masteredCount = deckProgress[deck.id]?.length || 0;
+                    const progressPercent = Math.min(100, Math.round((masteredCount / totalCards) * 100));
+
+                    return (
+                      <Col xs={12} sm={12} lg={12} xl={8} key={deck.id}>
+                        <FlashcardDeckCard 
+                          deck={deck} 
+                          onStudy={handleOpenStudy}
+                          onPractice={handleOpenPractice}
+                          onInfo={handleOpenInfo}
+                          onToggleFavorite={handleToggleFavorite}
+                          onResetProgress={handleResetProgress}
+                          isFavorite={favoriteDeckIds.includes(deck.id)}
+                          progress={progressPercent}
+                        />
+                      </Col>
+                    );
+                  })}
                 </Row>
 
                 {/* Pagination */}
@@ -382,13 +410,13 @@ export default function FlashcardPageContent() {
         open={isCreateOpen}
         onCancel={() => setIsCreateOpen(false)}
         footer={null}
-        destroyOnHidden
+        destroyOnClose
       >
         <Form 
           form={form} 
           layout="vertical" 
           onFinish={handleCreateDeck}
-          initialValues={{ category: "vocabulary", cardCount: 10 }}
+          initialValues={{ category: "vocabulary", cardCount: 5 }}
         >
           <Form.Item
             name="title"
@@ -461,6 +489,26 @@ export default function FlashcardPageContent() {
               </div>
             </div>
 
+            {/* Mastery evaluation buttons */}
+            {isFlipped && studyDeck && (
+              <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 24 }}>
+                <Button 
+                  danger 
+                  style={{ height: 40, borderRadius: 8, fontWeight: 600 }}
+                  onClick={() => handleMarkCardMastery(studyDeck.id, studyCards[activeCardIndex].front, false)}
+                >
+                  Chưa thuộc ❌
+                </Button>
+                <Button 
+                  type="primary" 
+                  style={{ backgroundColor: "#22c55e", borderColor: "#22c55e", height: 40, borderRadius: 8, fontWeight: 600 }}
+                  onClick={() => handleMarkCardMastery(studyDeck.id, studyCards[activeCardIndex].front, true)}
+                >
+                  Đã thuộc bài ✅
+                </Button>
+              </div>
+            )}
+
             {/* Navigation buttons */}
             <div className="fc-card-navigator" style={{ marginTop: 28, display: "flex", justifyContent: "space-between", width: "100%" }}>
               <Button 
@@ -474,6 +522,7 @@ export default function FlashcardPageContent() {
               </Button>
               <Button 
                 type="primary"
+                ghost
                 onClick={() => setIsFlipped(!isFlipped)}
               >
                 Lật thẻ
@@ -487,6 +536,144 @@ export default function FlashcardPageContent() {
               >
                 Tiếp theo
               </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* QUICK PRACTICE (QUIZ) MODAL */}
+      <Modal
+        title={practiceDeck ? `Luyện tập nhanh: ${practiceDeck.title}` : "Luyện tập Flashcard"}
+        open={isPracticeOpen}
+        onCancel={() => setIsPracticeOpen(false)}
+        footer={null}
+        width={550}
+        centered
+        destroyOnClose
+      >
+        {quizQuestions.length > 0 && !quizFinished ? (
+          <div style={{ padding: "12px 0" }}>
+            {/* Progress indicator */}
+            <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b", fontSize: 13, marginBottom: 16 }}>
+              <span>Câu hỏi {currentQuizIndex + 1} / {quizQuestions.length}</span>
+              <span>Điểm số: {score}</span>
+            </div>
+
+            {/* Question Card */}
+            <div 
+              style={{ 
+                background: "#f8fafc", 
+                border: "2px solid #e2e8f0", 
+                borderRadius: 12, 
+                padding: "24px 16px", 
+                textAlign: "center", 
+                marginBottom: 24 
+              }}
+            >
+              <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Từ vựng cần dịch:</div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{quizQuestions[currentQuizIndex].question}</h2>
+            </div>
+
+            {/* Options grid */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {quizQuestions[currentQuizIndex].options.map((opt, idx) => {
+                const isSelected = selectedOption === opt;
+                const isCorrect = opt === quizQuestions[currentQuizIndex].answer;
+                
+                let btnType: "default" | "primary" = "default";
+                let btnStyle: React.CSSProperties = {
+                  height: "auto",
+                  padding: "12px 16px",
+                  textAlign: "left",
+                  fontSize: "15px",
+                  whiteSpace: "normal",
+                  borderRadius: "8px"
+                };
+
+                if (isAnswered) {
+                  if (isCorrect) {
+                    btnStyle.borderColor = "#22c55e";
+                    btnStyle.backgroundColor = "#f0fdf4";
+                    btnStyle.color = "#15803d";
+                    btnStyle.fontWeight = 600;
+                  } else if (isSelected) {
+                    btnStyle.borderColor = "#ef4444";
+                    btnStyle.backgroundColor = "#fef2f2";
+                    btnStyle.color = "#b91c1c";
+                  }
+                } else if (isSelected) {
+                  btnType = "primary";
+                }
+
+                return (
+                  <Button 
+                    key={idx} 
+                    type={btnType}
+                    style={btnStyle}
+                    onClick={() => handleSelectOption(opt)}
+                    disabled={isAnswered}
+                  >
+                    <span style={{ fontWeight: 700, marginRight: 8 }}>{String.fromCharCode(65 + idx)}.</span>
+                    {opt}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        ) : quizFinished ? (
+          <div style={{ padding: "24px 0", textAlign: "center" }}>
+            <div style={{ fontSize: 60, marginBottom: 12 }}>{score === quizQuestions.length ? "🏆" : "🎉"}</div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", marginBottom: 8 }}>Hoàn thành luyện tập!</h2>
+            <p style={{ fontSize: 16, color: "#475569", marginBottom: 24 }}>Bạn đạt được <strong>{score} / {quizQuestions.length}</strong> câu trả lời chính xác.</p>
+            <div style={{ width: "100%", height: 8, backgroundColor: "#e2e8f0", borderRadius: 4, overflow: "hidden", marginBottom: 24 }}>
+              <div 
+                style={{ 
+                  width: `${(score / quizQuestions.length) * 100}%`, 
+                  height: "100%", 
+                  backgroundColor: score === quizQuestions.length ? "#22c55e" : "#3b82f6" 
+                }}
+              ></div>
+            </div>
+            <Button type="primary" size="large" onClick={() => setIsPracticeOpen(false)}>Quay lại</Button>
+          </div>
+        ) : null}
+      </Modal>
+
+      {/* DECK INFO MODAL */}
+      <Modal
+        title={infoDeck ? `Danh sách từ vựng: ${infoDeck.title}` : "Chi tiết bộ thẻ"}
+        open={isInfoOpen}
+        onCancel={() => setIsInfoOpen(false)}
+        footer={[
+          <Button key="close" type="primary" onClick={() => setIsInfoOpen(false)}>Đóng</Button>
+        ]}
+        width={600}
+        centered
+        destroyOnClose
+      >
+        {infoDeck && (
+          <div style={{ padding: "12px 0" }}>
+            <div style={{ marginBottom: 16 }}>
+              <strong>Danh mục:</strong> <Tag color="blue">{infoDeck.categoryLabel || infoDeck.category}</Tag>
+              <strong style={{ marginLeft: 16 }}>Tổng số từ:</strong> {infoDeck.cards?.length || infoDeck.cardCount || 0} từ
+            </div>
+            <div style={{ maxHeight: 350, overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: 8 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                    <th style={{ padding: "10px 16px", fontWeight: 700, color: "#475569" }}>Thuật ngữ / Từ vựng</th>
+                    <th style={{ padding: "10px 16px", fontWeight: 700, color: "#475569" }}>Nghĩa tiếng Việt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(infoDeck.cards || []).map((card: any, idx: number) => (
+                    <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, color: "#0f172a" }}>{card.front}</td>
+                      <td style={{ padding: "12px 16px", color: "#334155" }}>{card.back}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

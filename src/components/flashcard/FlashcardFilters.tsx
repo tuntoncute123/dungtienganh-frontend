@@ -20,6 +20,7 @@ const categories = [
   { key: "collocation", label: "Kết hợp từ", color: "#34a853" },
   { key: "grammar", label: "Ngữ pháp", color: "#f9ab00" },
   { key: "mixed", label: "Tổng hợp", color: "#f28500" },
+  { key: "favorites", label: "★ Yêu thích", color: "#e11d48" },
 ];
 
 export default function FlashcardFilters({
