@@ -302,7 +302,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                 {!hasOptions && q.text.includes("_____") ? (
                   // Inline fill-in-the-blanks (Part 6)
                   <p className={styles.questionText}>
-                    {q.text.split("_____")[0]}
+                    <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[0] }} />
                     <input
                       type="text"
                       className={`${styles.gapInput} ${
@@ -317,10 +317,10 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                       placeholder={isSubmitted ? "" : "..."}
                       onChange={(e) => handleTextChange(q.number, e.target.value)}
                     />
-                    {q.text.split("_____")[1]}
+                    <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[1] }} />
                   </p>
                 ) : (
-                  <p className={styles.questionText}>{q.text}</p>
+                  <p className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
                 )}
               </div>
 
@@ -354,7 +354,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                       >
                         <div className={styles.optionInner}>
                           <div className={styles.optionLetter}>{optKey}</div>
-                          <span className={styles.optionText}>{optionText}</span>
+                          <span className={styles.optionText} dangerouslySetInnerHTML={{ __html: optionText }} />
                         </div>
                         {isSubmitted && isCorrectAnswer && (
                           <CheckCircleOutlined style={{ color: "#10b981", fontSize: 16 }} />
@@ -421,7 +421,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                   </div>
                   {expandedExplanations[q.number] && (
                     <div className={styles.explanationContent}>
-                      <p style={{ whiteSpace: "pre-line" }}>{q.explanation}</p>
+                      <p style={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
                       <p className={styles.correctAnswerText}>⇒ Đáp án đúng: {q.correctAnswer}</p>
                     </div>
                   )}
