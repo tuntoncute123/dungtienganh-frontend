@@ -462,7 +462,7 @@ export default function AdminPage() {
   }, []);
 
   // Handle custom upload trigger
-  const handleUpload = async (file: File, callback: (url: string) => void) => {
+  const handleUpload = async (file: File, folder: string, callback: (url: string) => void) => {
     setUploadLoading(true);
     const isVideo = file.type.startsWith("video/");
     const isImage = file.type.startsWith("image/");
@@ -476,9 +476,9 @@ export default function AdminPage() {
       });
 
       try {
-        // 1. Lấy presigned URL từ backend
+        // 1. Lấy presigned URL từ backend với tham số folder
         const presignedRes = await fetch(
-          `${API_BASE_URL}/api/upload/presigned-url?filename=${encodeURIComponent(file.name)}&mimetype=${encodeURIComponent(file.type || "application/octet-stream")}`
+          `${API_BASE_URL}/api/upload/presigned-url?filename=${encodeURIComponent(file.name)}&mimetype=${encodeURIComponent(file.type || "application/octet-stream")}&folder=${encodeURIComponent(folder)}`
         );
 
         if (!presignedRes.ok) {
@@ -546,7 +546,7 @@ export default function AdminPage() {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch(`${API_BASE_URL}/api/upload`, {
+        const res = await fetch(`${API_BASE_URL}/api/upload?folder=${encodeURIComponent(folder)}`, {
           method: "POST",
           body: formData
         });
@@ -1502,7 +1502,7 @@ export default function AdminPage() {
                   if (!isLt100M) {
                     msg.warning("Video nặng hơn 100MB có thể tải lên lâu. Khuyên dùng Handbrake nén trước.");
                   }
-                  handleUpload(file, (url) => lessonForm.setFieldsValue({ videoUrl: url }));
+                  handleUpload(file, "lessons/videos", (url) => lessonForm.setFieldsValue({ videoUrl: url }));
                   return false;
                 }}
                 showUploadList={false}
@@ -1557,7 +1557,7 @@ export default function AdminPage() {
               </Form.Item>
               <Upload
                 beforeUpload={(file) => {
-                  handleUpload(file, (url) => lessonForm.setFieldsValue({ thumbnail: url }));
+                  handleUpload(file, "lessons/thumbnails", (url) => lessonForm.setFieldsValue({ thumbnail: url }));
                   return false;
                 }}
                 showUploadList={false}
@@ -1765,7 +1765,7 @@ export default function AdminPage() {
               </Form.Item>
               <Upload
                 beforeUpload={(file) => {
-                  handleUpload(file, (url) => storyForm.setFieldsValue({ avatar: url }));
+                  handleUpload(file, "stories/avatars", (url) => storyForm.setFieldsValue({ avatar: url }));
                   return false;
                 }}
                 showUploadList={false}
@@ -1782,7 +1782,7 @@ export default function AdminPage() {
               </Form.Item>
               <Upload
                 beforeUpload={(file) => {
-                  handleUpload(file, (url) => storyForm.setFieldsValue({ image: url }));
+                  handleUpload(file, "stories/images", (url) => storyForm.setFieldsValue({ image: url }));
                   return false;
                 }}
                 showUploadList={false}
@@ -2238,7 +2238,7 @@ export default function AdminPage() {
                 accept="image/*"
                 showUploadList={false}
                 beforeUpload={(file) => {
-                  handleUpload(file, (url) => {
+                  handleUpload(file, "courses/thumbnails", (url) => {
                     courseForm.setFieldsValue({ thumbnail: url });
                   });
                   return false;
