@@ -452,7 +452,7 @@ export default function AdminPage() {
 
         // Sau khi hoàn thành tải tất cả các chunk, tiến hành ghép file (Merge)
         msg.loading({ 
-          content: "Đang ghép các phần và tải lên hệ thống lưu trữ (Có thể mất vài phút)...", 
+          content: "Đang khởi tạo tiến trình ghép các phần video trên máy chủ...", 
           key: "uploading", 
           duration: 0 
         });
@@ -470,15 +470,56 @@ export default function AdminPage() {
           }),
         });
 
-        const mergeData = await mergeRes.json();
-        if (mergeRes.ok) {
-          msg.success({ 
-            content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", 
-            key: "uploading" 
-          });
-          callback(mergeData.url);
-        } else {
-          throw new Error(mergeData.error || "Không thể ghép các mảnh file đã tải");
+        if (!mergeRes.ok) {
+          const mergeData = await mergeRes.json().catch(() => ({}));
+          throw new Error(mergeData.error || "Không thể khởi tạo tiến trình ghép file");
+        }
+
+        // Bắt đầu vòng lặp check status (polling)
+        let status = "processing";
+        let attempts = 0;
+        const maxAttempts = 150; // 5 phút tối đa (mỗi 2 giây check một lần)
+
+        while (status === "processing" || status === "merging" || status === "uploading") {
+          if (attempts >= maxAttempts) {
+            throw new Error("Quá thời gian chờ ghép và upload file (Timeout 5 phút)");
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          attempts++;
+
+          const statusRes = await fetch(`${API_BASE_URL}/api/upload/status/${uploadId}`);
+          if (!statusRes.ok) {
+            throw new Error("Lỗi khi kiểm tra trạng thái upload");
+          }
+
+          const statusData = await statusRes.json();
+          status = statusData.status;
+
+          if (status === "merging") {
+            msg.loading({ 
+              content: "Đang tiến hành ghép các phần video trên máy chủ...", 
+              key: "uploading", 
+              duration: 0 
+            });
+          } else if (status === "uploading") {
+            msg.loading({ 
+              content: "Đang tải video lên hệ thống lưu trữ Cloudflare R2...", 
+              key: "uploading", 
+              duration: 0 
+            });
+          } else if (status === "complete") {
+            msg.success({ 
+              content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", 
+              key: "uploading" 
+            });
+            callback(statusData.url);
+            return;
+          } else if (status === "error") {
+            throw new Error(statusData.error || "Lỗi xảy ra trong quá trình ghép/upload trên server");
+          } else if (status === "not_found") {
+            throw new Error("Không tìm thấy tiến trình upload trên máy chủ");
+          }
         }
 
       } catch (error: any) {
