@@ -383,7 +383,7 @@ export default function ProgressTest() {
         </div>
           {isExpanded && (
             <div onClick={(e) => e.stopPropagation()} style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-              <p style={{ whiteSpace: "pre-line" }}>{q.explanation}</p>
+              <p style={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
               <p style={{ color: "#cc4125", fontWeight: "bold" }}>⇒ Đáp án đúng: {q.correctAnswer}</p>
             </div>
           )}
@@ -577,7 +577,7 @@ export default function ProgressTest() {
                     <div className={styles.questionTextContainer}>
                       <div className={styles.questionNumberBadge}>{q.number}</div>
                       <div className={styles.questionText}>
-                        {beforeBlank}
+                        <span dangerouslySetInnerHTML={{ __html: beforeBlank }} />
                         <input
                           type="text"
                           className={inputClass}
@@ -586,7 +586,7 @@ export default function ProgressTest() {
                           onChange={(e) => handleTextChange(q.number, e.target.value)}
                           disabled={isSubmitted}
                         />
-                        {afterBlank}
+                        <span dangerouslySetInnerHTML={{ __html: afterBlank }} />
                       </div>
                     </div>
 
@@ -622,7 +622,7 @@ export default function ProgressTest() {
                 >
                   <div className={styles.questionTextContainer}>
                     <div className={styles.questionNumberBadge}>{q.number}</div>
-                    <div className={styles.questionText}>{q.text}</div>
+                    <div className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
                   </div>
 
                   <div className={styles.optionsContainer}>
@@ -695,9 +695,7 @@ export default function ProgressTest() {
                             >
                               {optKey}
                             </div>
-                            <p className={styles.optionText} style={inlineTextStyle}>
-                              {optionText}
-                            </p>
+                            <p className={styles.optionText} style={inlineTextStyle} dangerouslySetInnerHTML={{ __html: optionText }} />
 
                             {/* Icons for check/wrong in submitted mode */}
                             {isSubmitted && isCorrectAnswer && (
