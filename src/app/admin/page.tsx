@@ -402,30 +402,120 @@ export default function AdminPage() {
   const handleUpload = async (file: File, callback: (url: string) => void) => {
     setUploadLoading(true);
     const isVideo = file.type.startsWith("video/");
-    const loadingMessage = isVideo 
-      ? "Đang tải lên và nén video trên server (Quá trình này có thể mất vài phút, vui lòng không đóng trang)..." 
-      : "Đang tải tập tin lên...";
     
-    msg.loading({ content: loadingMessage, key: "uploading", duration: 0 });
+    // Ngưỡng dung lượng file để chuyển sang cơ chế chunk upload (ví dụ: >= 15MB)
+    const CHUNK_THRESHOLD = 15 * 1024 * 1024; 
+    const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB mỗi chunk
     
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API_BASE_URL}/api/upload`, {
-        method: "POST",
-        body: formData
+    if (file.size >= CHUNK_THRESHOLD) {
+      // --- LUỒNG UPLOAD THEO TỪNG CHUNK (Dành cho file lớn >= 15MB) ---
+      const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      
+      msg.loading({ 
+        content: `Bắt đầu tải lên: 0% (0/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
+        key: "uploading", 
+        duration: 0 
       });
-      const data = await res.json();
-      if (res.ok) {
-        msg.success({ content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", key: "uploading" });
-        callback(data.url);
-      } else {
-        msg.error({ content: data.error || "Tải lên thất bại", key: "uploading" });
+
+      try {
+        // Tải tuần tự từng chunk
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(start + CHUNK_SIZE, file.size);
+          const chunkBlob = file.slice(start, end);
+          
+          const formData = new FormData();
+          formData.append("file", chunkBlob, file.name);
+          formData.append("uploadId", uploadId);
+          formData.append("chunkIndex", i.toString());
+
+          const res = await fetch(`${API_BASE_URL}/api/upload/chunk`, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `Lỗi khi tải lên phần ${i + 1}`);
+          }
+
+          // Cập nhật phần trăm tiến trình tải
+          const bytesUploaded = end;
+          const percent = (bytesUploaded / file.size) * 100;
+          msg.loading({ 
+            content: `Đang tải lên: ${percent.toFixed(0)}% (${(bytesUploaded / 1024 / 1024).toFixed(1)}/${(file.size / 1024 / 1024).toFixed(1)}MB)...`, 
+            key: "uploading", 
+            duration: 0 
+          });
+        }
+
+        // Sau khi hoàn thành tải tất cả các chunk, tiến hành ghép file (Merge)
+        msg.loading({ 
+          content: "Đang ghép các phần và tải lên hệ thống lưu trữ (Có thể mất vài phút)...", 
+          key: "uploading", 
+          duration: 0 
+        });
+
+        const mergeRes = await fetch(`${API_BASE_URL}/api/upload/merge`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uploadId,
+            filename: file.name,
+            mimetype: file.type || "application/octet-stream",
+            totalChunks,
+          }),
+        });
+
+        const mergeData = await mergeRes.json();
+        if (mergeRes.ok) {
+          msg.success({ 
+            content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", 
+            key: "uploading" 
+          });
+          callback(mergeData.url);
+        } else {
+          throw new Error(mergeData.error || "Không thể ghép các mảnh file đã tải");
+        }
+
+      } catch (error: any) {
+        msg.error({ 
+          content: error.message || "Có lỗi xảy ra khi upload", 
+          key: "uploading" 
+        });
+      } finally {
+        setUploadLoading(false);
       }
-    } catch (error) {
-      msg.error({ content: "Có lỗi xảy ra khi upload", key: "uploading" });
-    } finally {
-      setUploadLoading(false);
+    } else {
+      // --- LUỒNG UPLOAD THÔNG THƯỜNG (Dành cho file < 15MB) ---
+      const loadingMessage = isVideo 
+        ? "Đang tải lên và nén video trên server (Quá trình này có thể mất vài phút, vui lòng không đóng trang)..." 
+        : "Đang tải tập tin lên...";
+      
+      msg.loading({ content: loadingMessage, key: "uploading", duration: 0 });
+      
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch(`${API_BASE_URL}/api/upload`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.success({ content: isVideo ? "Nén và tải video lên thành công! 🎉" : "Tải lên thành công!", key: "uploading" });
+          callback(data.url);
+        } else {
+          msg.error({ content: data.error || "Tải lên thất bại", key: "uploading" });
+        }
+      } catch (error) {
+        msg.error({ content: "Có lỗi xảy ra khi upload", key: "uploading" });
+      } finally {
+        setUploadLoading(false);
+      }
     }
   };
 
