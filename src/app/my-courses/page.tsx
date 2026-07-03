@@ -27,7 +27,7 @@ interface Course {
   price_main?: string;
   price_sale?: string;
   sale_tag?: string;
-  grade: "8" | "9" | "10" | "11" | "12";
+  grade: "8" | "9" | "10" | "11" | "12" | "dgnl";
 }
 
 const COURSES_DATA: Course[] = [
@@ -183,6 +183,7 @@ const GRADES = [
   { key: "10", label: "Lớp 10" },
   { key: "11", label: "Lớp 11" },
   { key: "12", label: "Lớp 12" },
+  { key: "dgnl", label: "ĐGNL" },
 ];
 
 /* ── Main Component ────────────────────────── */

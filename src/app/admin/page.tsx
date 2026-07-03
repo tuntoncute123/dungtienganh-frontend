@@ -43,18 +43,7 @@ import {
   AppstoreOutlined
 } from "@ant-design/icons";
 
-let COURSE_MAP: Record<string, string> = {
-  "toan-9-he-2k12": "TOÁN 9 | KHÓA HÈ 2K12",
-  "toan-12-l-nen-tang": "TOÁN 12 | KHOÁ [L] NỀN TẢNG 12 2027",
-  "toan-12-f-he-thong": "TOÁN 12 | KHOÁ [F] HỆ THỐNG NỀN TẢNG 11 2027",
-  "500-cau-chong-sai-ngu": "500 CÂU CHỐNG SAI NGU KỔNH ĐIỂN",
-  "tieng-anh-10-hk2": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 2 - HS 2K11",
-  "tieng-anh-11-hk2": "TIẾNG ANH 11 | KHOÁ HỌC KÌ 2 - HS 2K10",
-  "tieng-anh-10-hk1": "TIẾNG ANH 10 | KHOÁ HỌC KÌ 1 - HS 2K11",
-  "tieng-anh-11-hk1": "TIẾNG ANH 11 | KHOÁ HỌC KÌ 1 - HS 2K10",
-  "tieng-anh-9-he-2k12": "TIẾNG ANH 9 | KHÓA HÈ 2K12",
-  "tieng-anh-9-ngu-phap": "TIẾNG ANH 9 | KHÓA NGỮ PHÁP TOÀN DIỆN"
-};
+let COURSE_MAP: Record<string, string> = {};
 
 const { Header, Content, Sider } = Layout;
 const { Option } = Select;
@@ -197,6 +186,10 @@ export default function AdminPage() {
       if (res.ok) {
         setCourses(data);
         if (Array.isArray(data)) {
+          // Clear COURSE_MAP to ensure deleted courses are removed
+          for (const key in COURSE_MAP) {
+            delete COURSE_MAP[key];
+          }
           data.forEach((c: any) => {
             COURSE_MAP[c.id] = c.title;
           });
@@ -244,19 +237,31 @@ export default function AdminPage() {
       title: "Mã khóa học (ID)",
       dataIndex: "id",
       key: "id",
+      sorter: (a: any, b: any) => a.id.localeCompare(b.id),
       render: (text: string) => <Tag color="geekblue">{text}</Tag>,
     },
     {
       title: "Tiêu đề",
       dataIndex: "title",
       key: "title",
+      sorter: (a: any, b: any) => a.title.localeCompare(b.title),
       render: (text: string) => <strong>{text}</strong>,
     },
     {
       title: "Lớp",
       dataIndex: "grade",
       key: "grade",
-      render: (text: string) => <Tag color="purple">Lớp {text}</Tag>,
+      sorter: (a: any, b: any) => a.grade.localeCompare(b.grade),
+      filters: [
+        { text: "Lớp 8", value: "8" },
+        { text: "Lớp 9", value: "9" },
+        { text: "Lớp 10", value: "10" },
+        { text: "Lớp 11", value: "11" },
+        { text: "Lớp 12", value: "12" },
+        { text: "ĐGNL", value: "dgnl" },
+      ],
+      onFilter: (value: any, record: any) => record.grade === value,
+      render: (text: string) => <Tag color="purple">{text === "dgnl" ? "ĐGNL" : `Lớp ${text}`}</Tag>,
     },
     {
       title: "Giáo viên",
@@ -949,15 +954,30 @@ export default function AdminPage() {
       key: "thumbnail",
       render: (src: string) => src ? <img src={src} alt="lesson thumb" style={{ width: 64, height: 36, objectFit: "cover", borderRadius: 4 }} /> : <Tag color="default">N/A</Tag>
     },
-    { title: "Tiêu đề bài học", dataIndex: "title", key: "title" },
+    { 
+      title: "Tiêu đề bài học", 
+      dataIndex: "title", 
+      key: "title",
+      sorter: (a: any, b: any) => a.title.localeCompare(b.title)
+    },
     {
       title: "Loại bài học",
       key: "type",
+      filters: [
+        { text: "Video bài giảng", value: "video" },
+        { text: "Thi Online", value: "test" }
+      ],
+      onFilter: (value: any, record: any) => value === "video" ? !!record.videoUrl : !record.videoUrl,
       render: (_: any, record: any) => record.videoUrl ? <Tag color="blue">Video bài giảng</Tag> : <Tag color="magenta">Thi Online</Tag>
     },
     {
       title: "Bài tập / Đề thi",
       key: "exercise",
+      filters: [
+        { text: "Đã gán bài thi", value: true },
+        { text: "Chưa có", value: false }
+      ],
+      onFilter: (value: any, record: any) => !!record.exerciseId === value,
       render: (_: any, record: any) => record.exerciseId ? <Tag color="green">Đã gán bài thi</Tag> : <Tag color="orange">Chưa có</Tag>
     },
     { title: "Thời lượng", dataIndex: "duration", key: "duration" },
@@ -992,11 +1012,22 @@ export default function AdminPage() {
       key: "image",
       render: (src: string) => <img src={src} alt="story content" style={{ width: 40, height: 60, objectFit: "cover", borderRadius: 4 }} />
     },
-    { title: "Học viên", dataIndex: "name", key: "name" },
+    { 
+      title: "Học viên", 
+      dataIndex: "name", 
+      key: "name",
+      sorter: (a: any, b: any) => a.name.localeCompare(b.name)
+    },
     {
       title: "Loại Story",
       dataIndex: "type",
       key: "type",
+      filters: [
+        { text: "Huy hiệu", value: "badge" },
+        { text: "Bài đăng", value: "post" },
+        { text: "Tải ảnh lên", value: "upload" }
+      ],
+      onFilter: (value: any, record: any) => record.type === value,
       render: (type: string) => {
         if (type === "badge") return <Tag color="success">Huy hiệu</Tag>;
         if (type === "post") return <Tag color="purple">Bài đăng</Tag>;
@@ -1007,6 +1038,11 @@ export default function AdminPage() {
       title: "Trạng thái",
       dataIndex: "isApproved",
       key: "isApproved",
+      filters: [
+        { text: "Đã duyệt ✅", value: true },
+        { text: "Chờ duyệt ⏳", value: false }
+      ],
+      onFilter: (value: any, record: any) => !!record.isApproved === value,
       render: (isApproved: boolean) => (
         isApproved ? <Tag color="green">Đã duyệt ✅</Tag> : <Tag color="orange">Chờ duyệt ⏳</Tag>
       )
@@ -1046,18 +1082,33 @@ export default function AdminPage() {
   ];
 
   const deckColumns = [
-    { title: "Tiêu đề bộ thẻ", dataIndex: "title", key: "title" },
+    { 
+      title: "Tiêu đề bộ thẻ", 
+      dataIndex: "title", 
+      key: "title",
+      sorter: (a: any, b: any) => a.title.localeCompare(b.title)
+    },
     {
       title: "Danh mục",
       dataIndex: "categoryLabel",
       key: "categoryLabel",
       render: (label: string, record: any) => <Tag color="blue">{label} ({record.category})</Tag>
     },
-    { title: "Số lượng thẻ", dataIndex: "cardCount", key: "cardCount" },
+    { 
+      title: "Số lượng thẻ", 
+      dataIndex: "cardCount", 
+      key: "cardCount",
+      sorter: (a: any, b: any) => (a.cardCount || 0) - (b.cardCount || 0)
+    },
     {
       title: "Khóa học VIP",
       dataIndex: "isLocked",
       key: "isLocked",
+      filters: [
+        { text: "VIP (Khóa)", value: true },
+        { text: "Không khóa", value: false }
+      ],
+      onFilter: (value: any, record: any) => !!record.isLocked === value,
       render: (locked: boolean) => locked ? <Tag color="red">Có</Tag> : <Tag color="green">Không</Tag>
     },
     {
@@ -1089,11 +1140,22 @@ export default function AdminPage() {
   ];
 
   const examColumns = [
-    { title: "Tiêu đề đề thi", dataIndex: "title", key: "title" },
+    { 
+      title: "Tiêu đề đề thi", 
+      dataIndex: "title", 
+      key: "title",
+      sorter: (a: any, b: any) => a.title.localeCompare(b.title)
+    },
     {
       title: "Loại đề",
       dataIndex: "category",
       key: "category",
+      filters: [
+        { text: "Đề thi thử THPT", value: "school-exams" },
+        { text: "Thi thử Online", value: "mock-test" },
+        { text: "Đề luyện tập", value: "progress-test" }
+      ],
+      onFilter: (value: any, record: any) => record.category === value,
       render: (cat: string) => {
         const conf: Record<string, string> = {
           "school-exams": "Đề thi thử THPT",
@@ -1103,8 +1165,19 @@ export default function AdminPage() {
         return <Tag color="purple">{conf[cat] || cat}</Tag>;
       }
     },
-    { title: "Thời gian", dataIndex: "duration", key: "duration", render: (dur: number) => `${dur} phút` },
-    { title: "Số câu hỏi", dataIndex: "cardCount", key: "cardCount" },
+    { 
+      title: "Thời gian", 
+      dataIndex: "duration", 
+      key: "duration", 
+      sorter: (a: any, b: any) => (a.duration || 0) - (b.duration || 0),
+      render: (dur: number) => `${dur} phút` 
+    },
+    { 
+      title: "Số câu hỏi", 
+      dataIndex: "cardCount", 
+      key: "cardCount",
+      sorter: (a: any, b: any) => (a.cardCount || 0) - (b.cardCount || 0)
+    },
     {
       title: "Hành động",
       key: "actions",
@@ -1151,8 +1224,19 @@ export default function AdminPage() {
   ];
 
   const userColumns = [
-    { title: "Tài khoản", dataIndex: "username", key: "username", render: (text: string) => <strong>{text}</strong> },
-    { title: "Họ và tên", dataIndex: "name", key: "name" },
+    { 
+      title: "Tài khoản", 
+      dataIndex: "username", 
+      key: "username", 
+      sorter: (a: any, b: any) => a.username.localeCompare(b.username),
+      render: (text: string) => <strong>{text}</strong> 
+    },
+    { 
+      title: "Họ và tên", 
+      dataIndex: "name", 
+      key: "name",
+      sorter: (a: any, b: any) => a.name.localeCompare(b.name)
+    },
     { 
       title: "Mật khẩu", 
       dataIndex: "plainPassword", 
@@ -1231,12 +1315,24 @@ export default function AdminPage() {
   ];
 
   const notificationColumns = [
-    { title: "Tiêu đề", dataIndex: "title", key: "title" },
+    { 
+      title: "Tiêu đề", 
+      dataIndex: "title", 
+      key: "title",
+      sorter: (a: any, b: any) => a.title.localeCompare(b.title)
+    },
     { title: "Nội dung", dataIndex: "content", key: "content" },
     {
       title: "Loại",
       dataIndex: "type",
       key: "type",
+      filters: [
+        { text: "Thông tin", value: "info" },
+        { text: "Thành công", value: "success" },
+        { text: "Cảnh báo", value: "warning" },
+        { text: "Khẩn cấp", value: "alert" }
+      ],
+      onFilter: (value: any, record: any) => record.type === value,
       render: (type: string) => {
         const conf: Record<string, string> = {
           info: "Thông tin",
@@ -1267,6 +1363,11 @@ export default function AdminPage() {
       title: "Trạng thái",
       dataIndex: "isRead",
       key: "isRead",
+      filters: [
+        { text: "Đã đọc", value: true },
+        { text: "Chưa đọc", value: false }
+      ],
+      onFilter: (value: any, record: any) => !!record.isRead === value,
       render: (read: boolean) => read ? <Tag color="green">Đã đọc</Tag> : <Tag color="orange">Chưa đọc</Tag>
     },
     {
@@ -2232,6 +2333,7 @@ export default function AdminPage() {
               <Select.Option value="10">Lớp 10</Select.Option>
               <Select.Option value="11">Lớp 11</Select.Option>
               <Select.Option value="12">Lớp 12</Select.Option>
+              <Select.Option value="dgnl">ĐGNL</Select.Option>
             </Select>
           </Form.Item>
 

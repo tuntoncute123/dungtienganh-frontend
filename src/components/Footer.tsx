@@ -36,7 +36,7 @@ export default function Footer() {
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn youtube" title="Kênh YouTube">
                 <YoutubeOutlined />
               </a>
-              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn tiktok" title="Kênh TikTok">
+              <a href="https://www.tiktok.com/@dungtienganh4work?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" className="social-icon-btn tiktok" title="Kênh TikTok">
                 <span style={{ fontWeight: "bold", fontSize: "14px" }}>T</span>
               </a>
             </div>
@@ -103,19 +103,19 @@ export default function Footer() {
               <li>
                 <EnvironmentOutlined className="contact-icon" />
                 <span className="contact-text">
-                  Cầu Giấy, Hà Nội, Việt Nam
+                  Lâm Đồng, Việt Nam
                 </span>
               </li>
               <li>
                 <PhoneOutlined className="contact-icon" />
                 <span className="contact-text">
-                  <a href="tel:0987654321">0987.654.321</a>
+                  <a href="tel:0987654321">0987.491.605</a>
                 </span>
               </li>
               <li>
                 <MailOutlined className="contact-icon" />
                 <span className="contact-text">
-                  <a href="mailto:co-dung@dungtienganh.com">co-dung@dungtienganh.com</a>
+                  <a href="mailto:dungtienganh4work@gmail.com">dungtienganh4work@gmail.com</a>
                 </span>
               </li>
             </ul>
