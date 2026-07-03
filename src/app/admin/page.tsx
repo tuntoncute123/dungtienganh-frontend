@@ -2183,26 +2183,26 @@ export default function AdminPage() {
                 <div style={{ maxHeight: 350, overflowY: "auto", paddingRight: 8 }}>
                   {fields.map(({ key, name, ...restField }) => (
                     <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
-                      <Row gutter={8}>
-                        <Col xs={24} sm={3} md={2}>
+                      <Row gutter={[8, 8]}>
+                        <Col xs={8} sm={4} md={2}>
                           <Form.Item {...restField} name={[name, "number"]} label="Câu số" rules={[{ required: true }]}>
                             <InputNumber style={{ width: "100%" }} />
                           </Form.Item>
                         </Col>
-                        <Col xs={24} sm={5} md={4}>
+                        <Col xs={16} sm={8} md={4}>
                           <Form.Item {...restField} name={[name, "qType"]} label="Loại câu hỏi" initialValue="multiple-choice" rules={[{ required: true }]}>
-                            <Select>
+                            <Select style={{ width: "100%" }}>
                               <Option value="multiple-choice">Trắc nghiệm</Option>
                               <Option value="gap-filling">Điền từ (Gap Filling)</Option>
                             </Select>
                           </Form.Item>
                         </Col>
-                        <Col xs={24} sm={6} md={5}>
+                        <Col xs={24} sm={12} md={6}>
                           <Form.Item {...restField} name={[name, "partTitle"]} label="Tiêu đề phần (Bài tập)">
                             <Input placeholder="Ví dụ: Bài tập 1: Chia động từ" />
                           </Form.Item>
                         </Col>
-                        <Col xs={24} sm={10} md={13}>
+                        <Col xs={24} sm={24} md={12}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
                             <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
