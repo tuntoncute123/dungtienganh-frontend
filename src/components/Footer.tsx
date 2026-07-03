@@ -23,7 +23,7 @@ export default function Footer() {
           {/* Cột 1: Thương hiệu */}
           <Col xs={24} sm={24} md={12} lg={8} className="footer-brand-col">
             <div className="footer-logo-wrapper">
-              <img src="/logo.png" alt="TeacherDung Logo" className="footer-logo" />
+              <img src="/logo.png?v=2" alt="TeacherDung Logo" className="footer-logo" />
               <span className="footer-brand-name">TeacherDung</span>
             </div>
             <p className="footer-slogan">

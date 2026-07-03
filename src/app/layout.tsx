@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: "TeacherDung",
     images: [
       {
-        url: "/logo.png",
+        url: "/logo.png?v=2",
         width: 512,
         height: 512,
         alt: "TeacherDung Logo",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TeacherDung - Học tiếng Anh cùng cô Dung",
     description: "Nền tảng học tiếng Anh với lộ trình cá nhân hóa, luyện TOEIC chuyên sâu cùng Cô Dung.",
-    images: ["/logo.png"],
+    images: ["/logo.png?v=2"],
   },
 };
 

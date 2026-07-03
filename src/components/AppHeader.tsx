@@ -9,7 +9,7 @@ const { useBreakpoint } = Grid;
 
 const ICONS = {
   menu: "/assets/1a44982fbf1eaacf09c8_5eae9335.svg",
-  logo: "/logo.png",
+  logo: "/logo.png?v=2",
   programIcon: "/assets/312127ec3e81c86b4825_e9dcfdde.svg",
   chevronDown: "/assets/1ceef3f6517e9ff843ac_d05eb16e.svg",
   streak: "/assets/8ba239a060b337b51758_3b5a2ca8.svg",

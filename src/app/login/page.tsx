@@ -70,7 +70,7 @@ export default function LoginPage() {
       <Card className="login-card" bordered={false}>
         <div className="login-header">
           <div className="login-logo-wrap">
-            <img src="/logo.png" alt="Logo" className="login-logo" />
+            <img src="/logo.png?v=2" alt="Logo" className="login-logo" />
           </div>
           <h1 className="login-title">
             TeacherDung

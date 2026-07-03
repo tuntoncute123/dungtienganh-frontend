@@ -432,7 +432,7 @@ export default function ProgressTest() {
           <div className={styles.logoContainer} onClick={() => router.push("/")}>
             <img
               alt="logo-prep"
-              src="/logo.png"
+              src="/logo.png?v=2"
               className={styles.logo}
             />
           </div>
