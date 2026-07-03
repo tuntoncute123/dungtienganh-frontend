@@ -12,8 +12,6 @@ import {
   UnorderedListOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  CaretUpOutlined,
-  CaretDownOutlined,
   InfoCircleOutlined
 } from "@ant-design/icons";
 import styles from "./quiz.module.css";
@@ -29,6 +27,8 @@ interface Question {
   };
   correctAnswer?: string | string[];
   explanation?: string;
+  qType?: string;      // "multiple-choice" | "gap-filling"
+  partTitle?: string;  // e.g. "Bài tập 1: Chia dạng đúng..."
 }
 
 
@@ -43,8 +43,6 @@ export default function ProgressTest() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [resultVisible, setResultVisible] = useState<boolean>(false);
   const [confirmSubmitVisible, setConfirmSubmitVisible] = useState<boolean>(false);
-  const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
-
   const [examId, setExamId] = useState<string | null>(null);
   const [dynamicExam, setDynamicExam] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -60,12 +58,7 @@ export default function ProgressTest() {
     score: 0
   });
 
-  const toggleExplanation = (questionNum: number) => {
-    setExpandedExplanations((prev) => ({
-      ...prev,
-      [questionNum]: prev[questionNum] === false ? true : false
-    }));
-  };
+
 
   // Load draft and dynamic exam on mount
   useEffect(() => {
@@ -371,25 +364,199 @@ export default function ProgressTest() {
   const renderExplanationBox = (qNum: number) => {
     const q = dynamicQuestions.find(item => item.number === qNum);
     if (!isSubmitted || !q || !q.explanation) return null;
-    const isExpanded = expandedExplanations[qNum] !== false;
     return (
-      <div className={styles.explanationBox} onClick={() => toggleExplanation(qNum)}>
-        <div className={styles.explanationHeader} style={{ cursor: "pointer" }}>
+      <div className={styles.explanationBox}>
+        <div className={styles.explanationHeader}>
           <span className={styles.explanationTitle}>
             <InfoCircleOutlined style={{ marginRight: 8 }} />
             Giải thích đáp án
           </span>
-          <span>{isExpanded ? <CaretUpOutlined /> : <CaretDownOutlined />}</span>
         </div>
-          {isExpanded && (
-            <div onClick={(e) => e.stopPropagation()} style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-              <p style={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
-              <p style={{ color: "#cc4125", fontWeight: "bold" }}>⇒ Đáp án đúng: {q.correctAnswer}</p>
+        <div style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+          <p style={{ whiteSpace: "pre-line", margin: 0 }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
+          <p style={{ color: "#cc4125", fontWeight: "bold", marginTop: 8, marginBottom: 0 }}>⇒ Đáp án đúng: {q.correctAnswer}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderQuestionItem = (q: Question) => {
+    const userAns = answers[q.number] || "";
+    const isGapFill = !isMultiPartTest ? q.qType === "gap-filling" : currentPart === 6;
+
+    if (isGapFill) {
+      const targetAnswers = dynamicCorrectAnswers;
+      const correctVal = targetAnswers[q.number];
+      const correctList = Array.isArray(correctVal)
+        ? correctVal
+        : (correctVal ? [correctVal] : []);
+      const isCorrect = isQuestionCorrect(q.number);
+
+      let inputClass = styles.inlineGapInput;
+
+      if (isSubmitted) {
+        if (isCorrect) {
+          inputClass = `${styles.inlineGapInput} ${styles.inlineGapInputCorrect}`;
+        } else {
+          inputClass = `${styles.inlineGapInput} ${styles.inlineGapInputIncorrect}`;
+        }
+      }
+
+      // Split question text by the blank placeholder
+      const textParts = q.text.split("_____");
+      const beforeBlank = textParts[0];
+      const afterBlank = textParts[1] || "";
+
+      return (
+        <div
+          key={q.number}
+          id={`question-item-${q.number}`}
+          className={styles.questionItem}
+        >
+          <div className={styles.questionTextContainer}>
+            <div className={styles.questionNumberBadge}>{q.number}</div>
+            <div className={styles.questionText}>
+              <span dangerouslySetInnerHTML={{ __html: beforeBlank }} />
+              <input
+                type="text"
+                className={inputClass}
+                value={userAns}
+                placeholder={isSubmitted ? "" : "..."}
+                onChange={(e) => handleTextChange(q.number, e.target.value)}
+                disabled={isSubmitted}
+              />
+              <span dangerouslySetInnerHTML={{ __html: afterBlank }} />
+            </div>
+          </div>
+
+          {/* Display correct answer / feedback in review mode below the text */}
+          {isSubmitted && !isCorrect && (
+            <div className={styles.correctAnswerBelowText}>
+              <CloseCircleOutlined style={{ color: "#ef4444" }} />
+              <span>
+                Đáp án đúng: <strong>{correctList.join(" / ")}</strong>
+              </span>
             </div>
           )}
+          {isSubmitted && isCorrect && (
+            <div className={styles.correctAnswerBelowText} style={{ color: "#10b981" }}>
+              <CheckCircleOutlined style={{ color: "#10b981" }} />
+              <span>Chính xác!</span>
+            </div>
+          )}
+          {renderExplanationBox(q.number)}
         </div>
       );
     }
+
+    // MULTIPLE CHOICE RENDER
+    const selectedOpt = userAns;
+    const correctOpt = dynamicCorrectAnswers[q.number] as string;
+
+    return (
+      <div
+        key={q.number}
+        id={`question-item-${q.number}`}
+        className={styles.questionItem}
+      >
+        <div className={styles.questionTextContainer}>
+          <div className={styles.questionNumberBadge}>{q.number}</div>
+          <div className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
+        </div>
+
+        <div className={styles.optionsContainer}>
+          {q.options && (Object.keys(q.options) as Array<keyof typeof q.options>).map((optKey) => {
+            const optionText = q.options![optKey];
+            const isSelected = selectedOpt === optKey;
+            const isCorrectAnswer = correctOpt === optKey;
+
+            // Decide options styling based on submission state
+            let cardClass = styles.optionCard;
+            if (isSubmitted) {
+              if (isCorrectAnswer) {
+                cardClass = `${styles.optionCard} ${styles.optionCardSelected}`;
+              }
+            } else if (isSelected) {
+              cardClass = `${styles.optionCard} ${styles.optionCardSelected}`;
+            }
+
+            // Dynamic styles for submitted state colors
+            let inlineCardStyle = {};
+            let inlineBadgeStyle = {};
+            let inlineTextStyle = {};
+
+            if (isSubmitted) {
+              if (isCorrectAnswer) {
+                inlineCardStyle = {
+                  borderColor: "#10b981",
+                  backgroundColor: "#e6f7ed"
+                };
+                inlineBadgeStyle = {
+                  backgroundColor: "#10b981",
+                  color: "#ffffff"
+                };
+                inlineTextStyle = {
+                  color: "#059669",
+                  fontWeight: "600"
+                };
+              } else if (isSelected) {
+                inlineCardStyle = {
+                  borderColor: "#ef4444",
+                  backgroundColor: "#fee2e2"
+                };
+                inlineBadgeStyle = {
+                  backgroundColor: "#ef4444",
+                  color: "#ffffff"
+                };
+                inlineTextStyle = {
+                  color: "#dc2626",
+                  fontWeight: "600"
+                };
+              } else {
+                inlineCardStyle = {
+                  opacity: 0.6,
+                  cursor: "not-allowed"
+                };
+              }
+            }
+
+            return (
+              <div
+                key={optKey}
+                className={cardClass}
+                style={inlineCardStyle}
+                onClick={() => handleOptionClick(q.number, optKey)}
+              >
+                <div className={styles.optionInner}>
+                  <div
+                    className={styles.optionLetterCircle}
+                    style={inlineBadgeStyle}
+                  >
+                    {optKey}
+                  </div>
+                  <p className={styles.optionText} style={inlineTextStyle} dangerouslySetInnerHTML={{ __html: optionText }} />
+
+                  {/* Icons for check/wrong in submitted mode */}
+                  {isSubmitted && isCorrectAnswer && (
+                    <CheckCircleOutlined style={{ color: "#10b981", fontSize: 18 }} />
+                  )}
+                  {isSubmitted && isSelected && !isCorrectAnswer && (
+                    <CloseCircleOutlined style={{ color: "#ef4444", fontSize: 18 }} />
+                  )}
+
+                  {/* Basic check icon in practice mode */}
+                  {!isSubmitted && isSelected && (
+                    <CheckOutlined className={styles.checkIcon} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {renderExplanationBox(q.number)}
+      </div>
+    );
+  };
 
 
   const handleGridItemClick = (qNumber: number) => {
@@ -541,183 +708,40 @@ export default function ProgressTest() {
 
           {/* Questions List */}
           <div className={styles.questionsList}>
-            {currentQuestions.map((q) => {
-              const userAns = answers[q.number] || "";
-
-              // RENDER PART 6 (GAP FILLING)
-              if (currentPart === 6) {
-                const targetAnswers = dynamicCorrectAnswers;
-                const correctVal = targetAnswers[q.number];
-                const correctList = Array.isArray(correctVal)
-                  ? correctVal
-                  : (correctVal ? [correctVal] : []);
-                const isCorrect = isQuestionCorrect(q.number);
-
-                let inputClass = styles.inlineGapInput;
-
-                if (isSubmitted) {
-                  if (isCorrect) {
-                    inputClass = `${styles.inlineGapInput} ${styles.inlineGapInputCorrect}`;
+            {(() => {
+              if (!isMultiPartTest) {
+                // Group by partTitle for dynamic exams
+                const groups: { title: string; questions: Question[] }[] = [];
+                let lastTitle = '';
+                for (const q of currentQuestions) {
+                  const t = (q as any).partTitle || '';
+                  if (t !== lastTitle) {
+                    groups.push({ title: t, questions: [q] });
+                    lastTitle = t;
                   } else {
-                    inputClass = `${styles.inlineGapInput} ${styles.inlineGapInputIncorrect}`;
+                    groups[groups.length - 1].questions.push(q);
                   }
                 }
-
-                // Split question text by the blank placeholder
-                const textParts = q.text.split("_____");
-                const beforeBlank = textParts[0];
-                const afterBlank = textParts[1];
-
-                return (
-                  <div
-                    key={q.number}
-                    id={`question-item-${q.number}`}
-                    className={styles.questionItem}
-                  >
-                    <div className={styles.questionTextContainer}>
-                      <div className={styles.questionNumberBadge}>{q.number}</div>
-                      <div className={styles.questionText}>
-                        <span dangerouslySetInnerHTML={{ __html: beforeBlank }} />
-                        <input
-                          type="text"
-                          className={inputClass}
-                          value={userAns}
-                          placeholder={isSubmitted ? "" : "..."}
-                          onChange={(e) => handleTextChange(q.number, e.target.value)}
-                          disabled={isSubmitted}
-                        />
-                        <span dangerouslySetInnerHTML={{ __html: afterBlank }} />
-                      </div>
-                    </div>
-
-                    {/* Display correct answer / feedback in review mode below the text */}
-                    {isSubmitted && !isCorrect && (
-                      <div className={styles.correctAnswerBelowText}>
-                        <CloseCircleOutlined style={{ color: "#ef4444" }} />
-                        <span>
-                          Đáp án đúng: <strong>{correctList.join(" / ")}</strong>
-                        </span>
+                return groups.map((group, gi) => (
+                  <div key={gi}>
+                    {group.title && (
+                      <div style={{
+                        margin: '20px 0 12px',
+                        padding: '10px 16px',
+                        background: 'linear-gradient(90deg,#1a56db11,#1a56db05)',
+                        borderLeft: '4px solid #1a56db',
+                        borderRadius: '0 8px 8px 0',
+                      }}>
+                        <span style={{ fontWeight: 700, fontSize: 15, color: '#1a56db' }}>{group.title}</span>
                       </div>
                     )}
-                    {isSubmitted && isCorrect && (
-                      <div className={styles.correctAnswerBelowText} style={{ color: "#10b981" }}>
-                        <CheckCircleOutlined style={{ color: "#10b981" }} />
-                        <span>Chính xác!</span>
-                      </div>
-                    )}
-                    {renderExplanationBox(q.number)}
+                    {group.questions.map((q) => renderQuestionItem(q))}
                   </div>
-                );
+                ));
               }
-
-              // RENDER PART 5 & PART 7 (MULTIPLE CHOICE)
-              const selectedOpt = userAns;
-              const correctOpt = dynamicCorrectAnswers[q.number] as string;
-
-              return (
-                <div
-                  key={q.number}
-                  id={`question-item-${q.number}`}
-                  className={styles.questionItem}
-                >
-                  <div className={styles.questionTextContainer}>
-                    <div className={styles.questionNumberBadge}>{q.number}</div>
-                    <div className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
-                  </div>
-
-                  <div className={styles.optionsContainer}>
-                    {q.options && (Object.keys(q.options) as Array<keyof typeof q.options>).map((optKey) => {
-                      const optionText = q.options![optKey];
-                      const isSelected = selectedOpt === optKey;
-                      const isCorrectAnswer = correctOpt === optKey;
-
-                      // Decide options styling based on submission state
-                      let cardClass = styles.optionCard;
-                      if (isSubmitted) {
-                        if (isCorrectAnswer) {
-                          cardClass = `${styles.optionCard} ${styles.optionCardSelected}`;
-                        }
-                      } else if (isSelected) {
-                        cardClass = `${styles.optionCard} ${styles.optionCardSelected}`;
-                      }
-
-                      // Dynamic styles for submitted state colors
-                      let inlineCardStyle = {};
-                      let inlineBadgeStyle = {};
-                      let inlineTextStyle = {};
-
-                      if (isSubmitted) {
-                        if (isCorrectAnswer) {
-                          inlineCardStyle = {
-                            borderColor: "#10b981",
-                            backgroundColor: "#e6f7ed"
-                          };
-                          inlineBadgeStyle = {
-                            backgroundColor: "#10b981",
-                            color: "#ffffff"
-                          };
-                          inlineTextStyle = {
-                            color: "#059669",
-                            fontWeight: "600"
-                          };
-                        } else if (isSelected) {
-                          inlineCardStyle = {
-                            borderColor: "#ef4444",
-                            backgroundColor: "#fee2e2"
-                          };
-                          inlineBadgeStyle = {
-                            backgroundColor: "#ef4444",
-                            color: "#ffffff"
-                          };
-                          inlineTextStyle = {
-                            color: "#dc2626",
-                            fontWeight: "600"
-                          };
-                        } else {
-                          inlineCardStyle = {
-                            opacity: 0.6,
-                            cursor: "not-allowed"
-                          };
-                        }
-                      }
-
-                      return (
-                        <div
-                          key={optKey}
-                          className={cardClass}
-                          style={inlineCardStyle}
-                          onClick={() => handleOptionClick(q.number, optKey)}
-                        >
-                          <div className={styles.optionInner}>
-                            <div
-                              className={styles.optionLetterCircle}
-                              style={inlineBadgeStyle}
-                            >
-                              {optKey}
-                            </div>
-                            <p className={styles.optionText} style={inlineTextStyle} dangerouslySetInnerHTML={{ __html: optionText }} />
-
-                            {/* Icons for check/wrong in submitted mode */}
-                            {isSubmitted && isCorrectAnswer && (
-                              <CheckCircleOutlined style={{ color: "#10b981", fontSize: 18 }} />
-                            )}
-                            {isSubmitted && isSelected && !isCorrectAnswer && (
-                              <CloseCircleOutlined style={{ color: "#ef4444", fontSize: 18 }} />
-                            )}
-
-                            {/* Basic check icon in practice mode */}
-                            {!isSubmitted && isSelected && (
-                              <CheckOutlined className={styles.checkIcon} />
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {renderExplanationBox(q.number)}
-                </div>
-              );
-            })}
+              // Multi-part: flat list
+              return currentQuestions.map((q) => renderQuestionItem(q));
+            })()}
           </div>
         </div>
       </div>

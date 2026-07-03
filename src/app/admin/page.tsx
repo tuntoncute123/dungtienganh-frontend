@@ -159,6 +159,8 @@ export default function AdminPage() {
 
   // Upload helpers
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [importDocxLoading, setImportDocxLoading] = useState(false);
+  const [importDocxInfo, setImportDocxInfo] = useState<string | null>(null);
 
   // Forms
   const [lessonForm] = Form.useForm();
@@ -2116,6 +2118,65 @@ export default function AdminPage() {
             </Col>
           </Row>
 
+          {/* ── Import từ file Word ─────────────────────────────── */}
+          <div style={{ border: "1px dashed #35a873", borderRadius: 8, padding: "12px 16px", background: "#f0fdf4", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <span style={{ fontWeight: 600, color: "#166534", fontSize: 13 }}>📄 Import câu hỏi từ file Word (.docx)</span>
+              <Upload
+                accept=".docx"
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  setImportDocxLoading(true);
+                  setImportDocxInfo(null);
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    const res = await fetch(`${API_BASE_URL}/api/exams/import-docx`, {
+                      method: "POST",
+                      body: formData,
+                    });
+                    if (!res.ok) {
+                      const err = await res.json();
+                      msg.error(err.message || "Không thể đọc file Word");
+                      return false;
+                    }
+                    const data = await res.json();
+                    const { questions: parsedQs, totalQuestions, part1Count, part2Count, part3Count } = data;
+                    const mapped = parsedQs.map((q: any) => {
+                      const isGapFill = q.qType === "gap-filling";
+                      return {
+                        number: q.number,
+                        qType: q.qType,
+                        text: q.text,
+                        options: isGapFill ? { A: "", B: "", C: "", D: "" } : q.options,
+                        correctAnswer: isGapFill ? undefined : q.correctAnswer,
+                        correctAnswers: isGapFill ? [q.correctAnswer] : [""],
+                        explanation: q.explanation || "",
+                        partTitle: q.partTitle || "",
+                      };
+                    });
+                    examForm.setFieldsValue({ questions: mapped });
+                    setImportDocxInfo(`✅ Đã import ${totalQuestions} câu (Part1: ${part1Count}, Part2: ${part2Count}, Part3: ${part3Count}). Kiểm tra & chỉnh sửa trước khi lưu.`);
+                    msg.success(`Import thành công ${totalQuestions} câu hỏi từ file Word!`);
+                  } catch {
+                    msg.error("Lỗi khi xử lý file Word");
+                  } finally {
+                    setImportDocxLoading(false);
+                  }
+                  return false;
+                }}
+              >
+                <Button icon={<UploadOutlined />} loading={importDocxLoading} size="small" style={{ borderColor: "#35a873", color: "#35a873" }}>
+                  Chọn file .docx
+                </Button>
+              </Upload>
+              {importDocxInfo && <span style={{ fontSize: 12, color: "#15803d" }}>{importDocxInfo}</span>}
+            </div>
+            <div style={{ fontSize: 11, color: "#4ade80", marginTop: 6 }}>
+              Quy ước: Part 1/3 — in đậm chữ cái đáp án đúng (A/B/C/D). Part 2 — in đậm từ cần điền. Thêm dòng <em>&quot;Giải thích: ...&quot;</em> sau mỗi câu để tự động điền lời giải.
+            </div>
+          </div>
+
           <Form.List name="questions">
             {(fields, { add, remove }) => (
               <Card size="small" title="Ngân hàng câu hỏi trắc nghiệm" extra={<Button type="dashed" onClick={() => add({ number: fields.length + 1, options: { A: "", B: "", C: "", D: "" }, correctAnswers: [""] })} icon={<PlusOutlined />}>Thêm câu hỏi</Button>}>
@@ -2123,12 +2184,12 @@ export default function AdminPage() {
                   {fields.map(({ key, name, ...restField }) => (
                     <Card key={key} size="small" style={{ marginBottom: 12, border: "1px solid #ebf0f4" }} extra={<Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>Xóa câu</Button>}>
                       <Row gutter={8}>
-                        <Col xs={24} sm={4} md={3}>
+                        <Col xs={24} sm={3} md={2}>
                           <Form.Item {...restField} name={[name, "number"]} label="Câu số" rules={[{ required: true }]}>
                             <InputNumber style={{ width: "100%" }} />
                           </Form.Item>
                         </Col>
-                        <Col xs={24} sm={6} md={5}>
+                        <Col xs={24} sm={5} md={4}>
                           <Form.Item {...restField} name={[name, "qType"]} label="Loại câu hỏi" initialValue="multiple-choice" rules={[{ required: true }]}>
                             <Select>
                               <Option value="multiple-choice">Trắc nghiệm</Option>
@@ -2136,7 +2197,12 @@ export default function AdminPage() {
                             </Select>
                           </Form.Item>
                         </Col>
-                        <Col xs={24} sm={14} md={16}>
+                        <Col xs={24} sm={6} md={5}>
+                          <Form.Item {...restField} name={[name, "partTitle"]} label="Tiêu đề phần (Bài tập)">
+                            <Input placeholder="Ví dụ: Bài tập 1: Chia động từ" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={10} md={13}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
                             <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
