@@ -262,8 +262,8 @@ export default function SchoolExamsPage() {
                               }}
                             >
                               {/* Hot badge */}
-                              {exam.isHot && exam.hotIcon && (
-                                <img className="icon-hot" src={exam.hotIcon} alt="Hot" />
+                              {exam.isHot && (
+                                <div className="icon-hot-badge">HOT</div>
                               )}
 
                               {/* Year badge overlay */}

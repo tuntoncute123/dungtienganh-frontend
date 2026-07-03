@@ -286,12 +286,8 @@ export default function PracticePage() {
                               }}
                             >
                               {/* Hot Tag badge */}
-                              {test.isHot && test.hotIcon && (
-                                <img
-                                  className="icon-hot"
-                                  src={test.hotIcon}
-                                  alt="Hot"
-                                />
+                              {test.isHot && (
+                                <div className="icon-hot-badge">HOT</div>
                               )}
 
                               {/* Thumbnail Area */}

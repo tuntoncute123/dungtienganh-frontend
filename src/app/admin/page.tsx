@@ -856,6 +856,12 @@ export default function AdminPage() {
         title: values.title,
         category: values.category,
         duration: parseInt(values.duration as any) || 60,
+        source: values.source || "",
+        province: values.province || "",
+        year: values.year !== undefined && values.year !== null ? parseInt(values.year as any) : undefined,
+        region: values.region || "all",
+        difficulty: values.difficulty || "Trung bình",
+        thumbnail: values.thumbnail || "",
         questions: processedQuestions,
         id: isEdit ? editingExam.id : undefined
       };
@@ -2048,6 +2054,64 @@ export default function AdminPage() {
             <Col xs={24} sm={10} md={4}>
               <Form.Item name="duration" label="Thời gian (phút)" rules={[{ required: true, message: "Nhập số phút" }]}>
                 <InputNumber min={5} max={180} style={{ width: "100%" }} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={12} md={8}>
+              <Form.Item name="source" label="Trường / Sở phát hành">
+                <Input placeholder="Ví dụ: Sở GD&ĐT Hà Nội, THPT Chuyên" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <Form.Item name="province" label="Tỉnh / Thành phố">
+                <Input placeholder="Ví dụ: Hà Nội, Toàn quốc" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={4}>
+              <Form.Item name="year" label="Năm dự thi">
+                <InputNumber min={2020} max={2030} style={{ width: "100%" }} placeholder="2026" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={4}>
+              <Form.Item name="region" label="Khu vực (Miền)" initialValue="all">
+                <Select>
+                  <Option value="all">Toàn quốc / Khác</Option>
+                  <Option value="mien-bac">Miền Bắc</Option>
+                  <Option value="mien-trung">Miền Trung</Option>
+                  <Option value="mien-nam">Miền Nam</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col xs={24} sm={12} md={6}>
+              <Form.Item name="difficulty" label="Độ khó" initialValue="Trung bình">
+                <Select>
+                  <Option value="Dễ">Dễ</Option>
+                  <Option value="Trung bình">Trung bình</Option>
+                  <Option value="Khó">Khó</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={12} md={18}>
+              <Form.Item name="thumbnail" label="Ảnh thu nhỏ (Thumbnail URL)">
+                <Input.Group compact>
+                  <Form.Item name="thumbnail" noStyle>
+                    <Input style={{ width: "calc(100% - 110px)" }} placeholder="Tải ảnh lên hoặc nhập URL" />
+                  </Form.Item>
+                  <Upload
+                    beforeUpload={(file) => {
+                      handleUpload(file, "exams/thumbnails", (url) => examForm.setFieldsValue({ thumbnail: url }));
+                      return false;
+                    }}
+                    showUploadList={false}
+                  >
+                    <Button icon={<UploadOutlined />} style={{ width: 110 }}>Tải lên</Button>
+                  </Upload>
+                </Input.Group>
               </Form.Item>
             </Col>
           </Row>

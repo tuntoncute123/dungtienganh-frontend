@@ -389,12 +389,7 @@ export default function MyCoursesPage() {
                           >
                             {/* Hot Tag badge */}
                             {course.is_hot && (
-                              <img
-                                loading="lazy"
-                                className="icon-hot"
-                                src={course.hot_icon}
-                                alt="Hot"
-                              />
+                              <div className="icon-hot-badge">HOT</div>
                             )}
 
                             {/* Thumbnail Area */}

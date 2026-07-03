@@ -2339,10 +2339,30 @@ body {
 .icon-hot {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   height: 40px;
   width: auto;
   z-index: 10;
+  pointer-events: none;
+  transform: rotate(90deg);
+}
+
+.icon-hot-badge {
+  position: absolute;
+  top: 14px;
+  right: -28px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100px;
+  padding: 4px 0;
+  transform: rotate(45deg);
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 1px;
   pointer-events: none;
 }
 
