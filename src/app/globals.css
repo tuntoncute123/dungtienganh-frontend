@@ -2221,19 +2221,22 @@ body {
 }
 
 @media (max-width: 767px) {
+  .list-test__header-title {
+    width: 100%;
+  }
+
   .tabs-navigation {
-    margin: 0 auto;
-    width: fit-content;
-    justify-content: center;
+    width: 100%;
     overflow-x: auto;
     white-space: nowrap;
     padding: 6px;
     -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    margin: 0;
   }
 
   .tabs-navigation::-webkit-scrollbar {
     display: none;
-    /* Hide scrollbar for clean mobile tabs */
   }
 }
 
