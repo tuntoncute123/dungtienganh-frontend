@@ -242,7 +242,7 @@ export default function MyCoursesPage() {
         const user = JSON.parse(userStr);
         setAllowedCourses(user.allowedCourses || []);
         setRole(user.role || "student");
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const fetchUserAndSync = async () => {
@@ -525,7 +525,7 @@ export default function MyCoursesPage() {
                                   </span>
                                 )}
                               </div>
-                              <button 
+                              <button
                                 className="btn card-course__cta"
                                 onClick={(e) => {
                                   e.preventDefault();
@@ -533,7 +533,7 @@ export default function MyCoursesPage() {
                                   router.push(`/lesson?courseId=${course.id}`);
                                 }}
                               >
-                                Học thử ngay
+                                Học ngay
                               </button>
                             </div>
                           </a>

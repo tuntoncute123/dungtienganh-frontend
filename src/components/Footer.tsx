@@ -24,11 +24,10 @@ export default function Footer() {
           <Col xs={24} sm={24} md={12} lg={8} className="footer-brand-col">
             <div className="footer-logo-wrapper">
               <img src="/logo.png?v=2" alt="TeacherDung Logo" className="footer-logo" />
-              <span className="footer-brand-name">TeacherDung</span>
+              <span className="footer-brand-name">Dung Tiếng Anh</span>
             </div>
             <p className="footer-slogan">
-              Nền tảng học tiếng Anh trực tuyến hàng đầu. Đồng hành cùng bạn trên con đường chinh phục TOEIC và giao tiếp tự tin.
-            </p>
+              Học ngữ pháp chắc – Tích lũy từ vựng nhanh – Tự tin đạt điểm cao trong các bài kiểm tra và kỳ thi tiếng Anh.            </p>
             <div className="footer-social-links">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon-btn facebook" title="Facebook Cô Dung">
                 <FacebookOutlined />

@@ -43,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "flashcard",
-    label: "Flash Card",
+    label: "FlashCards",
     icon: <ThunderboltOutlined />,
   },
   {
@@ -98,7 +98,7 @@ export default function AppSidebar({ activeKey = "home" }: AppSidebarProps) {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
         {NAV_ITEMS.map((item) => {
           const isActive = item.key === activeKey;
-          
+
           if (item.key === "reading") {
             return (
               <ReadingSidebarItem key={item.key} item={item} isActive={isActive} />
