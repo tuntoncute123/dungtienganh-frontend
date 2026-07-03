@@ -101,7 +101,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         }
       });
       if (res.ok) {
-        setNotifications(prev => 
+        setNotifications(prev =>
           prev.map(n => n.id === id ? { ...n, isRead: true } : n)
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -150,7 +150,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         <span style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>Thông báo ({unreadCount} chưa đọc)</span>
         <Button type="link" size="small" style={{ padding: 0, fontSize: 11 }} onClick={fetchNotifications}>Làm mới</Button>
       </div>
-      
+
       <div style={{ maxHeight: 300, overflowY: "auto", marginTop: 8 }}>
         {notifLoading && notifications.length === 0 ? (
           <div style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>Đang tải...</div>
@@ -158,11 +158,11 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
           <div style={{ padding: "24px 0", textAlign: "center", color: "#64748b" }}>Bạn không có thông báo nào.</div>
         ) : (
           notifications.map((n) => (
-            <div 
-              key={n.id} 
-              style={{ 
-                padding: "10px 8px", 
-                borderBottom: "1px solid #f8fafc", 
+            <div
+              key={n.id}
+              style={{
+                padding: "10px 8px",
+                borderBottom: "1px solid #f8fafc",
                 backgroundColor: n.isRead ? "transparent" : "#f0f7ff",
                 position: "relative",
                 display: "flex",
@@ -174,25 +174,25 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
               onClick={(e) => !n.isRead && handleMarkAsRead(n.id, e as any)}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: 24 }}>
-                <span style={{ 
-                  fontWeight: n.isRead ? 600 : 800, 
-                  fontSize: 12, 
-                  color: n.isRead ? "#475569" : "#0f172a" 
+                <span style={{
+                  fontWeight: n.isRead ? 600 : 800,
+                  fontSize: 12,
+                  color: n.isRead ? "#475569" : "#0f172a"
                 }}>
-                  <span style={{ 
-                    display: "inline-block", 
-                    width: 6, 
-                    height: 6, 
-                    borderRadius: "50%", 
+                  <span style={{
+                    display: "inline-block",
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
                     backgroundColor: getTagColor(n.type),
                     marginRight: 6,
                     verticalAlign: "middle"
                   }} />
                   {n.title}
                 </span>
-                
-                <span 
-                  style={{ 
+
+                <span
+                  style={{
                     position: "absolute",
                     top: 10,
                     right: 8,
@@ -207,11 +207,11 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
                   ✕
                 </span>
               </div>
-              
+
               <div style={{ fontSize: 11, color: "#475569", paddingLeft: 12 }}>
                 {n.content}
               </div>
-              
+
               <div style={{ fontSize: 10, color: "#94a3b8", paddingLeft: 12 }}>
                 {new Date(n.createdAt).toLocaleDateString("vi-VN", {
                   hour: "2-digit",
@@ -232,7 +232,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         const user = JSON.parse(userStr);
         setUserName(user.name || user.username);
         setRole(user.role);
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -275,9 +275,9 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
     <div className="streak-dropdown-container">
       {/* 3D Fire icon */}
       <div className="streak-fire-wrapper">
-        <img 
-          src="https://g-static-assets.prepcdn.com/learning-web-app/v20260626.0810-6b85ce86/_nuxt/692b2b15_6b85ce86_20260626.0810.png" 
-          alt="fire icon" 
+        <img
+          src="https://g-static-assets.prepcdn.com/learning-web-app/v20260626.0810-6b85ce86/_nuxt/692b2b15_6b85ce86_20260626.0810.png"
+          alt="fire icon"
           className="streak-fire-img"
         />
       </div>
@@ -338,8 +338,8 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
       </div>
 
       {/* Share button */}
-      <Button 
-        type="primary" 
+      <Button
+        type="primary"
         className="streak-share-btn"
         onClick={() => {
           setPopoverOpen(false);
@@ -366,9 +366,9 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         </button>
 
         {/* Logo */}
-        <Link href="/" style={{ display: "block", marginLeft: 16, cursor: "pointer" }}>
-          <div style={{ overflow: "hidden", height: 30, flexShrink: 0 }}>
-            <img src={ICONS.logo} alt="logo-prep" className="logo-img" />
+        <Link href="/" style={{ display: "block", marginLeft: 16, cursor: "pointer", height: 64 }}>
+          <div style={{ display: "flex", alignItems: "center", height: 64, overflow: "hidden", flexShrink: 0 }}>
+            <img src={ICONS.logo} alt="logo-prep" className="logo-img" style={{ height: 48, objectFit: "contain" }} />
           </div>
         </Link>
       </div>
@@ -433,7 +433,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
           <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: "#1e293b" }}>
             Chia sẻ thành tích
           </h3>
-          
+
           {/* Card Preview */}
           <div className="streak-share-card-preview">
             <img src={ICONS.logo} alt="logo" className="streak-share-logo" />
@@ -443,26 +443,26 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
               <div className="streak-share-badge-tag">
                 {streakCount >= 100 ? "Huy hiệu Vàng 🥇" : streakCount >= 50 ? "Huy hiệu Bạc 🥈" : "Huy hiệu Đồng 🥉"}
               </div>
-              
+
               <div className="streak-share-count-number">{streakCount}</div>
               <div className="streak-share-count-label">Ngày Học Liên Tiếp 🔥</div>
-              
+
               <p className="streak-share-footer-text">
                 "Giữ chuỗi thật lâu, hiểu biết thêm sâu"
               </p>
             </div>
           </div>
 
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             loading={sharing}
             onClick={handleShareStory}
-            style={{ 
-              width: "100%", 
-              height: 40, 
-              borderRadius: 20, 
-              fontWeight: 700, 
-              background: "linear-gradient(135deg, #ff9305 0%, #ff5e00 100%)", 
+            style={{
+              width: "100%",
+              height: 40,
+              borderRadius: 20,
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #ff9305 0%, #ff5e00 100%)",
               border: "none",
               boxShadow: "0 4px 10px rgba(255, 94, 0, 0.2)"
             }}
