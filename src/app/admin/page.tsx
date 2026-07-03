@@ -690,7 +690,9 @@ export default function AdminPage() {
           text: q.text || "",
           options: isGapFilling ? {} : (q.options || {}),
           correctAnswer: answerStr,
-          explanation: q.explanation || null
+          explanation: q.explanation || null,
+          qType: q.qType || (isGapFilling ? "gap-filling" : "multiple-choice"),
+          partTitle: q.partTitle || null
         };
       });
 
@@ -850,7 +852,9 @@ export default function AdminPage() {
           text: q.text || "",
           options: isGapFilling ? {} : (q.options || {}),
           correctAnswer: answerStr,
-          explanation: q.explanation || null
+          explanation: q.explanation || null,
+          qType: q.qType || (isGapFilling ? "gap-filling" : "multiple-choice"),
+          partTitle: q.partTitle || null
         };
       });
 
@@ -2268,7 +2272,7 @@ export default function AdminPage() {
                                 ) : (
                                   <>
                                     <Col xs={24} sm={12} md={10}>
-                                      <Form.List name={[name, "correctAnswers"]} initialValue={[""]}>
+                                      <Form.List name={[name, "correctAnswers"]}>
                                         {(answerFields, { add: addAns, remove: removeAns }) => (
                                           <div>
                                             <label style={{ display: 'block', marginBottom: 8, fontWeight: 500, color: 'rgba(0, 0, 0, 0.88)' }}>
