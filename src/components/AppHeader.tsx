@@ -368,7 +368,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         {/* Logo */}
         <Link href="/" style={{ display: "block", marginLeft: 16, cursor: "pointer", height: 64 }}>
           <div style={{ display: "flex", alignItems: "center", height: 64, overflow: "hidden", flexShrink: 0 }}>
-            <img src={ICONS.logo} alt="logo-prep" className="logo-img" style={{ height: 48, objectFit: "contain" }} />
+            <img src={ICONS.logo} alt="logo-prep" className="logo-img" style={{ height: 54, objectFit: "contain" }} />
           </div>
         </Link>
       </div>
