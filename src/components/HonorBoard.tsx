@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 const STATS = [
   { value: 1, label: "Thủ khoa Toàn Quốc", color: "#f59e0b", bg: "#fef3c7", hideOnMobile: true },
-  { value: 15, label: "Thủ khoa Tỉnh / Thành phố", color: "#0071f9", bg: "#e1effe", hideOnMobile: true },
+  { value: 15, label: "Thủ khoa Tỉnh / Thành phố", color: "#35a873", bg: "#ebf7ee", hideOnMobile: true },
   { value: 10, label: "Á khoa Tỉnh / Thành phố", color: "#7c3aed", bg: "#ede9fe", hideOnMobile: true },
   { value: 27, label: "Điểm 10 Tuyệt đối", color: "#059669", bg: "#d1fae5", hideOnMobile: false },
   { value: "2.348+", label: "Điểm 9.0 – 9.8", color: "#e20d2c", bg: "#fee2e2", hideOnMobile: false },

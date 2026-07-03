@@ -61,7 +61,7 @@
 
 .progressBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #0071f9, #3b82f6);
+  background: linear-gradient(90deg, #35a873, #3b82f6);
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -99,7 +99,7 @@
   min-width: 24px;
   height: 24px;
   background: #eff6ff;
-  color: #0071f9;
+  color: #35a873;
   font-weight: 700;
   font-size: 12px;
   border-radius: 50%;
@@ -147,7 +147,7 @@
 }
 
 .optionSelected {
-  border-color: #0071f9;
+  border-color: #35a873;
   background: #eff6ff;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .optionSelected .optionLetter {
-  background: #0071f9;
+  background: #35a873;
   color: #ffffff;
 }
 
@@ -247,8 +247,8 @@
 }
 
 .gapInput:focus {
-  border-color: #0071f9;
-  box-shadow: 0 0 0 3px rgba(0, 113, 249, 0.15);
+  border-color: #35a873;
+  box-shadow: 0 0 0 3px rgba(53, 168, 115, 0.15);
 }
 
 .gapInputCorrect {
@@ -410,13 +410,13 @@
 }
 
 .btnPrimary {
-  background: #0071f9;
+  background: #35a873;
   color: #ffffff;
 }
 
 .btnPrimary:hover {
   background: #005ec2;
-  box-shadow: 0 4px 12px rgba(0, 113, 249, 0.2);
+  box-shadow: 0 4px 12px rgba(53, 168, 115, 0.2);
 }
 
 .btnSecondary {

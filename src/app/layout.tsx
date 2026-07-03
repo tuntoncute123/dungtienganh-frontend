@@ -71,7 +71,7 @@ export default function RootLayout({
           <ConfigProvider
             theme={{
               token: {
-                colorPrimary: "#0071f9",
+                colorPrimary: "#35a873",
                 fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                 borderRadius: 12,
               },
@@ -84,8 +84,8 @@ export default function RootLayout({
                 },
                 Menu: {
                   itemBorderRadius: 16,
-                  itemSelectedBg: "#edf7ff",
-                  itemSelectedColor: "#0071f9",
+                  itemSelectedBg: "#e6f6ec",
+                  itemSelectedColor: "#35a873",
                   itemHeight: 56,
                 },
               },

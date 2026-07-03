@@ -13,7 +13,7 @@ const { useBreakpoint } = Grid;
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const DEFAULT_AVATAR = (name: string) =>
-  `https://ui-avatars.com/api/?background=e1effe&color=0071f9&size=70&name=${encodeURIComponent(
+  `https://ui-avatars.com/api/?background=e1effe&color=35a873&size=70&name=${encodeURIComponent(
     name ? name.split(" ").slice(-1)[0] : "U"
   )}`;
 
@@ -264,7 +264,7 @@ function StoryPageContent() {
                           height="18"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="#0071f9"
+                          stroke="#35a873"
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"

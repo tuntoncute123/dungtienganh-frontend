@@ -254,7 +254,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
       <div className={styles.headerRow}>
         <div>
           <h3 className={styles.title}>
-            <FormOutlined style={{ color: "#0071f9" }} />
+            <FormOutlined style={{ color: "#35a873" }} />
             {exam.title}
           </h3>
           <p className={styles.subtitle}>Thời gian đề xuất: {exam.duration} phút</p>
@@ -363,7 +363,7 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                           <CloseCircleOutlined style={{ color: "#ef4444", fontSize: 16 }} />
                         )}
                         {!isSubmitted && isSelected && (
-                          <CheckOutlined style={{ color: "#0071f9", fontSize: 14 }} />
+                          <CheckOutlined style={{ color: "#35a873", fontSize: 14 }} />
                         )}
                       </div>
                     );

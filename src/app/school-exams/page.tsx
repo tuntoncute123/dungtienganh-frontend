@@ -59,7 +59,7 @@ const REGION_TABS = [
 ];
 
 const REGION_COLOR_MAP: Record<string, { bg: string; color: string }> = {
-  "mien-bac": { bg: "#e6f4ff", color: "#0071f9" },
+  "mien-bac": { bg: "#e6f4ff", color: "#35a873" },
   "mien-trung": { bg: "#fff7e6", color: "#d46b08" },
   "mien-nam": { bg: "#f6ffed", color: "#389e0d" },
 };

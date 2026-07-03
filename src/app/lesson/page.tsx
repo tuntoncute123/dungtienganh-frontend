@@ -226,7 +226,7 @@ function LessonPageContent() {
                         <button
                           onClick={scrollToPractice}
                           className="lp-homework-task-btn"
-                          style={{ background: "#0071f9", color: "#ffffff", borderColor: "#0071f9", fontWeight: "600" }}
+                          style={{ background: "#35a873", color: "#ffffff", borderColor: "#35a873", fontWeight: "600" }}
                         >
                           📝&nbsp;&nbsp;Làm bài tập ôn luyện đính kèm
                         </button>
@@ -385,7 +385,7 @@ function LessonPageContent() {
                             borderRadius: 20, 
                             borderColor: "#cbd5e1", 
                             fontWeight: 600, 
-                            color: "#0071f9", 
+                            color: "#35a873", 
                             background: "#eff6ff",
                             display: "flex",
                             alignItems: "center",
@@ -422,7 +422,7 @@ function LessonPageContent() {
                         </div>
                         {lesson.documents.map((doc: any, idx: number) => (
                           <div key={idx} style={{ display: "flex", alignItems: "center", background: "#f8fafc", padding: "12px 16px", borderRadius: 8, border: "1px solid #f1f5f9", width: "100%", justifyContent: "space-between", marginBottom: idx < lesson.documents.length - 1 ? 8 : 0 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#0071f9", cursor: "pointer", fontWeight: 500 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#35a873", cursor: "pointer", fontWeight: 500 }}>
                               <span style={{ textDecoration: "underline", fontSize: 14 }}>
                                 {doc.name}
                               </span>

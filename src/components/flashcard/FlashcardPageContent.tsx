@@ -630,7 +630,7 @@ export default function FlashcardPageContent() {
                 style={{ 
                   width: `${(score / quizQuestions.length) * 100}%`, 
                   height: "100%", 
-                  backgroundColor: score === quizQuestions.length ? "#22c55e" : "#3b82f6" 
+                  backgroundColor: score === quizQuestions.length ? "#22c55e" : "#35a873" 
                 }}
               ></div>
             </div>

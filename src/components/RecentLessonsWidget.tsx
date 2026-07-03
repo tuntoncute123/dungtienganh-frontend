@@ -64,7 +64,7 @@ export default function RecentLessonsWidget() {
         <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1c2a4c", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 20 }}>📖</span> Bài học đang học của bạn
         </h3>
-        <span style={{ fontSize: 13, color: "#0071f9", fontWeight: 600 }}>Tiếp tục học dở dang</span>
+        <span style={{ fontSize: 13, color: "#35a873", fontWeight: 600 }}>Tiếp tục học dở dang</span>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -83,7 +83,7 @@ export default function RecentLessonsWidget() {
                 style={{
                   padding: "16px 20px",
                   borderRadius: 16,
-                  border: "1px solid rgba(0, 113, 249, 0.08)",
+                  border: "1px solid rgba(53, 168, 115, 0.08)",
                   background: "linear-gradient(135deg, #ffffff 0%, #fbfdff 100%)",
                   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
                   transition: "all 0.3s ease",
@@ -97,8 +97,8 @@ export default function RecentLessonsWidget() {
                         style={{
                           fontSize: 11,
                           fontWeight: 700,
-                          color: "#0071f9",
-                          background: "rgba(0, 113, 249, 0.06)",
+                          color: "#35a873",
+                          background: "rgba(53, 168, 115, 0.06)",
                           padding: "2px 8px",
                           borderRadius: 8,
                         }}
@@ -120,7 +120,7 @@ export default function RecentLessonsWidget() {
                         <Progress
                           percent={lesson.progressPercent}
                           size="small"
-                          strokeColor="#0071f9"
+                          strokeColor="#35a873"
                           trailColor="#f1f5f9"
                           showInfo={false}
                         />
@@ -136,13 +136,13 @@ export default function RecentLessonsWidget() {
                       display: "flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#0071f9",
+                      background: "#35a873",
                       color: "#ffffff",
                       padding: "8px 18px",
                       borderRadius: 24,
                       fontWeight: 600,
                       fontSize: 14,
-                      boxShadow: "0 4px 12px rgba(0, 113, 249, 0.2)",
+                      boxShadow: "0 4px 12px rgba(53, 168, 115, 0.2)",
                     }}
                   >
                     <PlayCircleOutlined style={{ fontSize: 18 }} />

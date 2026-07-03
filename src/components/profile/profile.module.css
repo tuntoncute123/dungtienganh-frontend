@@ -942,8 +942,8 @@
   width: 100%;
   border-radius: 10px;
   padding: 10px 10px 2px 10px;
-  background-color: #edf7ff; /* bg-primary2 */
-  color: #0071f9; /* text-primary1 */
+  background-color: #e6f6ec; /* bg-primary2 */
+  color: #35a873; /* text-primary1 */
 }
 
 @media (min-width: 768px) {

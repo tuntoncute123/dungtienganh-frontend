@@ -38,8 +38,27 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [streakCount, setStreakCount] = useState<number>(0);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  const fetchStreak = async () => {
+    const token = localStorage.getItem("teacherdung_token");
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/streak`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStreakCount(data.streakCount || 0);
+      }
+    } catch (e) {
+      console.error("Error fetching streak:", e);
+    }
+  };
 
   const fetchNotifications = async () => {
     const token = localStorage.getItem("teacherdung_token");
@@ -65,6 +84,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
 
   useEffect(() => {
     fetchNotifications();
+    fetchStreak();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -231,7 +251,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
       <hr style={{ border: 0, borderTop: "1px solid #f1f5f9", margin: "4px 0" }} />
       {role === "admin" && (
         <Link href="/admin">
-          <Button type="link" size="small" style={{ padding: 0, textAlign: "left", width: "100%", color: "#0071f9" }}>
+          <Button type="link" size="small" style={{ padding: 0, textAlign: "left", width: "100%", color: "#35a873" }}>
             Trang quản trị
           </Button>
         </Link>
@@ -262,7 +282,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         />
       </div>
 
-      <h2 className="streak-count-title">22 Ngày Liên Tiếp</h2>
+      <h2 className="streak-count-title">{streakCount} Ngày Liên Tiếp</h2>
       <p className="streak-sub-title">Giữ chuỗi thật lâu, hiểu biết thêm sâu</p>
 
       {/* Rules */}
@@ -285,28 +305,34 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
       <div className="streak-milestones-section">
         <div className="streak-milestones-title">Cột mốc huy hiệu</div>
         <div className="streak-badges-grid">
-          {/* Milestone 10: Unlocked */}
-          <div className="streak-badge-card unlocked">
+          {/* Milestone 10: Unlocked if streakCount >= 10 */}
+          <div className={`streak-badge-card ${streakCount >= 10 ? "unlocked" : "locked"}`}>
             <span className="streak-badge-icon">🥉</span>
             <span className="streak-badge-target">10 Ngày</span>
-            <span className="streak-badge-status">Đã đạt</span>
-            <span className="streak-lock-status-dot">✅</span>
+            <span className="streak-badge-status">
+              {streakCount >= 10 ? "Đã đạt" : `${streakCount}/10 ngày`}
+            </span>
+            <span className="streak-lock-status-dot">{streakCount >= 10 ? "✅" : "🔒"}</span>
           </div>
 
-          {/* Milestone 50: Locked */}
-          <div className="streak-badge-card locked">
+          {/* Milestone 50: Unlocked if streakCount >= 50 */}
+          <div className={`streak-badge-card ${streakCount >= 50 ? "unlocked" : "locked"}`}>
             <span className="streak-badge-icon">🥈</span>
             <span className="streak-badge-target">50 Ngày</span>
-            <span className="streak-badge-status">22/50 ngày</span>
-            <span className="streak-lock-status-dot">🔒</span>
+            <span className="streak-badge-status">
+              {streakCount >= 50 ? "Đã đạt" : `${streakCount}/50 ngày`}
+            </span>
+            <span className="streak-lock-status-dot">{streakCount >= 50 ? "✅" : "🔒"}</span>
           </div>
 
-          {/* Milestone 100: Locked */}
-          <div className="streak-badge-card locked">
+          {/* Milestone 100: Unlocked if streakCount >= 100 */}
+          <div className={`streak-badge-card ${streakCount >= 100 ? "unlocked" : "locked"}`}>
             <span className="streak-badge-icon">🥇</span>
             <span className="streak-badge-target">100 Ngày</span>
-            <span className="streak-badge-status">22/100 ngày</span>
-            <span className="streak-lock-status-dot">🔒</span>
+            <span className="streak-badge-status">
+              {streakCount >= 100 ? "Đã đạt" : `${streakCount}/100 ngày`}
+            </span>
+            <span className="streak-lock-status-dot">{streakCount >= 100 ? "✅" : "🔒"}</span>
           </div>
         </div>
       </div>
@@ -414,9 +440,11 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
             <div style={{ position: "relative", zIndex: 2 }}>
               <img src={ICONS.avatar} alt="avatar" className="streak-share-avatar" />
               <h4 className="streak-share-username">{userName}</h4>
-              <div className="streak-share-badge-tag">Huy hiệu Đồng 🥉</div>
+              <div className="streak-share-badge-tag">
+                {streakCount >= 100 ? "Huy hiệu Vàng 🥇" : streakCount >= 50 ? "Huy hiệu Bạc 🥈" : "Huy hiệu Đồng 🥉"}
+              </div>
               
-              <div className="streak-share-count-number">22</div>
+              <div className="streak-share-count-number">{streakCount}</div>
               <div className="streak-share-count-label">Ngày Học Liên Tiếp 🔥</div>
               
               <p className="streak-share-footer-text">

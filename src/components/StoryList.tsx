@@ -8,7 +8,7 @@ import { STORIES, Story } from "@/data/stories";
 
 /* ── Static data (from outerHTML) ───────────── */
 
-const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=e1effe&color=0071f9&size=70&name=";
+const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=e1effe&color=35a873&size=70&name=";
 
 /* ── Sub-components ─────────────────────────── */
 

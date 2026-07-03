@@ -17,7 +17,7 @@ interface FlashcardDeckCardProps {
 
 // Map category to styling colors
 const categoryConfig = {
-  vocabulary: { color: "#4285f4", bg: "#e8f0fe" },
+  vocabulary: { color: "#35a873", bg: "#e6f6ec" },
   idiom: { color: "#ea4335", bg: "#fce8e6" },
   phrasal_verb: { color: "#ff2d57", bg: "#ffebee" },
   collocation: { color: "#34a853", bg: "#e6f4ea" },

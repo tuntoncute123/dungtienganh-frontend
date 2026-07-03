@@ -14,7 +14,7 @@ interface FlashcardFiltersProps {
 
 const categories = [
   { key: null, label: "Tất cả", color: "#64748b" },
-  { key: "vocabulary", label: "Từ vựng", color: "#4285f4" },
+  { key: "vocabulary", label: "Từ vựng", color: "#35a873" },
   { key: "idiom", label: "Thành ngữ", color: "#ea4335" },
   { key: "phrasal_verb", label: "Cụm động từ", color: "#ff2d57" },
   { key: "collocation", label: "Kết hợp từ", color: "#34a853" },

@@ -322,8 +322,8 @@ export default function PracticePage() {
                                     <span
                                       style={{
                                         fontSize: "11px",
-                                        background: test.category === "ielts" ? "#edf7ff" : test.category === "toeic" ? "#fff2e8" : "#f6ffed",
-                                        color: test.category === "ielts" ? "#0071f9" : test.category === "toeic" ? "#d4380d" : "#389e0d",
+                                        background: test.category === "ielts" ? "#e6f6ec" : test.category === "toeic" ? "#fff2e8" : "#f6ffed",
+                                        color: test.category === "ielts" ? "#35a873" : test.category === "toeic" ? "#d4380d" : "#389e0d",
                                         padding: "2px 8px",
                                         borderRadius: "4px",
                                         fontWeight: 600,
@@ -396,7 +396,7 @@ export default function PracticePage() {
                               <div className="card-course__footer">
                                 <div className="card-course__price-sale">
                                   {completedTests[test.id] ? (
-                                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#0071f9" }}>
+                                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#35a873" }}>
                                       Điểm: {completedTests[test.id].score}% ({completedTests[test.id].correct}/{completedTests[test.id].total} câu)
                                     </span>
                                   ) : (

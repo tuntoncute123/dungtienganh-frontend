@@ -937,6 +937,13 @@ export default function AdminPage() {
   // Columns definition
   const lessonColumns = [
     {
+      title: "STT",
+      dataIndex: "order",
+      key: "order",
+      sorter: (a: any, b: any) => (a.order || 0) - (b.order || 0),
+      render: (val: any) => val !== undefined ? <strong>{val}</strong> : "-"
+    },
+    {
       title: "Thumbnail",
       dataIndex: "thumbnail",
       key: "thumbnail",
@@ -1278,7 +1285,7 @@ export default function AdminPage() {
       <div style={{ marginBottom: 24 }}>
         <Row gutter={[16, 16]}>
           <Col xs={12} sm={12} md={6}>
-            <Card style={{ textAlign: "center", borderLeft: "4px solid #0071f9" }}>
+            <Card style={{ textAlign: "center", borderLeft: "4px solid #35a873" }}>
               <div style={{ fontSize: 13, color: "#64748b" }}>Bài học</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>{lessons.length}</div>
             </Card>
@@ -1332,7 +1339,7 @@ export default function AdminPage() {
       {!isMobile && (
         <Sider width={220} theme="light" style={{ borderRight: "1px solid #ebf0f4" }}>
           <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid #ebf0f4" }}>
-            <div style={{ fontWeight: 800, fontSize: 16, color: "#0071f9" }}>TD-ADMIN PANEL</div>
+            <div style={{ fontWeight: 800, fontSize: 16, color: "#35a873" }}>TD-ADMIN PANEL</div>
           </div>
           {adminMenu}
         </Sider>
@@ -1341,7 +1348,7 @@ export default function AdminPage() {
       {/* Mobile/Tablet Drawer Sidebar */}
       {isMobile && (
         <Drawer
-          title={<div style={{ fontWeight: 800, fontSize: 16, color: "#0071f9" }}>TD-ADMIN PANEL</div>}
+          title={<div style={{ fontWeight: 800, fontSize: 16, color: "#35a873" }}>TD-ADMIN PANEL</div>}
           placement="left"
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
@@ -1549,6 +1556,9 @@ export default function AdminPage() {
                 </Select.Option>
               ))}
             </Select>
+          </Form.Item>
+          <Form.Item name="order" label="Số thứ tự bài giảng trong khóa học (STT)" rules={[{ required: true, message: "Nhập số thứ tự" }]}>
+            <InputNumber placeholder="Ví dụ: 1, 2, 3..." min={1} style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item name="thumbnail" label="Ảnh thu nhỏ (Thumbnail Url)">
             <Input.Group compact>

@@ -93,7 +93,7 @@ function LevelRow({
 }
 
 const SUMMARY_STATS = [
-  { icon: ICONS.totalTime, label: "Tổng thời lượng", value: "8 hours", color: "#0071f9" },
+  { icon: ICONS.totalTime, label: "Tổng thời lượng", value: "8 hours", color: "#35a873" },
   { icon: ICONS.totalCups, label: "Tổng số cúp đã đạt", value: "13", color: "#f49000" },
   { icon: ICONS.totalTests, label: "Tổng số bài test", value: "0", color: "#e20d2c" },
   { icon: ICONS.totalLessons, label: "Tổng số bài học", value: "3", color: "#00b135" },
@@ -148,7 +148,7 @@ export default function LearningProfile() {
             entryValue={10}
             predictedValue={10}
             targetValue={300}
-            predictedColor="#0071f9"
+            predictedColor="#35a873"
           />
         </div>
 

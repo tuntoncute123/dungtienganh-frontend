@@ -221,7 +221,7 @@ export default function VideoPlayer({
       </div>
 
       {/* Video area */}
-      <div className="lp-video-wrap" style={{ height: finalVideoUrl ? "auto" : undefined }}>
+      <div className="lp-video-wrap" style={{ height: finalVideoUrl ? "auto" : undefined, aspectRatio: finalVideoUrl ? "unset" : undefined }}>
         {finalVideoUrl ? (
           <video
             ref={videoRef}
