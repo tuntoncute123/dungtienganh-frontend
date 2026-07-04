@@ -74,10 +74,10 @@ export default function LoginPage() {
             <img src="/logo.png?v=2" alt="Logo" className="login-logo" />
           </div>
           <h1 className="login-title">
-            TeacherDung
+            Dung Tiếng Anh
           </h1>
           <Text className="login-subtitle">
-            Học tiếng Anh cùng cô Dung - Luyện thi TOEIC chuyên sâu
+            Học tiếng Anh cùng cô Dung - Luyện thi chuyên sâu
           </Text>
         </div>
 

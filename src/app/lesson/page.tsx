@@ -34,6 +34,7 @@ function LessonPageContent() {
   const [lesson, setLesson] = useState<any>(null);
   const [playlist, setPlaylist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [courseInfo, setCourseInfo] = useState<any>(null);
   const practiceRef = useRef<HTMLDivElement>(null);
 
   const [showQuiz, setShowQuiz] = useState(false);
@@ -44,6 +45,15 @@ function LessonPageContent() {
   const scrollToPractice = () => {
     practiceRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  useEffect(() => {
+    if (courseId) {
+      fetch(`${API_BASE_URL}/api/courses?id=${courseId}`)
+        .then(res => res.json())
+        .then(data => setCourseInfo(data))
+        .catch(err => console.error("Lỗi khi tải thông tin khóa học:", err));
+    }
+  }, [courseId, API_BASE_URL]);
 
   useEffect(() => {
     setShowQuiz(false);
@@ -193,8 +203,32 @@ function LessonPageContent() {
               items={[
                 { title: <Link href="/" style={{ color: "inherit" }}>Trang chủ</Link> },
                 { title: <Link href="/my-courses" style={{ color: "inherit" }}>Danh mục khoá học</Link> },
-                { title: <Link href="/my-courses" style={{ color: "inherit" }}>Ngữ pháp Ứng dụng (2027)</Link> },
-                { title: <span style={{ color: "inherit" }}>CHUYÊN ĐỀ 01: TỪ LOẠI | LÝ THUYẾT TRỌNG TÂM VÀ ỨNG DỤNG</span> },
+                { 
+                  title: (
+                    <Link 
+                      href={`/lesson?courseId=${courseId || ""}`} 
+                      style={{ color: "inherit" }}
+                    >
+                      {courseInfo?.title || "Khóa học"}
+                    </Link>
+                  ) 
+                },
+                { 
+                  title: (
+                    <span style={{ color: "inherit" }}>
+                      {(() => {
+                        const titleLower = (lesson?.title || "").toLowerCase();
+                        if (titleLower.includes("từ loại")) {
+                          return "CHUYÊN ĐỀ 01: TỪ LOẠI | LÝ THUYẾT TRỌNG TÂM VÀ ỨNG DỤNG";
+                        }
+                        if (titleLower.includes("thì") || titleLower.includes("tense")) {
+                          return "CHUYÊN ĐỀ 02: CÁC THÌ TRONG TIẾNG ANH | THÌ HIỆN TẠI VÀ QUÁ KHỨ";
+                        }
+                        return "CHUYÊN ĐỀ: BÀI GIẢNG TRỌNG TÂM";
+                      })()}
+                    </span>
+                  ) 
+                },
                 {
                   title: (
                     <span style={{ color: "#f40c44" }}>{lesson.title}</span>
