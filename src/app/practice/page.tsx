@@ -22,7 +22,7 @@ interface PracticeTest {
   thumbnail: string;
   isHot: boolean;
   hotIcon?: string;
-  category: "all" | "ielts" | "toeic" | "thpt";
+  category: string;
   href: string;
   disabled?: boolean;
 }
@@ -42,7 +42,7 @@ interface PracticeTest {
   thumbnail: string;
   isHot: boolean;
   hotIcon?: string;
-  category: "all" | "ielts" | "toeic" | "thpt";
+  category: string;
   href: string;
   disabled?: boolean;
 }
