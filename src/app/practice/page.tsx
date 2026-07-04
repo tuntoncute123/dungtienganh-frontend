@@ -49,9 +49,12 @@ interface PracticeTest {
 
 const CATEGORIES = [
   { key: "all", label: "Tất cả" },
-  { key: "ielts", label: "IELTS" },
-  { key: "toeic", label: "TOEIC" },
-  { key: "thpt", label: "THPT Quốc gia" },
+  { key: "8", label: "Lớp 8" },
+  { key: "9", label: "Lớp 9" },
+  { key: "10", label: "Lớp 10" },
+  { key: "11", label: "Lớp 11" },
+  { key: "12", label: "Lớp 12" },
+  { key: "dgnl", label: "ĐGNL" },
 ];
 
 /* ── Main Component ────────────────────────── */
@@ -100,7 +103,7 @@ export default function PracticePage() {
           thumbnail: item.thumbnail || "/assets/1782388373-2_9d3976ca.png",
           isHot: idx % 2 === 0,
           hotIcon: "/assets/hotB9F-tCZm_3b836ae8.png",
-          category: item.examCategory || (idx % 3 === 0 ? "toeic" : idx % 3 === 1 ? "ielts" : "thpt"),
+          category: item.grade || "all",
           href: `/progress-test?id=${item.id}`,
           disabled: false
         }));
@@ -318,15 +321,15 @@ export default function PracticePage() {
                                     <span
                                       style={{
                                         fontSize: "11px",
-                                        background: test.category === "ielts" ? "#e6f6ec" : test.category === "toeic" ? "#fff2e8" : "#f6ffed",
-                                        color: test.category === "ielts" ? "#35a873" : test.category === "toeic" ? "#d4380d" : "#389e0d",
+                                        background: "#e6f6ec",
+                                        color: "#35a873",
                                         padding: "2px 8px",
                                         borderRadius: "4px",
                                         fontWeight: 600,
                                         textTransform: "uppercase",
                                       }}
                                     >
-                                      {test.category}
+                                      {test.category === "dgnl" ? "ĐGNL" : `Lớp ${test.category}`}
                                     </span>
                                   </div>
                                 </div>

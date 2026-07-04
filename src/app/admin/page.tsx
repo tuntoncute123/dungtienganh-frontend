@@ -2431,33 +2431,64 @@ export default function AdminPage() {
             </Col>
           </Row>
 
-          <Row gutter={16}>
-            <Col xs={24} sm={12} md={8}>
-              <Form.Item name="source" label="Trường / Sở phát hành">
-                <Input placeholder="Ví dụ: Sở GD&ĐT Hà Nội, THPT Chuyên" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Form.Item name="province" label="Tỉnh / Thành phố">
-                <Input placeholder="Ví dụ: Hà Nội, Toàn quốc" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item name="year" label="Năm dự thi">
-                <InputNumber min={2020} max={2030} style={{ width: "100%" }} placeholder="2026" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Form.Item name="region" label="Khu vực (Miền)" initialValue="all">
-                <Select>
-                  <Option value="all">Toàn quốc / Khác</Option>
-                  <Option value="mien-bac">Miền Bắc</Option>
-                  <Option value="mien-trung">Miền Trung</Option>
-                  <Option value="mien-nam">Miền Nam</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
+          <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.category !== currentValues.category}>
+            {({ getFieldValue }) => {
+              const category = getFieldValue("category");
+              const showGrade = category === "practice" || category === "mock-test";
+              const showSchoolFields = category === "school-exams";
+
+              return (
+                <>
+                  {showGrade && (
+                    <Row gutter={16}>
+                      <Col xs={24} sm={12}>
+                        <Form.Item name="grade" label="Lớp / Mục tiêu" rules={[{ required: true, message: "Chọn lớp hoặc ĐGNL" }]}>
+                          <Select placeholder="Chọn lớp / ĐGNL...">
+                            <Option value="8">Lớp 8</Option>
+                            <Option value="9">Lớp 9</Option>
+                            <Option value="10">Lớp 10</Option>
+                            <Option value="11">Lớp 11</Option>
+                            <Option value="12">Lớp 12</Option>
+                            <Option value="dgnl">ĐGNL</Option>
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )}
+
+                  {showSchoolFields && (
+                    <Row gutter={16}>
+                      <Col xs={24} sm={12} md={8}>
+                        <Form.Item name="source" label="Trường / Sở phát hành">
+                          <Input placeholder="Ví dụ: Sở GD&ĐT Hà Nội, THPT Chuyên" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12} md={8}>
+                        <Form.Item name="province" label="Tỉnh / Thành phố">
+                          <Input placeholder="Ví dụ: Hà Nội, Toàn quốc" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12} md={4}>
+                        <Form.Item name="year" label="Năm dự thi">
+                          <InputNumber min={2020} max={2030} style={{ width: "100%" }} placeholder="2026" />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} sm={12} md={4}>
+                        <Form.Item name="region" label="Khu vực (Miền)" initialValue="all">
+                          <Select>
+                            <Option value="all">Toàn quốc / Khác</Option>
+                            <Option value="mien-bac">Miền Bắc</Option>
+                            <Option value="mien-trung">Miền Trung</Option>
+                            <Option value="mien-nam">Miền Nam</Option>
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )}
+                </>
+              );
+            }}
+          </Form.Item>
 
           <Row gutter={16}>
             <Col xs={24} sm={12} md={6}>
