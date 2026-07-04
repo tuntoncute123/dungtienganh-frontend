@@ -410,7 +410,7 @@ export default function FlashcardPageContent() {
         open={isCreateOpen}
         onCancel={() => setIsCreateOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form 
           form={form} 
@@ -549,7 +549,7 @@ export default function FlashcardPageContent() {
         footer={null}
         width={550}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         {quizQuestions.length > 0 && !quizFinished ? (
           <div style={{ padding: "12px 0" }}>
@@ -649,7 +649,7 @@ export default function FlashcardPageContent() {
         ]}
         width={600}
         centered
-        destroyOnClose
+        destroyOnHidden
       >
         {infoDeck && (
           <div style={{ padding: "12px 0" }}>

@@ -43,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "flashcard",
-    label: "FlashCards",
+    label: "Flashcard",
     icon: <ThunderboltOutlined />,
   },
   {

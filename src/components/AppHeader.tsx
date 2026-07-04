@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Grid, Popover, Modal, Button, message } from "antd";
+import { Grid, Popover, Modal, Button, App } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +22,7 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const { message } = App.useApp();
   const screens = useBreakpoint();
   const router = useRouter();
   const isMobile = !screens.sm;

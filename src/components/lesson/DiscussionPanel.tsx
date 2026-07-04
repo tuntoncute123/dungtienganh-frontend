@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { LikeOutlined, DislikeOutlined, SyncOutlined, SendOutlined, PictureOutlined } from "@ant-design/icons";
-import { Spin, message } from "antd";
+import { Spin, App } from "antd";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=e1effe&color=35a873&size=30&name=";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -51,6 +51,7 @@ interface DiscussionPanelProps {
 }
 
 export default function DiscussionPanel({ lessonId }: DiscussionPanelProps) {
+  const { message } = App.useApp();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState("");

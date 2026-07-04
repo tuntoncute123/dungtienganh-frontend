@@ -3895,6 +3895,37 @@ body {
     width: 11px !important;
     height: 11px !important;
   }
+  .card-course__footer {
+    padding: 8px 10px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .card-course__price-sale {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .card-course__price {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 6px !important;
+  }
+  .price-main {
+    font-size: 13.5px !important;
+  }
+  .price-sale {
+    font-size: 10.5px !important;
+    margin-top: 0 !important;
+  }
+  .card-course__cta {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 6px 0 !important;
+    font-size: 11px !important;
+  }
 
   /* 4. Flashcard Deck Card (.fc-deck-card) */
   .fc-deck-card {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { forwardRef, useState, useEffect } from "react";
-import { Spin, message, Modal } from "antd";
+import { Spin, App, Modal } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -37,6 +37,7 @@ export interface LessonPracticeProps {
 }
 
 const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerciseId }, ref) => {
+  const { message } = App.useApp();
   const [exam, setExam] = useState<Exam | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<number, string>>({});

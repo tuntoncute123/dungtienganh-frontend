@@ -8,7 +8,7 @@ import {
   SoundOutlined,
   FullscreenOutlined,
 } from "@ant-design/icons";
-import { message } from "antd";
+import { App } from "antd";
 
 const PLAY_ICON = "/assets/5f41ca666790ad7191b8_d40728ed.svg";
 
@@ -31,6 +31,7 @@ export default function VideoPlayer({
   duration,
   quizPoints,
 }: VideoPlayerProps) {
+  const { message } = App.useApp();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -128,8 +129,8 @@ export default function VideoPlayer({
       const currentTime = video.currentTime;
       const duration = video.duration || 0;
       
-      // Send progress to server every 15 seconds
-      if (Math.abs(currentTime - lastLoggedTimeRef.current) >= 15) {
+      // Send progress to server every 45 seconds to optimize mobile bandwidth
+      if (Math.abs(currentTime - lastLoggedTimeRef.current) >= 45) {
         lastLoggedTimeRef.current = currentTime;
         trackProgress(currentTime, duration);
       }
@@ -226,6 +227,8 @@ export default function VideoPlayer({
           <video
             ref={videoRef}
             controls
+            playsInline
+            preload="auto"
             style={{ width: "100%", maxHeight: "500px", borderRadius: 12, display: "block", background: "#000" }}
           />
         ) : (

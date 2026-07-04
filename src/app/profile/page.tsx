@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Layout, Grid, Drawer, Modal, Form, Input, Button, DatePicker, message } from "antd";
+import { Layout, Grid, Drawer, Modal, Form, Input, Button, DatePicker, App } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import AppHeader from "@/components/AppHeader";
@@ -249,6 +249,7 @@ const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
 };
 
 export default function ProfilePage() {
+  const { message } = App.useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const screens = useBreakpoint();
@@ -1621,7 +1622,7 @@ const getHeatmapCells = () => {
         open={isEditModalOpen}
         onCancel={() => setIsEditModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={editForm}

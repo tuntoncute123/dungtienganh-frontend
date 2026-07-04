@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, Card, message, Typography } from "antd";
+import { Form, Input, Button, Card, App, Typography } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +9,7 @@ const { Title, Text } = Typography;
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function LoginPage() {
+  const { message } = App.useApp();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
