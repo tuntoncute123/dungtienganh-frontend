@@ -1794,7 +1794,7 @@ export default function AdminPage() {
               extra={
                 <Space>
                   <Button icon={<EditOutlined />} onClick={() => setIsCategoryModalOpen(true)}>Quản lý phân loại</Button>
-                  <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [] }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [], category: "practice" }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>
                 </Space>
               }
             >
