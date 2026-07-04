@@ -8,6 +8,7 @@ import GreetingSection from "@/components/GreetingSection";
 import RecentLessonsWidget from "@/components/RecentLessonsWidget";
 import StoryList from "@/components/StoryList";
 import HonorBoard from "@/components/HonorBoard";
+import HomeCoursesSection from "@/components/HomeCoursesSection";
 import TeacherIntro from "@/components/TeacherIntro";
 import Footer from "@/components/Footer";
 
@@ -81,6 +82,8 @@ export default function HomePage() {
             {/* Bảng Vàng */}
             <HonorBoard />
 
+            {/* Danh sách khóa học */}
+            <HomeCoursesSection />
 
             <TeacherIntro />
           </div>

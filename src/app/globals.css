@@ -2534,6 +2534,28 @@ body {
   background: #005ec3;
 }
 
+.card-course__cta.btn-trial {
+  background: #f59e0b;
+}
+
+.card-course__cta.btn-trial:hover {
+  background: #d97706;
+}
+
+.card-course__cta.btn-register {
+  background: #0060fd;
+}
+
+.card-course__cta.btn-register:hover {
+  background: #004ecb;
+}
+
+.card-course__footer-double-btn {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
 .empty-courses-state {
   display: flex;
   flex-direction: column;

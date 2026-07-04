@@ -1,53 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
-
-/* ── Data ──────────────────────────────────── */
-
-const STATS = [
-  { value: 1, label: "Thủ khoa Toàn Quốc", color: "#f59e0b", bg: "#fef3c7", hideOnMobile: true },
-  { value: 15, label: "Thủ khoa Tỉnh / Thành phố", color: "#35a873", bg: "#ebf7ee", hideOnMobile: true },
-  { value: 10, label: "Á khoa Tỉnh / Thành phố", color: "#7c3aed", bg: "#ede9fe", hideOnMobile: true },
-  { value: 27, label: "Điểm 10 Tuyệt đối", color: "#059669", bg: "#d1fae5", hideOnMobile: false },
-  { value: "2.348+", label: "Điểm 9.0 – 9.8", color: "#e20d2c", bg: "#fee2e2", hideOnMobile: false },
-];
-
-const DATA = [
-  { stt: 1, name: "Nguyễn Hà Nhi", achievement: "Thủ khoa toàn quốc năm 2024", isTopKhoa: true },
-  { stt: 2, name: "Nguyễn Thị Mỹ Duyên", achievement: "Thủ khoa khối D01 tỉnh Hà Nam" },
-  { stt: 3, name: "Trương Hà My", achievement: "Thủ khoa tốt nghiệp tỉnh Tuyên Quang" },
-  { stt: 4, name: "Trần Tiến Lực", achievement: "Thủ khoa khối D07 tỉnh Phú Thọ" },
-  { stt: 5, name: "Bùi Minh Nguyệt", achievement: "Thủ khoa khối D07 tỉnh Quảng Ngãi" },
-  { stt: 6, name: "Phạm Ngọc Quỳnh Như", achievement: "Thủ khoa khối D tỉnh Đồng Nai" },
-  { stt: 7, name: "Trần Yến Hương", achievement: "Thủ khoa khối D01 tỉnh Sóc Trăng" },
-  { stt: 8, name: "Văn Thị Ánh Ngọc", achievement: "Thủ khoa khối D01 tỉnh Quảng Trị" },
-  { stt: 9, name: "Thái Bình Trà Giang", achievement: "Thủ khoa khối D07 tỉnh Quảng Ngãi" },
-  { stt: 10, name: "Chu Phạm Minh Thư", achievement: "Thủ khoa khối D78 tỉnh Bắc Kạn" },
-  { stt: 11, name: "Nguyễn Mai Thu Hương", achievement: "Thủ khoa khối D01 tỉnh Phú Thọ" },
-  { stt: 12, name: "Đào Xuân Danh", achievement: "Thủ khoa khối A01 tỉnh Hà Tĩnh" },
-  { stt: 13, name: "Nguyễn Hồng Hạnh", achievement: "Thủ khoa khối D01 tỉnh Lạng Sơn" },
-  { stt: 14, name: "Nguyễn Tiến Dũng", achievement: "Thủ khoa tốt nghiệp tỉnh Yên Bái" },
-  { stt: 15, name: "Lê Đức Thịnh", achievement: "Thủ khoa khối D07 tỉnh Khánh Hòa" },
-  { stt: 16, name: "Phạm Nguyên Khang", achievement: "Thủ khoa khối A01 tỉnh Sóc Trăng" },
-  { stt: 17, name: "Nguyễn Minh Anh", achievement: "Á khoa khối D07 Thành phố Hà Nội" },
-  { stt: 18, name: "Phan Thủy Tiên", achievement: "Á khoa khối A01 tỉnh An Giang" },
-  { stt: 19, name: "Trần Hoàng Hải", achievement: "Á khoa khối A01 tỉnh Hà Tĩnh" },
-  { stt: 20, name: "Nguyễn Thị Diệu Lan", achievement: "Á khoa khối D07 tỉnh Yên Bái" },
-  { stt: 21, name: "Nguyễn Thị Thu Huyền", achievement: "Á khoa khối D07 tỉnh Quảng Trị" },
-  { stt: 22, name: "Tiêu Đặng Kim Phụng", achievement: "Á khoa tốt nghiệp tỉnh Đắk Nông" },
-  { stt: 23, name: "Vương Đình Thắng", achievement: "Á khoa khối A01 tỉnh Bắc Ninh" },
-  { stt: 24, name: "Hồ Phạm Nhật Quyên", achievement: "Á khoa khối D07 tỉnh Quảng Bình" },
-  { stt: 25, name: "Hà Hiền Phương", achievement: "Á khoa khối D01 tỉnh Tây Ninh" },
-  { stt: 26, name: "Nguyễn Thị Hải Châu", achievement: "Á khoa khối D01 tỉnh Khánh Hòa" },
-];
+import React, { useState, useEffect } from "react";
 
 const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
-/* ── Component ─────────────────────────────── */
-
 export default function HonorBoard() {
   const [showAll, setShowAll] = useState(false);
-  const visibleData = showAll ? DATA : DATA.slice(0, 10);
+  const [stats, setStats] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHonors = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/honors`);
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data.stats || []);
+          setStudents(data.students || []);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải bảng vinh danh:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHonors();
+  }, []);
+
+  const visibleData = showAll ? students : students.slice(0, 10);
+
+  if (loading) {
+    return (
+      <section className="honor-section" style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "#35a873", fontWeight: 600 }}>Đang tải bảng vinh danh...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="honor-section">
@@ -55,23 +44,30 @@ export default function HonorBoard() {
       <div className="honor-header">
         <div className="honor-crown">👑</div>
         <div>
-          <h2 className="honor-title">VINH DANH BẢNG VÀNG MÙA THI 2024</h2>
+          <h2 className="honor-title">Bảng vinh danh mùa thi</h2>
           <p className="honor-subtitle">Team Cô Dung</p>
         </div>
       </div>
 
       {/* ── Statistics ── */}
       <div className="honor-stats">
-        {STATS.map((stat) => (
+        {stats.map((stat) => (
           <div
-            key={stat.label}
-            className={`honor-stat-card${stat.hideOnMobile ? " hide-on-mobile" : ""}`}
-            style={{ borderColor: stat.color }}
+            key={stat.id}
+            className="honor-stat-card"
+            style={{ 
+              borderColor: "#bbf7d0", 
+              backgroundColor: "#f0fdf4",
+              borderWidth: "2px",
+              borderStyle: "solid"
+            }}
           >
-            <div className="honor-stat-value" style={{ color: stat.color }}>
+            <div className="honor-stat-value" style={{ color: "#15803d" }}>
               {stat.value}
             </div>
-            <div className="honor-stat-label">{stat.label}</div>
+            <div className="honor-stat-label" style={{ color: "#16a34a" }}>
+              {stat.label}
+            </div>
           </div>
         ))}
       </div>
@@ -84,58 +80,64 @@ export default function HonorBoard() {
             <tr>
               <th className="honor-th" style={{ width: 56 }}>STT</th>
               <th className="honor-th">Họ và tên</th>
-              <th className="honor-th">Thành tích xuất sắc mùa thi 2024</th>
+              <th className="honor-th">Thành tích xuất sắc</th>
             </tr>
           </thead>
           <tbody>
-            {visibleData.map((row) => (
-              <tr
-                key={row.stt}
-                className={`honor-tr${row.isTopKhoa ? " honor-tr-top" : ""}`}
-              >
-                <td className="honor-td honor-td-stt">
-                  {MEDALS[row.stt] ? (
-                    <span className="honor-medal">{MEDALS[row.stt]}</span>
-                  ) : (
-                    <span className="honor-stt-num">{row.stt}</span>
-                  )}
-                </td>
-                <td className="honor-td honor-td-name">
-                  {row.isTopKhoa && (
-                    <span className="honor-badge-national">⭐ Toàn Quốc</span>
-                  )}
-                  <span className={row.isTopKhoa ? "honor-name-top" : ""}>{row.name}</span>
-                </td>
-                <td className="honor-td honor-td-achievement">{row.achievement}</td>
-              </tr>
-            ))}
+            {visibleData.map((row, idx) => {
+              const displayStt = idx + 1;
+              return (
+                <tr
+                  key={row.id}
+                  className={`honor-tr${row.isTopKhoa ? " honor-tr-top" : ""}`}
+                >
+                  <td className="honor-td honor-td-stt">
+                    {MEDALS[displayStt] ? (
+                      <span className="honor-medal">{MEDALS[displayStt]}</span>
+                    ) : (
+                      <span className="honor-stt-num">{displayStt}</span>
+                    )}
+                  </td>
+                  <td className="honor-td honor-td-name">
+                    {row.isTopKhoa && (
+                      <span className="honor-badge-national">⭐ Toàn Quốc</span>
+                    )}
+                    <span className={row.isTopKhoa ? "honor-name-top" : ""}>{row.name}</span>
+                  </td>
+                  <td className="honor-td honor-td-achievement">{row.achievement}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
         {/* Mobile cards */}
         <div className="honor-cards">
-          {visibleData.map((row) => (
-            <div
-              key={row.stt}
-              className={`honor-card${row.isTopKhoa ? " honor-card-top" : ""}`}
-            >
-              <div className="honor-card-header">
-                <span className="honor-card-stt">
-                  {MEDALS[row.stt] ?? `#${row.stt}`}
-                </span>
-                {row.isTopKhoa && (
-                  <span className="honor-badge-national">⭐ Thủ khoa Toàn Quốc</span>
-                )}
+          {visibleData.map((row, idx) => {
+            const displayStt = idx + 1;
+            return (
+              <div
+                key={row.id}
+                className={`honor-card${row.isTopKhoa ? " honor-card-top" : ""}`}
+              >
+                <div className="honor-card-header">
+                  <span className="honor-card-stt">
+                    {MEDALS[displayStt] ?? `#${displayStt}`}
+                  </span>
+                  {row.isTopKhoa && (
+                    <span className="honor-badge-national">⭐ Thủ khoa Toàn Quốc</span>
+                  )}
+                </div>
+                <div className="honor-card-name">{row.name}</div>
+                <div className="honor-card-achievement">{row.achievement}</div>
               </div>
-              <div className="honor-card-name">{row.name}</div>
-              <div className="honor-card-achievement">{row.achievement}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* ── Show more / less ── */}
-      {DATA.length > 5 && (
+      {students.length > 10 && (
         <button
           className="honor-show-more"
           onClick={() => setShowAll((p) => !p)}
@@ -144,8 +146,8 @@ export default function HonorBoard() {
             "Thu gọn ▲"
           ) : (
             <>
-              <span className="show-more-desktop">Xem thêm {DATA.length - 10} người ▼</span>
-              <span className="show-more-mobile">Xem thêm {DATA.length - 5} người ▼</span>
+              <span className="show-more-desktop">Xem thêm {students.length - 10} người ▼</span>
+              <span className="show-more-mobile">Xem thêm {students.length - 5} người ▼</span>
             </>
           )}
         </button>

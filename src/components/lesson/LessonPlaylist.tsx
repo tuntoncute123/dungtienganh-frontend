@@ -32,14 +32,22 @@ export default function LessonPlaylist({ currentLessonId, lessons = [], courseId
                 onClick={() => router.push(`/lesson?id=${item.id}${courseId ? `&courseId=${courseId}` : ""}`)}
               >
                 <span className="lp-playlist-icon">
-                  {isTest ? (
+                  {item.isLocked ? (
+                    <span style={{ fontSize: 16, color: "#94a3b8" }}>🔒</span>
+                  ) : isTest ? (
                     <ClockCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
                   ) : (
                     <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
                   )}
                 </span>
-                <span className={`lp-playlist-title${isActive ? " lp-playlist-title-active" : ""}`}>
+                <span 
+                  className={`lp-playlist-title${isActive ? " lp-playlist-title-active" : ""}`}
+                  style={{ color: item.isLocked ? "#94a3b8" : undefined }}
+                >
                   {item.title}
+                  {item.isLocked && (
+                    <span style={{ fontSize: 11, color: "#ef4444", marginLeft: 8, fontWeight: 500 }}>(Khóa)</span>
+                  )}
                 </span>
               </li>
             );

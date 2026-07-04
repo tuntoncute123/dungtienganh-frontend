@@ -280,11 +280,7 @@ export default function MyCoursesPage() {
 
   // Filter logic
   const filteredCourses = courses.filter((course) => {
-    // 1. Phân quyền học sinh
-    if (role === "student" && !allowedCourses.includes(course.id)) {
-      return false;
-    }
-
+    // 1. Phân quyền học sinh - Bỏ phần ẩn khóa học chưa được mua để hiển thị toàn bộ
     // 2. Lọc thông thường
     const matchesTab = activeTab === "all" || course.grade === activeTab;
     const matchesSearch =
@@ -525,16 +521,21 @@ export default function MyCoursesPage() {
                                   </span>
                                 )}
                               </div>
-                              <button
-                                className="btn card-course__cta"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  router.push(`/lesson?courseId=${course.id}`);
-                                }}
-                              >
-                                Học ngay
-                              </button>
+                              {(() => {
+                                const isAllowed = role === "admin" || allowedCourses.includes(course.id);
+                                return (
+                                  <button
+                                    className={`btn card-course__cta${!isAllowed ? " btn-trial" : ""}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      router.push(`/lesson?courseId=${course.id}`);
+                                    }}
+                                  >
+                                    {isAllowed ? "Học ngay" : "Học thử ngay"}
+                                  </button>
+                                );
+                              })()}
                             </div>
                           </a>
                         ))}

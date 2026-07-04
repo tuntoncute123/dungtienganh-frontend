@@ -40,7 +40,8 @@ import {
   UserOutlined,
   CheckOutlined,
   BellOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  TrophyOutlined
 } from "@ant-design/icons";
 
 let COURSE_MAP: Record<string, string> = {};
@@ -130,6 +131,22 @@ export default function AdminPage() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notifForm] = Form.useForm();
 
+  // Honors states
+  const [honorsStats, setHonorsStats] = useState<any[]>([]);
+  const [honorsStudents, setHonorsStudents] = useState<any[]>([]);
+  const [isHonorStatModalOpen, setIsHonorStatModalOpen] = useState(false);
+  const [isHonorStudentModalOpen, setIsHonorStudentModalOpen] = useState(false);
+  const [editingHonorStat, setEditingHonorStat] = useState<any>(null);
+  const [editingHonorStudent, setEditingHonorStudent] = useState<any>(null);
+  const [honorStatForm] = Form.useForm();
+  const [honorStudentForm] = Form.useForm();
+
+  // Exam categories states
+  const [examCategories, setExamCategories] = useState<any[]>([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [categoryForm] = Form.useForm();
+
   // Course states
   const [courses, setCourses] = useState<any[]>([]);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -161,6 +178,8 @@ export default function AdminPage() {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [importDocxLoading, setImportDocxLoading] = useState(false);
   const [importDocxInfo, setImportDocxInfo] = useState<string | null>(null);
+  const [importExerciseDocxLoading, setImportExerciseDocxLoading] = useState(false);
+  const [importExerciseDocxInfo, setImportExerciseDocxInfo] = useState<string | null>(null);
 
   // Forms
   const [lessonForm] = Form.useForm();
@@ -449,6 +468,173 @@ export default function AdminPage() {
     }
   };
 
+  const fetchExamCategories = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exams/categories`);
+      const data = await res.json();
+      if (res.ok) setExamCategories(data);
+    } catch (e) {
+      msg.error("Lỗi khi tải phân loại đề thi");
+    }
+  };
+
+  const saveCategory = async (values: any) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const isEdit = !!editingCategory;
+      const url = `${API_BASE_URL}/api/exams/categories`;
+      const method = isEdit ? "PUT" : "POST";
+      const body = isEdit ? { ...values, id: editingCategory.id } : values;
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        msg.success(`${isEdit ? "Cập nhật" : "Tạo mới"} phân loại thành công!`);
+        setIsCategoryModalOpen(false);
+        setEditingCategory(null);
+        categoryForm.resetFields();
+        fetchExamCategories();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || "Không thể lưu phân loại");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const deleteCategory = async (id: string) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/exams/categories?id=${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        msg.success("Xóa phân loại thành công!");
+        fetchExamCategories();
+      } else {
+        msg.error("Không thể xóa phân loại");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const fetchHonors = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/honors`);
+      const data = await res.json();
+      if (res.ok) {
+        setHonorsStats(data.stats || []);
+        setHonorsStudents(data.students || []);
+      }
+    } catch (e: any) {
+      msg.error("Lỗi khi tải bảng vinh danh");
+    }
+  };
+
+  const handleHonorStatSubmit = async (values: any) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const url = `${API_BASE_URL}/api/honors/stats`;
+      const method = editingHonorStat ? "PUT" : "POST";
+      const body = editingHonorStat ? { ...values, id: editingHonorStat.id } : values;
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        msg.success(editingHonorStat ? "Cập nhật chỉ số thành công!" : "Thêm chỉ số thành công!");
+        setIsHonorStatModalOpen(false);
+        setEditingHonorStat(null);
+        honorStatForm.resetFields();
+        fetchHonors();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || "Lỗi khi lưu");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const handleHonorStudentSubmit = async (values: any) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const url = `${API_BASE_URL}/api/honors/students`;
+      const method = editingHonorStudent ? "PUT" : "POST";
+      const body = editingHonorStudent ? { ...values, id: editingHonorStudent.id } : values;
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        msg.success(editingHonorStudent ? "Cập nhật học sinh thành công!" : "Thêm học sinh thành công!");
+        setIsHonorStudentModalOpen(false);
+        setEditingHonorStudent(null);
+        honorStudentForm.resetFields();
+        fetchHonors();
+      } else {
+        const err = await res.json();
+        msg.error(err.message || "Lỗi khi lưu");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const deleteHonorStat = async (id: string) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/honors/stats?id=${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        msg.success("Xóa chỉ số thành công!");
+        fetchHonors();
+      } else {
+        msg.error("Lỗi khi xóa");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
+  const deleteHonorStudent = async (id: string) => {
+    const token = localStorage.getItem("teacherdung_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/honors/students?id=${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        msg.success("Xóa học sinh thành công!");
+        fetchHonors();
+      } else {
+        msg.error("Lỗi khi xóa");
+      }
+    } catch (e) {
+      msg.error("Lỗi hệ thống");
+    }
+  };
+
   const loadAllData = async () => {
     setLoading(true);
     await Promise.all([
@@ -458,7 +644,9 @@ export default function AdminPage() {
       fetchExams(),
       fetchUsers(),
       fetchNotifications(),
-      fetchCourses()
+      fetchCourses(),
+      fetchHonors(),
+      fetchExamCategories()
     ]);
     setLoading(false);
   };
@@ -617,6 +805,7 @@ export default function AdminPage() {
 
   // Exercise CRUD for video lesson
   const openExerciseModal = async () => {
+    setImportExerciseDocxInfo(null);
     const currentExerciseId = lessonForm.getFieldValue("exerciseId");
     if (currentExerciseId) {
       setLoading(true);
@@ -952,6 +1141,77 @@ export default function AdminPage() {
   };
 
   // Columns definition
+  const honorStatColumns = [
+    { title: "Nhãn hiển thị", dataIndex: "label", key: "label" },
+    { title: "Số liệu / Giá trị", dataIndex: "value", key: "value", render: (val: string) => <Tag color="green">{val}</Tag> },
+    { title: "Thứ tự", dataIndex: "order", key: "order" },
+    {
+      title: "Thao tác",
+      key: "action",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditingHonorStat(record);
+              honorStatForm.setFieldsValue(record);
+              setIsHonorStatModalOpen(true);
+            }}
+          >
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Chắc chắn muốn xóa chỉ số này?"
+            onConfirm={() => deleteHonorStat(record.id)}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
+          </Popconfirm>
+        </Space>
+      )
+    }
+  ];
+
+  const honorStudentColumns = [
+    { title: "STT Sắp xếp", dataIndex: "stt", key: "stt", sorter: (a: any, b: any) => a.stt - b.stt },
+    { title: "Họ và tên", dataIndex: "name", key: "name", render: (text: string, r: any) => <strong>{text} {r.isTopKhoa && "⭐"}</strong> },
+    { title: "Thành tích", dataIndex: "achievement", key: "achievement" },
+    { title: "Thủ khoa toàn quốc", dataIndex: "isTopKhoa", key: "isTopKhoa", render: (top: boolean) => top ? <Tag color="gold">Thủ khoa TQ</Tag> : <Tag>Thường</Tag> },
+    {
+      title: "Thao tác",
+      key: "action",
+      render: (_: any, record: any) => (
+        <Space size="middle">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditingHonorStudent(record);
+              honorStudentForm.setFieldsValue(record);
+              setIsHonorStudentModalOpen(true);
+            }}
+          >
+            Sửa
+          </Button>
+          <Popconfirm
+            title="Chắc chắn muốn xóa học sinh này?"
+            onConfirm={() => deleteHonorStudent(record.id)}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              Xóa
+            </Button>
+          </Popconfirm>
+        </Space>
+      )
+    }
+  ];
+
   const lessonColumns = [
     {
       title: "STT",
@@ -1162,19 +1422,11 @@ export default function AdminPage() {
       title: "Loại đề",
       dataIndex: "category",
       key: "category",
-      filters: [
-        { text: "Đề thi thử THPT", value: "school-exams" },
-        { text: "Thi thử Online", value: "mock-test" },
-        { text: "Đề luyện tập", value: "progress-test" }
-      ],
+      filters: examCategories.map((c) => ({ text: c.label, value: c.key })),
       onFilter: (value: any, record: any) => record.category === value,
       render: (cat: string) => {
-        const conf: Record<string, string> = {
-          "school-exams": "Đề thi thử THPT",
-          "mock-test": "Thi thử Online",
-          "progress-test": "Đề luyện tập"
-        };
-        return <Tag color="purple">{conf[cat] || cat}</Tag>;
+        const found = examCategories.find((c) => c.key === cat);
+        return <Tag color="purple">{found ? found.label : cat}</Tag>;
       }
     },
     { 
@@ -1442,6 +1694,7 @@ export default function AdminPage() {
         { key: "exams", icon: <FileTextOutlined />, label: "Đề thi & Câu hỏi" },
         { key: "users", icon: <UserOutlined />, label: "Quản lý Học sinh" },
         { key: "notifications", icon: <BellOutlined />, label: "Gửi thông báo" },
+        { key: "honors", icon: <TrophyOutlined />, label: "Vinh danh bảng vàng" },
       ]}
     />
   );
@@ -1492,6 +1745,7 @@ export default function AdminPage() {
               {activeTab === "exams" && (isMobile ? "Đề thi & Câu hỏi" : "Quản lý Đề thi khảo sát & Đề thi thử")}
               {activeTab === "users" && (isMobile ? "Quản lý Học sinh" : "Quản lý tài khoản Học sinh & Phân quyền")}
               {activeTab === "notifications" && "Gửi thông báo & Quản lý Thông báo"}
+              {activeTab === "honors" && "Quản lý Bảng vinh danh mùa thi"}
             </div>
           </div>
           <Space style={{ marginTop: isMobile ? 12 : 0, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
@@ -1535,7 +1789,15 @@ export default function AdminPage() {
 
           {/* Exams view */}
           {activeTab === "exams" && (
-            <Card title="Các bộ đề luyện tập & đề thi thử" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [] }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>}>
+            <Card 
+              title="Các bộ đề luyện tập & đề thi thử" 
+              extra={
+                <Space>
+                  <Button icon={<EditOutlined />} onClick={() => setIsCategoryModalOpen(true)}>Quản lý phân loại</Button>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditingExam(null); examForm.resetFields(); examForm.setFieldsValue({ questions: [] }); setIsExamModalOpen(true); }}>Thêm đề thi mới</Button>
+                </Space>
+              }
+            >
               <Table dataSource={exams} columns={examColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} scroll={{ x: "max-content" }} />
             </Card>
           )}
@@ -1584,6 +1846,52 @@ export default function AdminPage() {
               <Col xs={24} lg={16}>
                 <Card title="Lịch sử thông báo đã gửi">
                   <Table dataSource={notifications} columns={notificationColumns} rowKey="id" loading={loading} pagination={{ pageSize: 6 }} scroll={{ x: "max-content" }} />
+                </Card>
+              </Col>
+            </Row>
+          )}
+
+          {/* Honors view */}
+          {activeTab === "honors" && (
+            <Row gutter={[16, 16]}>
+              <Col xs={24} lg={10}>
+                <Card 
+                  title="Chỉ số thống kê (Stats)" 
+                  extra={
+                    <Button 
+                      type="primary" 
+                      icon={<PlusOutlined />} 
+                      onClick={() => {
+                        setEditingHonorStat(null);
+                        honorStatForm.resetFields();
+                        setIsHonorStatModalOpen(true);
+                      }}
+                    >
+                      Thêm chỉ số
+                    </Button>
+                  }
+                >
+                  <Table dataSource={honorsStats} columns={honorStatColumns} rowKey="id" loading={loading} pagination={false} size="small" />
+                </Card>
+              </Col>
+              <Col xs={24} lg={14}>
+                <Card 
+                  title="Danh sách học sinh vinh danh (Students)" 
+                  extra={
+                    <Button 
+                      type="primary" 
+                      icon={<PlusOutlined />} 
+                      onClick={() => {
+                        setEditingHonorStudent(null);
+                        honorStudentForm.resetFields();
+                        setIsHonorStudentModalOpen(true);
+                      }}
+                    >
+                      Thêm học sinh
+                    </Button>
+                  }
+                >
+                  <Table dataSource={honorsStudents} columns={honorStudentColumns} rowKey="id" loading={loading} pagination={{ pageSize: 8 }} size="small" />
                 </Card>
               </Col>
             </Row>
@@ -1711,6 +2019,65 @@ export default function AdminPage() {
               </Form.Item>
             </Col>
           </Row>
+
+          {/* ── Import từ file Word cho Bài tập ôn luyện ─────────────────────────────── */}
+          <div style={{ border: "1px dashed #35a873", borderRadius: 8, padding: "12px 16px", background: "#f0fdf4", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <span style={{ fontWeight: 600, color: "#166534", fontSize: 13 }}>📄 Import câu hỏi từ file Word (.docx)</span>
+              <Upload
+                accept=".docx"
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  setImportExerciseDocxLoading(true);
+                  setImportExerciseDocxInfo(null);
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    const res = await fetch(`${API_BASE_URL}/api/exams/import-docx`, {
+                      method: "POST",
+                      body: formData,
+                    });
+                    if (!res.ok) {
+                      const err = await res.json();
+                      msg.error(err.message || "Không thể đọc file Word");
+                      return false;
+                    }
+                    const data = await res.json();
+                    const { questions: parsedQs, totalQuestions, part1Count, part2Count, part3Count } = data;
+                    const mapped = parsedQs.map((q: any) => {
+                      const isGapFill = q.qType === "gap-filling";
+                      return {
+                        number: q.number,
+                        qType: q.qType,
+                        text: q.text,
+                        options: isGapFill ? { A: "", B: "", C: "", D: "" } : q.options,
+                        correctAnswer: isGapFill ? undefined : q.correctAnswer,
+                        correctAnswers: isGapFill ? [q.correctAnswer] : [""],
+                        explanation: q.explanation || "",
+                        partTitle: q.partTitle || "",
+                      };
+                    });
+                    exerciseForm.setFieldsValue({ questions: mapped });
+                    setImportExerciseDocxInfo(`✅ Đã import ${totalQuestions} câu (Part1: ${part1Count}, Part2: ${part2Count}, Part3: ${part3Count}). Kiểm tra & chỉnh sửa trước khi lưu.`);
+                    msg.success(`Import thành công ${totalQuestions} câu hỏi từ file Word!`);
+                  } catch {
+                    msg.error("Lỗi khi xử lý file Word");
+                  } finally {
+                    setImportExerciseDocxLoading(false);
+                  }
+                  return false;
+                }}
+              >
+                <Button icon={<UploadOutlined />} loading={importExerciseDocxLoading} size="small" style={{ borderColor: "#35a873", color: "#35a873" }}>
+                  Chọn file .docx
+                </Button>
+              </Upload>
+              {importExerciseDocxInfo && <span style={{ fontSize: 12, color: "#15803d" }}>{importExerciseDocxInfo}</span>}
+            </div>
+            <div style={{ fontSize: 11, color: "#4ade80", marginTop: 6 }}>
+              Quy ước: Part 1/3 — in đậm chữ cái đáp án đúng (A/B/C/D). Part 2 — in đậm từ cần điền. Thêm dòng <em>&quot;Giải thích: ...&quot;</em> sau mỗi câu để tự động điền lời giải.
+            </div>
+          </div>
 
           <Form.List name="questions">
             {(fields, { add, remove }) => (
@@ -2050,10 +2417,10 @@ export default function AdminPage() {
             </Col>
             <Col xs={24} sm={14} md={6}>
               <Form.Item name="category" label="Phân loại" rules={[{ required: true, message: "Chọn phân loại" }]}>
-                <Select>
-                  <Option value="school-exams">Đề thi thử THPT (Sở/Trường)</Option>
-                  <Option value="mock-test">Đề thi thử TOEIC Online</Option>
-                  <Option value="progress-test">Đề luyện tập định kỳ</Option>
+                <Select placeholder="Chọn phân loại...">
+                  {examCategories.map((cat) => (
+                    <Option key={cat.key} value={cat.key}>{cat.label}</Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -2386,7 +2753,7 @@ export default function AdminPage() {
             <Select mode="multiple" placeholder="Chọn các đề thi được làm..." style={{ width: "100%" }}>
               {exams.map(exam => (
                 <Option key={exam.id} value={exam.id}>
-                  {exam.title} ({exam.category === "school-exams" ? "Đề thi trường" : exam.category === "mock-test" ? "Thi thử" : "Luyện tập"})
+                  {exam.title} ({examCategories.find(c => c.key === exam.category)?.label || exam.category})
                 </Option>
               ))}
             </Select>
@@ -2536,6 +2903,102 @@ export default function AdminPage() {
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Honor Stat Modal */}
+      <Modal
+        title={editingHonorStat ? "Cập nhật chỉ số thống kê" : "Thêm chỉ số thống kê mới"}
+        open={isHonorStatModalOpen}
+        onCancel={() => { setIsHonorStatModalOpen(false); setEditingHonorStat(null); }}
+        onOk={() => honorStatForm.submit()}
+      >
+        <Form form={honorStatForm} layout="vertical" onFinish={handleHonorStatSubmit}>
+          <Form.Item name="label" label="Nhãn hiển thị" rules={[{ required: true, message: "Vui lòng nhập nhãn hiển thị" }]}>
+            <Input placeholder="Ví dụ: Điểm 10, Điểm 9+..." />
+          </Form.Item>
+          <Form.Item name="value" label="Số liệu / Giá trị" rules={[{ required: true, message: "Vui lòng nhập số liệu" }]}>
+            <Input placeholder="Ví dụ: 12, 150, 320..." />
+          </Form.Item>
+          <Form.Item name="order" label="Thứ tự hiển thị" initialValue={0}>
+            <InputNumber min={0} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Honor Student Modal */}
+      <Modal
+        title={editingHonorStudent ? "Cập nhật học sinh vinh danh" : "Thêm học sinh vinh danh mới"}
+        open={isHonorStudentModalOpen}
+        onCancel={() => { setIsHonorStudentModalOpen(false); setEditingHonorStudent(null); }}
+        onOk={() => honorStudentForm.submit()}
+      >
+        <Form form={honorStudentForm} layout="vertical" onFinish={handleHonorStudentSubmit}>
+          <Form.Item name="stt" label="STT xếp hạng (Huy chương 🥇, 🥈, 🥉 hiển thị cho STT 1, 2, 3)" rules={[{ required: true, message: "Vui lòng nhập STT" }]}>
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item name="name" label="Họ và tên học sinh" rules={[{ required: true, message: "Vui lòng nhập tên học sinh" }]}>
+            <Input placeholder="Ví dụ: Nguyễn Văn A" />
+          </Form.Item>
+          <Form.Item name="achievement" label="Thành tích đạt được" rules={[{ required: true, message: "Vui lòng nhập thành tích" }]}>
+            <Input placeholder="Ví dụ: Thủ khoa khối D01 tỉnh Hà Nam" />
+          </Form.Item>
+          <Form.Item name="isTopKhoa" valuePropName="checked" initialValue={false}>
+            <Checkbox>Thủ khoa toàn quốc (Hiển thị nhãn ⭐ Toàn Quốc)</Checkbox>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Exam Category Management Modal */}
+      <Modal
+        title="Quản lý phân loại đề thi"
+        open={isCategoryModalOpen}
+        onCancel={() => { setIsCategoryModalOpen(false); setEditingCategory(null); categoryForm.resetFields(); }}
+        footer={null}
+        width={600}
+      >
+        <Form form={categoryForm} layout="inline" onFinish={saveCategory} style={{ marginBottom: 20, display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <Form.Item name="key" rules={[{ required: true, message: "Nhập mã phân loại" }]}>
+            <Input placeholder="Mã phân loại (ví dụ: mock-test)" disabled={!!editingCategory} />
+          </Form.Item>
+          <Form.Item name="label" rules={[{ required: true, message: "Nhập tên hiển thị" }]}>
+            <Input placeholder="Tên hiển thị (ví dụ: Thi thử Online)" />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                {editingCategory ? "Lưu lại" : "Thêm mới"}
+              </Button>
+              {editingCategory && (
+                <Button onClick={() => { setEditingCategory(null); categoryForm.resetFields(); }}>
+                  Hủy
+                </Button>
+              )}
+            </Space>
+          </Form.Item>
+        </Form>
+
+        <Table
+          dataSource={examCategories}
+          pagination={false}
+          size="small"
+          rowKey="id"
+          columns={[
+            { title: "Mã phân loại (Key)", dataIndex: "key", key: "key" },
+            { title: "Tên hiển thị (Label)", dataIndex: "label", key: "label" },
+            {
+              title: "Thao tác",
+              key: "action",
+              render: (_: any, record: any) => (
+                <Space>
+                  <Button type="link" size="small" onClick={() => { setEditingCategory(record); categoryForm.setFieldsValue(record); }}>Sửa</Button>
+                  <Popconfirm title="Bạn có chắc chắn muốn xóa phân loại này?" onConfirm={() => deleteCategory(record.id)}>
+                    <Button type="link" size="small" danger>Xóa</Button>
+                  </Popconfirm>
+                </Space>
+              )
+            }
+          ]}
+        />
       </Modal>
     </Layout>
   );

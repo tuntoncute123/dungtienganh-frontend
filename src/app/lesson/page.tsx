@@ -74,15 +74,21 @@ function LessonPageContent() {
     const fetchLessonAndPlaylist = async () => {
       setLoading(true);
       try {
+        const token = localStorage.getItem("teacherdung_token");
+        const headers: any = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
         // 1. Fetch playlist data
         let playlistData: any[] = [];
         if (courseId) {
-          const listRes = await fetch(`${API_BASE_URL}/api/lessons?playlistId=${courseId}`);
+          const listRes = await fetch(`${API_BASE_URL}/api/lessons?playlistId=${courseId}`, { headers });
           if (listRes.ok) {
             playlistData = await listRes.json();
           }
         } else {
-          const listRes = await fetch(`${API_BASE_URL}/api/lessons`);
+          const listRes = await fetch(`${API_BASE_URL}/api/lessons`, { headers });
           if (listRes.ok) {
             playlistData = await listRes.json();
           }
@@ -91,7 +97,7 @@ function LessonPageContent() {
 
         // 2. Identify the active lesson
         if (lessonId) {
-          const res = await fetch(`${API_BASE_URL}/api/lessons?id=${lessonId}`);
+          const res = await fetch(`${API_BASE_URL}/api/lessons?id=${lessonId}`, { headers });
           if (res.ok) {
             const data = await res.json();
             setLesson(data);
@@ -205,7 +211,49 @@ function LessonPageContent() {
           <div className={`lp-main-grid${!isDesktop ? " lp-main-grid-mobile" : ""}`}>
             {/* ── LEFT: Video + docs + homework OR Thi Online ── */}
             <div className="lp-left-col">
-              {(lesson.videoUrl || !lesson.exerciseId) ? (
+              {lesson.isLocked ? (
+                // --- LOCKED LESSON VIEW ---
+                <div 
+                  className="lp-card" 
+                  style={{ 
+                    padding: "80px 24px", 
+                    textAlign: "center", 
+                    display: "flex", 
+                    flexDirection: "column", 
+                    alignItems: "center", 
+                    justifyContent: "center", 
+                    minHeight: 450, 
+                    borderRadius: 16,
+                    background: "#ffffff",
+                    border: "1px solid #f1f5f9"
+                  }}
+                >
+                  <div style={{ fontSize: 64, marginBottom: 20 }}>🔒</div>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1e293b", marginBottom: 12 }}>
+                    Bài giảng này đã được khóa
+                  </h2>
+                  <p style={{ fontSize: 16, color: "#64748b", maxWidth: 450, margin: "0 auto 24px auto", lineHeight: 1.6 }}>
+                    Bạn đang ở chế độ học thử. Vui lòng đăng ký mua khóa học để mở khóa toàn bộ bài giảng chất lượng cao và học tập đầy đủ nhất.
+                  </p>
+                  <Button
+                    type="primary"
+                    size="large"
+                    style={{ 
+                      background: "#f40c44", 
+                      borderColor: "#f40c44", 
+                      height: 48, 
+                      borderRadius: 24, 
+                      fontWeight: 700, 
+                      fontSize: 16,
+                      padding: "0 32px",
+                      boxShadow: "0 4px 14px rgba(244, 12, 68, 0.3)"
+                    }}
+                    onClick={() => window.open("https://zalo.me/0987654321", "_blank")}
+                  >
+                    Mua khóa học ngay
+                  </Button>
+                </div>
+              ) : (lesson.videoUrl || !lesson.exerciseId) ? (
                 // --- REGULAR VIDEO LESSON VIEW ---
                 <>
                   <VideoPlayer
