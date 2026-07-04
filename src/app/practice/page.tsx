@@ -396,7 +396,12 @@ export default function PracticePage() {
                                 <div className="card-course__price-sale">
                                   {completedTests[test.id] ? (
                                     <span style={{ fontSize: "13px", fontWeight: 600, color: "#35a873" }}>
-                                      Điểm: {completedTests[test.id].score}% ({completedTests[test.id].correct}/{completedTests[test.id].total} câu)
+                                      Điểm: {(() => {
+                                        const score10 = completedTests[test.id].score / 10;
+                                        if (Number.isInteger(score10)) return score10.toString();
+                                        if (parseFloat(score10.toFixed(1)) === score10) return score10.toFixed(1);
+                                        return score10.toFixed(2);
+                                      })()} ({completedTests[test.id].correct}/{completedTests[test.id].total} câu)
                                     </span>
                                   ) : (
                                     <span style={{ fontSize: "14px", fontWeight: 700, color: "#13a62e" }}>

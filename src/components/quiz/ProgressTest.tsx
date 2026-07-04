@@ -294,7 +294,7 @@ export default function ProgressTest() {
 
     const incorrect = totalAnsweredCount - correct;
     const unanswered = totalQuestions - totalAnsweredCount;
-    const scoreVal = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+    const scoreVal = totalQuestions > 0 ? parseFloat(((correct / totalQuestions) * 100).toFixed(2)) : 0;
 
     setScoreData({
       correctCount: correct,
@@ -859,7 +859,14 @@ export default function ProgressTest() {
           {isSubmitted ? (
             <>
               <div className={styles.scoreCircle}>
-                <span className={styles.scoreNumber}>{scoreData.score}</span>
+                <span className={styles.scoreNumber}>
+                  {(() => {
+                    const score10 = scoreData.score / 10;
+                    if (Number.isInteger(score10)) return score10.toString();
+                    if (parseFloat(score10.toFixed(1)) === score10) return score10.toFixed(1);
+                    return score10.toFixed(2);
+                  })()}
+                </span>
                 <span className={styles.scoreLabel}>Điểm số</span>
               </div>
 

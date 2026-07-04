@@ -78,6 +78,7 @@ export default function SchoolExamsPage() {
   const [loading, setLoading] = useState(true);
   const [allowedExams, setAllowedExams] = useState<string[]>([]);
   const [role, setRole] = useState<string>("student");
+  const [completedExams, setCompletedExams] = useState<Record<string, { score: number; correct: number; total: number }>>({});
 
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
@@ -117,12 +118,45 @@ export default function SchoolExamsPage() {
           disabled: false
         }));
         setExams(formatted);
+
+        // Check localStorage for completed school exams
+        const completedMap: Record<string, { score: number; correct: number; total: number }> = {};
+        data.forEach((item: any) => {
+          try {
+            const saved = localStorage.getItem(`practice_completed_${item.id}`);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              completedMap[item.id] = {
+                score: parsed.score,
+                correct: parsed.correct,
+                total: parsed.total
+              };
+            }
+          } catch (e) {
+            // Ignore
+          }
+        });
+        setCompletedExams(completedMap);
       }
     } catch (e) {
       console.error("Lỗi khi tải đề thi thử:", e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRetakeExam = (e: React.MouseEvent, href: string, examId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      localStorage.removeItem(`practice_completed_${examId}`);
+    } catch (err) {}
+    setCompletedExams((prev) => {
+      const updated = { ...prev };
+      delete updated[examId];
+      return updated;
+    });
+    router.push(href);
   };
 
   useEffect(() => {
@@ -365,32 +399,66 @@ export default function SchoolExamsPage() {
                               {/* Footer CTA */}
                               <div className="card-course__footer">
                                 <div className="card-course__price-sale">
-                                  <span style={{ fontSize: "14px", fontWeight: 700, color: "#13a62e" }}>
-                                    Miễn phí
-                                  </span>
+                                  {completedExams[exam.id] ? (
+                                    <span style={{ fontSize: "13px", fontWeight: 600, color: "#35a873" }}>
+                                      Điểm: {(() => {
+                                        const score10 = completedExams[exam.id].score / 10;
+                                        if (Number.isInteger(score10)) return score10.toString();
+                                        if (parseFloat(score10.toFixed(1)) === score10) return score10.toFixed(1);
+                                        return score10.toFixed(2);
+                                      })()} ({completedExams[exam.id].correct}/{completedExams[exam.id].total} câu)
+                                    </span>
+                                  ) : (
+                                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#13a62e" }}>
+                                      Miễn phí
+                                    </span>
+                                  )}
                                 </div>
-                                <button
-                                  className={`btn card-course__cta${exam.disabled ? " disabled" : ""}`}
-                                  style={
-                                    exam.disabled
-                                      ? {
-                                          background: isHovered ? "#d1d1d6" : "#e5e5ea",
-                                          color: isHovered ? "#515154" : "#8a8a8e",
-                                          cursor: "not-allowed",
-                                        }
-                                      : undefined
-                                  }
-                                  onClick={(e) => {
-                                    if (exam.disabled) {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                    } else {
-                                      router.push(exam.href);
+                                {completedExams[exam.id] ? (
+                                  <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                    <button
+                                      className="btn card-course__cta"
+                                      style={{ background: "#6b7280", color: "#fff", fontSize: "12px", padding: "6px 10px", flexShrink: 0 }}
+                                      onClick={(e) => handleRetakeExam(e, exam.href, exam.id)}
+                                    >
+                                      Làm lại
+                                    </button>
+                                    <button
+                                      className="btn card-course__cta"
+                                      style={{ background: "#f59e0b", color: "#fff", fontSize: "12px", padding: "6px 10px", flexShrink: 0 }}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        router.push(`${exam.href}&review=true`);
+                                      }}
+                                    >
+                                      Xem chi tiết
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className={`btn card-course__cta${exam.disabled ? " disabled" : ""}`}
+                                    style={
+                                      exam.disabled
+                                        ? {
+                                            background: isHovered ? "#d1d1d6" : "#e5e5ea",
+                                            color: isHovered ? "#515154" : "#8a8a8e",
+                                            cursor: "not-allowed",
+                                          }
+                                        : undefined
                                     }
-                                  }}
-                                >
-                                  {exam.disabled && isHovered ? "Sắp ra mắt" : "Luyện tập ngay"}
-                                </button>
+                                    onClick={(e) => {
+                                      if (exam.disabled) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                      } else {
+                                        router.push(exam.href);
+                                      }
+                                    }}
+                                  >
+                                    {exam.disabled && isHovered ? "Sắp ra mắt" : "Luyện tập ngay"}
+                                  </button>
+                                )}
                               </div>
                             </a>
                           );

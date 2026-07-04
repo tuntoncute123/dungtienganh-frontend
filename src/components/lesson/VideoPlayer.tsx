@@ -183,9 +183,35 @@ export default function VideoPlayer({
 
           if (HlsClass) {
             if (HlsClass.isSupported()) {
-              const hls = new HlsClass();
+              // Optimizing buffering configuration specifically for mobile and slow networks
+              const hls = new HlsClass({
+                maxBufferLength: 30,         // Maximum buffer ahead in seconds
+                maxMaxBufferLength: 60,      // Max buffer size limit
+                enableWorker: true,          // Perform segment loading in a web worker to save CPU main thread
+                lowLatencyMode: false,
+                backBufferLength: 30,        // Retain 30 seconds of played back buffer to avoid reload on minor rewinds
+                appendErrorMaxRetry: 5       // Max retries on loading error
+              });
+
               hls.loadSource(finalVideoUrl);
               hls.attachMedia(video);
+
+              // Auto-recover streaming/audio stalls on network errors
+              hls.on(HlsClass.Events.ERROR, (event: any, data: any) => {
+                if (data.fatal) {
+                  switch (data.type) {
+                    case HlsClass.ErrorTypes.NETWORK_ERROR:
+                      hls.startLoad();
+                      break;
+                    case HlsClass.ErrorTypes.MEDIA_ERROR:
+                      hls.recoverMediaError();
+                      break;
+                    default:
+                      break;
+                  }
+                }
+              });
+
               activeHls = hls;
             } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
               video.src = finalVideoUrl;
@@ -195,10 +221,20 @@ export default function VideoPlayer({
       };
       loadHls();
 
+      // Trigger automatic buffer reload on native iOS players if data delivery stalls
+      const handleStalled = () => {
+        if (video && !video.paused) {
+          video.pause();
+          video.play().catch(() => {});
+        }
+      };
+      video.addEventListener("stalled", handleStalled);
+
       return () => {
         if (activeHls) {
           activeHls.destroy();
         }
+        video.removeEventListener("stalled", handleStalled);
       };
     } else {
       video.src = finalVideoUrl;
@@ -228,6 +264,7 @@ export default function VideoPlayer({
             ref={videoRef}
             controls
             playsInline
+            webkit-playsinline="true"
             preload="auto"
             style={{ width: "100%", maxHeight: "500px", borderRadius: 12, display: "block", background: "#000" }}
           />
