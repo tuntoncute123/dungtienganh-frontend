@@ -4579,6 +4579,22 @@ body {
   display: block;
 }
 
+@media (max-width: 480px) {
+  .login-page-container {
+    padding: 12px;
+  }
+  .login-card {
+    border-radius: 16px !important;
+  }
+  .login-card .ant-card-body {
+    padding: 24px 14px !important;
+  }
+  .login-subtitle {
+    font-size: 12px;
+    letter-spacing: -0.1px;
+  }
+}
+
 .login-form-button {
   height: 48px !important;
   border-radius: 12px !important;
