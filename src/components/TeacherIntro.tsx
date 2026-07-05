@@ -25,7 +25,6 @@ export default function TeacherIntro() {
                   width: 26,
                   height: 26,
                   borderRadius: "50%",
-                  objectFit: "cover",
                   display: "block"
                 }}
               />

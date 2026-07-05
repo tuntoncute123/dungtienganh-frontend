@@ -306,7 +306,6 @@ body {
 .avatar-btn img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
 
 /* Hamburger button */
@@ -423,7 +422,6 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  object-fit: cover;
   flex-shrink: 0;
 }
 
@@ -1240,6 +1238,7 @@ body {
     max-width: 100%;
     padding: 10px 8px;
   }
+
   .honor-stat-card:last-child:nth-child(odd) {
     flex: 1 1 100%;
   }
@@ -1463,6 +1462,7 @@ body {
   .show-more-desktop {
     display: none;
   }
+
   .show-more-mobile {
     display: inline;
   }
@@ -3353,13 +3353,11 @@ body {
 .active-story-item .content-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.45) 0%,
-    rgba(0, 0, 0, 0) 25%,
-    rgba(0, 0, 0, 0) 75%,
-    rgba(0, 0, 0, 0.6) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 0) 75%,
+      rgba(0, 0, 0, 0.6) 100%);
   z-index: 5;
   pointer-events: none;
 }
@@ -3504,12 +3502,10 @@ body {
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.3) 30%,
-    rgba(0, 0, 0, 0) 60%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.3) 30%,
+      rgba(0, 0, 0, 0) 60%);
   z-index: 2;
   pointer-events: none;
 }
@@ -3616,7 +3612,8 @@ body {
 .story-grid-item {
   position: relative;
   width: 100%;
-  aspect-ratio: 9/13.5; /* Uniform aspect-ratio for all story cards in the list */
+  aspect-ratio: 9/13.5;
+  /* Uniform aspect-ratio for all story cards in the list */
 }
 
 .story-item-link {
@@ -3702,12 +3699,10 @@ body {
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.65) 0%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0) 70%
-  );
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.65) 0%,
+      rgba(0, 0, 0, 0.2) 40%,
+      rgba(0, 0, 0, 0) 70%);
   z-index: 2;
   pointer-events: none;
 }
@@ -3731,10 +3726,10 @@ body {
   right: 0;
   height: 70%;
   background: radial-gradient(circle at 80% 20%, #fef08a, transparent 55%),
-              radial-gradient(circle at 15% 20%, #a5b4fc, transparent 55%),
-              radial-gradient(circle at 90% 80%, #f472b6, transparent 50%),
-              radial-gradient(circle at 10% 80%, #93c5fd, transparent 55%),
-              linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
+    radial-gradient(circle at 15% 20%, #a5b4fc, transparent 55%),
+    radial-gradient(circle at 90% 80%, #f472b6, transparent 50%),
+    radial-gradient(circle at 10% 80%, #93c5fd, transparent 55%),
+    linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -3831,6 +3826,7 @@ body {
 }
 
 @media (max-width: 575px) {
+
   /* 1. General list grid of exams/tests/courses */
   .list-category__course {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -3841,29 +3837,36 @@ body {
   .course-card-figure {
     height: 95px !important;
   }
+
   .course-thumbnail {
     height: 95px !important;
   }
+
   .course-body {
     padding: 8px 10px 10px !important;
   }
+
   .course-title {
     font-size: 12.5px !important;
     line-height: 1.35 !important;
     min-height: 34px !important;
     -webkit-line-clamp: 2 !important;
   }
+
   .course-meta {
     margin-top: 6px !important;
     gap: 2px !important;
   }
+
   .course-units {
     font-size: 11px !important;
   }
+
   .course-exercises {
     font-size: 11px !important;
     gap: 2px !important;
   }
+
   .course-exercises img {
     width: 14px !important;
     height: 14px !important;
@@ -3874,62 +3877,77 @@ body {
     padding: 8px !important;
     gap: 6px !important;
   }
+
   .card-course__title {
     font-size: 12px !important;
     line-height: 1.3 !important;
-    height: 32px !important; /* 2 lines of text */
+    height: 32px !important;
+    /* 2 lines of text */
   }
+
   .card-course__teacher {
     gap: 4px !important;
   }
+
   .card-course__teacher-name {
     font-size: 10px !important;
   }
+
   .item-teacher {
     font-size: 10px !important;
   }
+
   .card-course__options img {
     height: 14px !important;
     width: 14px !important;
   }
+
   .card-course__info-group {
     gap: 4px !important;
     padding-top: 8px !important;
     margin-top: auto !important;
   }
+
   .card-course__lesson-info {
     font-size: 9.5px !important;
     gap: 2px !important;
   }
+
   .card-course__lesson-info svg {
     width: 11px !important;
     height: 11px !important;
   }
+
   .card-course__footer {
     padding: 8px 10px !important;
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 8px !important;
   }
+
   .card-course__price-sale {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
   }
+
   .card-course__price {
     display: flex !important;
     flex-direction: row !important;
     align-items: baseline !important;
     gap: 6px !important;
   }
+
   .price-main {
     font-size: 13.5px !important;
   }
+
   .price-sale {
     font-size: 10.5px !important;
     margin-top: 0 !important;
   }
+
   .card-course__cta {
     width: 100% !important;
     text-align: center !important;
@@ -3942,29 +3960,35 @@ body {
     padding: 12px 8px !important;
     min-height: 200px !important;
   }
+
   .fc-deck-badge {
     font-size: 10px !important;
     padding: 2px 6px !important;
     margin-bottom: 8px !important;
   }
+
   .fc-deck-title {
     font-size: 12.5px !important;
     margin-bottom: 8px !important;
     min-height: 48px !important;
     margin-top: 2px !important;
   }
+
   .fc-deck-info {
     margin-bottom: 12px !important;
     font-size: 11px !important;
   }
+
   .fc-deck-footer {
     gap: 4px !important;
   }
+
   .fc-footer-btn {
     width: 25px !important;
     height: 25px !important;
     font-size: 12px !important;
   }
+
   .fc-lock-overlay .fc-lock-btn {
     font-size: 11px !important;
     padding: 4px 8px !important;
@@ -3994,7 +4018,8 @@ body {
 .streak-dropdown-container {
   width: 360px;
   max-width: calc(100vw - 24px);
-  background: #fffbf5; /* Warm background */
+  background: #fffbf5;
+  /* Warm background */
   padding: 24px 20px;
   display: flex;
   flex-direction: column;
@@ -4019,8 +4044,15 @@ body {
 }
 
 @keyframes floatFire {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 .streak-count-title {
@@ -4130,7 +4162,7 @@ body {
 .streak-badge-icon {
   font-size: 26px;
   margin-bottom: 4px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 .streak-badge-card.locked .streak-badge-icon {
@@ -4152,7 +4184,8 @@ body {
 }
 
 .streak-badge-card.unlocked .streak-badge-status {
-  color: #34a853; /* Success color */
+  color: #34a853;
+  /* Success color */
 }
 
 /* Lock/unlock icons overlay */
@@ -4228,7 +4261,7 @@ body {
   border-radius: 50%;
   border: 2px solid #ff9305;
   margin-bottom: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .streak-share-username {
@@ -4278,33 +4311,42 @@ body {
   .streak-dropdown-container {
     padding: 16px 12px !important;
   }
+
   .streak-count-title {
     font-size: 20px !important;
   }
+
   .streak-sub-title {
     font-size: 13.5px !important;
     margin-bottom: 14px !important;
   }
+
   .streak-rules-list {
     padding: 12px 8px !important;
     gap: 10px !important;
     margin-bottom: 14px !important;
   }
+
   .streak-rule-text {
     font-size: 12px !important;
   }
+
   .streak-milestones-title {
     margin-bottom: 8px !important;
   }
+
   .streak-badge-target {
     font-size: 10.5px !important;
   }
+
   .streak-badge-status {
     font-size: 9px !important;
   }
+
   .streak-badge-icon {
     font-size: 20px !important;
   }
+
   .streak-share-btn {
     height: 38px !important;
     font-size: 13px !important;
@@ -4339,6 +4381,7 @@ body {
     margin-right: -16px;
     margin-bottom: -16px;
   }
+
   .app-footer {
     padding: 32px 16px 20px 16px;
   }
@@ -4501,25 +4544,25 @@ body {
     padding: 32px 24px 20px 24px;
     text-align: center;
   }
-  
+
   .footer-logo-wrapper {
     justify-content: center;
   }
-  
+
   .footer-social-links {
     justify-content: center;
     margin-bottom: 24px;
   }
-  
+
   .footer-col-title::after {
     left: 50%;
     transform: translateX(-50%);
   }
-  
+
   .footer-links-list a:hover {
     transform: none;
   }
-  
+
   .footer-contact-list li {
     justify-content: center;
   }
@@ -4582,12 +4625,15 @@ body {
   .login-page-container {
     padding: 12px;
   }
+
   .login-card {
     border-radius: 16px !important;
   }
+
   .login-card .ant-card-body {
     padding: 24px 14px !important;
   }
+
   .login-subtitle {
     font-size: 12px;
     letter-spacing: -0.1px;
