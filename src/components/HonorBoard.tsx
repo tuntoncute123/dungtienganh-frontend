@@ -56,16 +56,16 @@ export default function HonorBoard() {
             key={stat.id}
             className="honor-stat-card"
             style={{ 
-              borderColor: "#35a873", 
-              backgroundColor: "#35a873",
+              borderColor: "#bbf7d0", 
+              backgroundColor: "#f0fdf4",
               borderWidth: "2px",
               borderStyle: "solid"
             }}
           >
-            <div className="honor-stat-value" style={{ color: "#ffffff" }}>
+            <div className="honor-stat-value" style={{ color: "#15803d" }}>
               {stat.value}
             </div>
-            <div className="honor-stat-label" style={{ color: "#ffffff" }}>
+            <div className="honor-stat-label" style={{ color: "#16a34a" }}>
               {stat.label}
             </div>
           </div>
