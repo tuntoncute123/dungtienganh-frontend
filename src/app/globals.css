@@ -320,7 +320,6 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 0 0 3px #d3eaff;
   outline: none;
   flex-shrink: 0;
 }

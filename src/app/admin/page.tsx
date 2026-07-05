@@ -838,6 +838,17 @@ export default function AdminPage() {
             duration: data.duration,
             questions: mappedQuestions
           });
+        } else if (res.status === 404) {
+          msg.warning("Không tìm thấy bài tập cũ (có thể đã bị xóa). Hệ thống sẽ chuẩn bị tạo bài tập mới.");
+          lessonForm.setFieldsValue({ exerciseId: undefined });
+          exerciseForm.resetFields();
+          exerciseForm.setFieldsValue({
+            title: `Bài tập: ${lessonForm.getFieldValue("title") || "Bài giảng mới"}`,
+            duration: 20,
+            questions: []
+          });
+        } else {
+          msg.error("Lỗi khi tải bài tập cũ");
         }
       } catch (e) {
         msg.error("Lỗi khi tải bài tập cũ");
