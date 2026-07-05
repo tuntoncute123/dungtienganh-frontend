@@ -2112,12 +2112,12 @@ export default function AdminPage() {
                         </Col>
                         <Col xs={24} sm={12} md={6}>
                           <Form.Item {...restField} name={[name, "partTitle"]} label="Tiêu đề phần (Bài tập)">
-                            <Input placeholder="Ví dụ: Bài tập 1: Chia động từ" />
+                            <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Ví dụ: Bài tập 1: Chia động từ" />
                           </Form.Item>
                         </Col>
                         <Col xs={24} sm={24} md={12}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
-                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
+                            <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -2617,12 +2617,12 @@ export default function AdminPage() {
                         </Col>
                         <Col xs={24} sm={12} md={6}>
                           <Form.Item {...restField} name={[name, "partTitle"]} label="Tiêu đề phần (Bài tập)">
-                            <Input placeholder="Ví dụ: Bài tập 1: Chia động từ" />
+                            <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Ví dụ: Bài tập 1: Chia động từ" />
                           </Form.Item>
                         </Col>
                         <Col xs={24} sm={24} md={12}>
                           <Form.Item {...restField} name={[name, "text"]} label="Nội dung câu hỏi" rules={[{ required: true, message: "Nhập nội dung" }]}>
-                            <Input placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
+                            <TextArea autoSize={{ minRows: 1, maxRows: 3 }} placeholder="Nhập câu hỏi. (Dùng _____ 5 dấu gạch dưới để làm ô trống điền từ)" onPaste={handlePasteRichText} />
                           </Form.Item>
                         </Col>
                       </Row>
