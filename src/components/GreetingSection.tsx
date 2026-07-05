@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 const AVATAR =
-  "/assets/fb250dbf83b979e24f4f_79779ecd.jpg";
+  "/assets/green_avatar.png";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function GreetingSection() {

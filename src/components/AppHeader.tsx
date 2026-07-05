@@ -14,7 +14,7 @@ const ICONS = {
   chevronDown: "/assets/1ceef3f6517e9ff843ac_d05eb16e.svg",
   streak: "/assets/8ba239a060b337b51758_3b5a2ca8.svg",
   bell: "/assets/3a3f0536d83aeaf2f911_cdc3298d.svg",
-  avatar: "/assets/5d5e5c98f63a53979d76_3c61bd87.jpg",
+  avatar: "/assets/green_avatar.png",
 };
 
 interface AppHeaderProps {

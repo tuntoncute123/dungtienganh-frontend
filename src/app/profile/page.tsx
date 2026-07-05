@@ -1336,60 +1336,7 @@ const getHeatmapCells = () => {
               {/* Two Column Details Grid: Cần luyện tập thêm & Từ vựng */}
               <div className={styles.detailsGrid}>
 
-                {/* Cần luyện tập thêm (Điểm yếu) */}
-                <div className={styles.detailsCard}>
-                  <div className={styles.detailsTitleRow}>
-                    <div className={styles.detailsIcon}>
-                      <img
-                        src="https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F763cb4c9254469015ffb480e1d973b6ab26f5bf0.svg?generation=1782490146460049&alt=media"
-                        alt="Điểm yếu"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </div>
-                    <span>Cần luyện tập thêm (Điểm yếu)</span>
-                  </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 4 }}>
-                    <div style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 12, backgroundColor: "#f9fafb" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontWeight: 600, fontSize: 13, color: "#1c2a4c" }}>Thì hiện tại hoàn thành (Present Perfect)</span>
-                        <span style={{ fontWeight: "bold", fontSize: 13, color: "#ef4444" }}>42% chính xác</span>
-                      </div>
-                      <div className={styles.cardProgressTrack} style={{ height: 6, marginTop: 4 }}>
-                        <div className={styles.cardProgressBar} style={{ width: "42%", backgroundColor: "#ef4444" }} />
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-                        <button style={{ backgroundColor: "#ef4444", color: "#fff", border: "none", borderRadius: 6, fontSize: 11, padding: "4px 10px", cursor: "pointer", fontWeight: 600 }}>Luyện tập ngay</button>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 12, backgroundColor: "#f9fafb" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontWeight: 600, fontSize: 13, color: "#1c2a4c" }}>Phrasal Verbs with 'Take' & 'Get'</span>
-                        <span style={{ fontWeight: "bold", fontSize: 13, color: "#f59e0b" }}>55% chính xác</span>
-                      </div>
-                      <div className={styles.cardProgressTrack} style={{ height: 6, marginTop: 4 }}>
-                        <div className={styles.cardProgressBar} style={{ width: "55%", backgroundColor: "#f59e0b" }} />
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-                        <button style={{ backgroundColor: "#f59e0b", color: "#fff", border: "none", borderRadius: 6, fontSize: 11, padding: "4px 10px", cursor: "pointer", fontWeight: 600 }}>Luyện tập ngay</button>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: 12, border: "1px solid #e5e7eb", borderRadius: 12, backgroundColor: "#f9fafb" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                        <span style={{ fontWeight: 600, fontSize: 13, color: "#1c2a4c" }}>Câu điều kiện loại 3 & Hỗn hợp</span>
-                        <span style={{ fontWeight: "bold", fontSize: 13, color: "#f59e0b" }}>58% chính xác</span>
-                      </div>
-                      <div className={styles.cardProgressTrack} style={{ height: 6, marginTop: 4 }}>
-                        <div className={styles.cardProgressBar} style={{ width: "58%", backgroundColor: "#f59e0b" }} />
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
-                        <button style={{ backgroundColor: "#f59e0b", color: "#fff", border: "none", borderRadius: 6, fontSize: 11, padding: "4px 10px", cursor: "pointer", fontWeight: 600 }}>Luyện tập ngay</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Từ vựng */}
                 <div className={styles.detailsCard}>
