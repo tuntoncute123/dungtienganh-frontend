@@ -215,7 +215,7 @@ function LessonPageContent() {
                 },
                 {
                   title: (
-                    <span style={{ color: "#f40c44" }}>{lesson.title}</span>
+                    <span style={{ color: "#35a873" }}>{lesson.title}</span>
                   ),
                 },
               ]}

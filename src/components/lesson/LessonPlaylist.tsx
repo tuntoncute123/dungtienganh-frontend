@@ -45,9 +45,9 @@ export default function LessonPlaylist({ currentLessonId, lessons = [], courseId
                     {item.isLocked ? (
                       <span style={{ fontSize: 16, color: "#94a3b8" }}>🔒</span>
                     ) : isTest ? (
-                      <ClockCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+                      <ClockCircleOutlined style={{ fontSize: 18, color: isActive ? "#35a873" : "#9ca3af" }} />
                     ) : (
-                      <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#f40c44" : "#9ca3af" }} />
+                      <PlayCircleOutlined style={{ fontSize: 18, color: isActive ? "#35a873" : "#9ca3af" }} />
                     )}
                   </span>
                   <span 

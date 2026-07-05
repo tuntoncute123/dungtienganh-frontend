@@ -380,7 +380,7 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         <Popover
           content={streakPopoverContent}
           trigger="click"
-          placement="bottomRight"
+          placement={isMobile ? "bottom" : "bottomRight"}
           open={popoverOpen}
           onOpenChange={setPopoverOpen}
           overlayClassName="streak-popover"

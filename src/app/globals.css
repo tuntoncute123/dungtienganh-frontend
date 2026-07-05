@@ -1284,8 +1284,8 @@ body {
 }
 
 .honor-th {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  color: #15803d;
+  background: #35a873;
+  color: #ffffff;
   font-weight: 700;
   font-size: 13px;
   padding: 14px 16px;
@@ -2130,7 +2130,7 @@ body {
 }
 
 .lp-playlist-item-active {
-  background: rgba(244, 12, 68, 0.04);
+  background: rgba(53, 168, 115, 0.08);
   border-radius: 6px;
   padding-left: 4px;
 }
@@ -2149,7 +2149,7 @@ body {
 }
 
 .lp-playlist-title-active {
-  color: #f40c44;
+  color: #35a873;
   font-weight: 600;
 }
 
@@ -4274,7 +4274,7 @@ body {
   font-style: italic;
 }
 
-@media (max-width: 359px) {
+@media (max-width: 480px) {
   .streak-dropdown-container {
     padding: 16px 12px !important;
   }
