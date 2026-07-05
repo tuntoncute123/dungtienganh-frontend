@@ -57,7 +57,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/flashcard">
-                  <Space><span className="footer-bullet">⚡</span> Flashcard</Space>
+                  <Space><span className="footer-bullet">⚡</span> Flashcards</Space>
                 </Link>
               </li>
               <li>
@@ -67,7 +67,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/story">
-                  <Space><span className="footer-bullet">📖</span> Truyện chêm</Space>
+                  <Space><span className="footer-bullet">📖</span> Story</Space>
                 </Link>
               </li>
             </ul>
