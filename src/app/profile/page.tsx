@@ -97,8 +97,8 @@ const WeekChart: React.FC<ChartProps> = ({ data = [] }) => {
   const xCoords = [70, 180, 290, 400, 510, 620, 730];
 
   const getCurve = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVals: number[]) => {
-    if (!data || data.length < 7) {
-      return getPathData(defaultVals, xCoords);
+    if (!data || data.length === 0) {
+      return getPathData([0, 0, 0, 0, 0, 0, 0], xCoords);
     }
     const points = data.slice(-7);
     const vals = points.map(p => {
@@ -114,7 +114,7 @@ const WeekChart: React.FC<ChartProps> = ({ data = [] }) => {
   };
 
   const getLastPoint = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVal: number) => {
-    if (!data || data.length === 0) return 230 - defaultVal * 2;
+    if (!data || data.length === 0) return 230; // 0%
     const last = data[data.length - 1];
     let val = 0;
     if (type === 'flashcard') val = Math.min(100, last.flashcard);
@@ -173,13 +173,19 @@ const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
   const xCoords = [137.5, 312.5, 487.5, 662.5];
 
   const getCurve = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVals: number[]) => {
-    if (!data || data.length < 28) {
-      return getPathData(defaultVals, xCoords);
+    if (!data || data.length === 0) {
+      return getPathData([0, 0, 0, 0], xCoords);
     }
+    const paddedData = [...data];
+    while (paddedData.length < 28) {
+      paddedData.unshift({ flashcard: 0, theory: 0, exercise: 0, exam: 0 });
+    }
+    const points = paddedData.slice(-28);
+
     const weeks = [0, 0, 0, 0];
     const counts = [0, 0, 0, 0];
 
-    data.forEach((p, idx) => {
+    points.forEach((p, idx) => {
       let weekIdx = Math.min(3, Math.floor(idx / 7));
       let val = 0;
       if (type === 'flashcard') val = Math.min(100, p.flashcard);
@@ -196,9 +202,12 @@ const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
   };
 
   const getLastPoint = (type: 'flashcard' | 'theory' | 'exercise' | 'exam', defaultVal: number) => {
-    if (!data || data.length < 28) return 230 - defaultVal * 2;
-    const lastWeek = data.slice(-7);
-    if (lastWeek.length === 0) return 230 - defaultVal * 2;
+    if (!data || data.length === 0) return 230; // 0%
+    const paddedData = [...data];
+    while (paddedData.length < 28) {
+      paddedData.unshift({ flashcard: 0, theory: 0, exercise: 0, exam: 0 });
+    }
+    const lastWeek = paddedData.slice(-7);
     let sum = 0;
     lastWeek.forEach(p => {
       let val = 0;
@@ -265,6 +274,8 @@ export default function ProfilePage() {
   const [exams, setExams] = useState<any[]>([]);
   const [dbStats, setDbStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [flashcardDecks, setFlashcardDecks] = useState<any[]>([]);
+  const [deckProgress, setDeckProgress] = useState<any>({});
 
   // Profile Edit states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -375,6 +386,23 @@ export default function ProfilePage() {
           const statsData = await resDbStats.json();
           setDbStats(statsData);
         }
+
+        // Fetch all flashcards for dynamic stats
+        const resFc = await fetch(`${API_BASE_URL}/api/flashcards`);
+        if (resFc.ok) {
+          const fcData = await resFc.json();
+          if (Array.isArray(fcData)) {
+            setFlashcardDecks(fcData);
+          }
+        }
+
+        // Load flashcard progress from localStorage
+        const prog = localStorage.getItem("fc_progress");
+        if (prog) {
+          try {
+            setDeckProgress(JSON.parse(prog));
+          } catch (e) {}
+        }
       } catch (e) {
         console.error("Failed to fetch profile and stats", e);
       } finally {
@@ -409,6 +437,118 @@ export default function ProfilePage() {
     } else {
       setDrawerOpen(true);
     }
+  };
+
+  // Dynamic Vocabulary / Flashcard stats
+  const totalVocab = flashcardDecks.reduce((sum, d) => sum + (d.cards?.length || d.cardCount || 0), 0) || 19561;
+  const masteredVocab = Object.keys(deckProgress).reduce((sum, deckId) => {
+    const cards = deckProgress[deckId];
+    return sum + (Array.isArray(cards) ? cards.length : 0);
+  }, 0);
+
+  // Calculate started vocab: sum of all cards in decks where user has mastered at least one card
+  const startedVocab = Object.keys(deckProgress).reduce((sum, deckId) => {
+    const deck = flashcardDecks.find(d => d.id === deckId);
+    return sum + (deck?.cards?.length || deck?.cardCount || 0);
+  }, 0) || (masteredVocab > 0 ? masteredVocab + 10 : 0);
+
+  const unstudiedVocab = Math.max(0, totalVocab - startedVocab);
+  const vocabPercentVal = totalVocab > 0 ? Math.min(100, Math.round((startedVocab / totalVocab) * 100)) : 0;
+
+  // Time formatting helpers
+  const formatTimeAgo = (dateStr: Date | string) => {
+    const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (60 * 1000));
+    const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+    if (diffMins < 60) {
+      return diffMins <= 0 ? "Vừa xong" : `${diffMins} phút trước`;
+    } else if (diffHours < 24) {
+      return `${diffHours} giờ trước`;
+    } else if (diffDays === 1) {
+      return "Hôm qua";
+    } else {
+      const day = date.getDate().toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+  };
+
+  const formatDate = (dateStr: Date | string) => {
+    const date = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Dynamic Quiz History
+  const getQuizHistory = () => {
+    const history: any[] = [];
+    lessons.forEach(l => {
+      if (l.exerciseId) {
+        const saved = localStorage.getItem(`practice_completed_${l.exerciseId}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            history.push({
+              id: l.exerciseId,
+              title: `Quiz: ${l.title}`,
+              completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
+              correct: parsed.correct || 0,
+              total: parsed.total || 10,
+              score: parsed.score || 0
+            });
+          } catch(e) {}
+        }
+      }
+    });
+    return history.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  };
+
+  // Dynamic Test History
+  const getTestHistory = () => {
+    const history: any[] = [];
+    exams.forEach(e => {
+      const saved = localStorage.getItem(`practice_completed_${e.id}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          history.push({
+            id: e.id,
+            title: e.title,
+            completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
+            correct: parsed.correct || 0,
+            total: parsed.total || 50,
+            score: parsed.score || 0
+          });
+        } catch(err) {}
+      }
+    });
+    return history.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  };
+
+  // Dynamic Flashcard History
+  const getFlashcardHistory = () => {
+    const history: any[] = [];
+    flashcardDecks.forEach(d => {
+      const mastered = deckProgress[d.id] || [];
+      if (mastered.length > 0) {
+        const total = d.cards?.length || d.cardCount || 10;
+        history.push({
+          id: d.id,
+          title: d.title,
+          masteredCount: mastered.length,
+          totalCount: total,
+          isCompleted: mastered.length >= total
+        });
+      }
+    });
+    return history;
   };
 
   // Stats data mapping based on selected timeframe
@@ -460,7 +600,7 @@ export default function ProfilePage() {
           const parsed = JSON.parse(saved);
           if (filterByTime(parsed.completedAt)) {
             completedHomework++;
-            homeworkScoresSum += parsed.percent || 0;
+            homeworkScoresSum += parsed.percent || parsed.score || 0;
           }
         } catch (e) {}
       }
@@ -482,7 +622,7 @@ export default function ProfilePage() {
           const parsed = JSON.parse(saved);
           if (filterByTime(parsed.completedAt)) {
             completedExams++;
-            const scoreTen = (parsed.percent || 0) / 10;
+            const scoreTen = (parsed.percent || parsed.score || 0) / 10;
             examScoresSum += scoreTen;
             if (scoreTen > maxExamScore) maxExamScore = scoreTen;
           }
@@ -495,9 +635,9 @@ export default function ProfilePage() {
     const testAttemptsStr = `${completedExams} lần thi`;
 
     // 4. Flashcard
-    const flashcardTotal = allowedCourses.length * 100 || 300;
-    const flashcardPercent = totalHomework > 0 ? Math.min(100, Math.round((completedHomework / totalHomework) * 85) || 40) : 40;
-    const flashcardVal = Math.round((flashcardPercent / 100) * flashcardTotal);
+    const flashcardTotal = totalVocab;
+    const flashcardPercent = totalVocab > 0 ? Math.min(100, Math.round((masteredVocab / totalVocab) * 100)) : 0;
+    const flashcardVal = masteredVocab;
     const flashcardAccuracy = totalHomework > 0 && completedHomework > 0 ? Math.round(homeworkScoresSum / completedHomework) || 85 : 85;
 
     // 5. Giữ chuỗi (Streak)
@@ -532,7 +672,7 @@ export default function ProfilePage() {
       flashcardTotal: flashcardTotal.toString(),
       flashcardPercent,
       flashcardAccuracy,
-      flashcardNew: tf === "week" ? "+ 25 từ mới" : tf === "month" ? "+ 110 từ mới" : `+ ${flashcardVal} từ thuộc`,
+      flashcardNew: tf === "week" ? "+ 0 từ mới" : tf === "month" ? "+ 0 từ mới" : `+ ${flashcardVal} từ thuộc`,
 
       theoryVal: completedVideos.toString(),
       theoryTotal: totalVideos.toString(),
@@ -563,11 +703,11 @@ export default function ProfilePage() {
   const stats = dbStats && dbStats.summary ? {
     timeframeLabel: timeframe === "week" ? "Tuần này" : timeframe === "month" ? "Tháng này" : "Tổng",
     
-    flashcardVal: (dbStats.summary.completedExercises * 8).toString(),
-    flashcardTotal: localStats.flashcardTotal,
-    flashcardPercent: Math.min(100, Math.round(((dbStats.summary.completedExercises * 8) / (parseInt(localStats.flashcardTotal) || 1)) * 100)) || localStats.flashcardPercent,
+    flashcardVal: masteredVocab.toString(),
+    flashcardTotal: totalVocab.toString(),
+    flashcardPercent: totalVocab > 0 ? Math.min(100, Math.round((masteredVocab / totalVocab) * 100)) : 0,
     flashcardAccuracy: dbStats.summary.avgExerciseScore || localStats.flashcardAccuracy,
-    flashcardNew: timeframe === "week" ? `+ ${dbStats.summary.completedExercises * 2} từ mới` : timeframe === "month" ? `+ ${dbStats.summary.completedExercises * 5} từ mới` : `+ ${dbStats.summary.completedExercises * 5} từ thuộc`,
+    flashcardNew: timeframe === "week" ? `+ ${dbStats.summary.completedExercises * 2} từ mới` : timeframe === "month" ? `+ ${dbStats.summary.completedExercises * 5} từ mới` : `+ ${masteredVocab} từ thuộc`,
 
     theoryVal: dbStats.summary.completedLessons.toString(),
     theoryTotal: localStats.theoryTotal,
@@ -777,7 +917,7 @@ export default function ProfilePage() {
 const getHeatmapCells = () => {
     const cells = new Array(98).fill(0);
     if (!dbStats || !dbStats.heatmap || dbStats.heatmap.length === 0) {
-      return mockHeatmapCells;
+      return cells;
     }
 
     const heatmapMap = new Map<string, number>();
@@ -1349,23 +1489,23 @@ const getHeatmapCells = () => {
                       />
                     </div>
                     <span>Từ vựng</span>
-                    <span className={styles.detailsTitleSpan}>Tổng hệ thống: 19561 từ</span>
+                    <span className={styles.detailsTitleSpan}>Tổng hệ thống: {totalVocab} từ</span>
                   </div>
 
                   <div>
                     <div className={styles.vocabStatRow}>
-                      <span className={styles.vocabBigNumber}>850</span>
+                      <span className={styles.vocabBigNumber}>{startedVocab}</span>
                       <span className={styles.vocabLabelText}>
-                        <strong>/ 19561</strong> từ đã bắt đầu học
+                        <strong>/ {totalVocab}</strong> từ đã bắt đầu học
                       </span>
-                      <span className={styles.vocabPercentage}>4.3 %</span>
+                      <span className={styles.vocabPercentage}>{vocabPercentVal} %</span>
                     </div>
 
                     <div className={styles.cardProgressTrack}>
                       <div
                         className={styles.cardProgressBar}
                         style={{
-                          width: "4.3%",
+                          width: `${vocabPercentVal}%`,
                           backgroundImage: "linear-gradient(to right, rgb(52, 211, 153), rgb(16, 185, 129))"
                         }}
                       />
@@ -1380,7 +1520,7 @@ const getHeatmapCells = () => {
                         />
                       </div>
                       <span className={styles.vocabGreenText}>
-                        Trong đó <strong>240</strong> từ đã thuộc
+                        Trong đó <strong>{masteredVocab}</strong> từ đã thuộc
                       </span>
                     </div>
                   </div>
@@ -1395,7 +1535,7 @@ const getHeatmapCells = () => {
                         />
                       </div>
                       <div>
-                        <p className={styles.vocabGridValue}>18711</p>
+                        <p className={styles.vocabGridValue}>{unstudiedVocab}</p>
                         <p className={styles.vocabGridLabel}>Chưa học</p>
                       </div>
                     </div>
@@ -1460,7 +1600,7 @@ const getHeatmapCells = () => {
                   </div>
                 </div>
 
-                {/* History table mock */}
+                {/* History table dynamic */}
                 <div style={{ minHeight: 200, padding: 20 }}>
                   {historyTab === "quiz" && (
                     <div style={{ overflowX: "auto" }}>
@@ -1474,18 +1614,22 @@ const getHeatmapCells = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>Quiz: Thì hiện tại đơn</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>2 giờ trước</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>9/10 câu</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#10b981" }}>90%</td>
-                          </tr>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>Quiz: Động từ khuyết thiếu</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>Hôm qua</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>8/10 câu</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#10b981" }}>80%</td>
-                          </tr>
+                          {getQuizHistory().length > 0 ? (
+                            getQuizHistory().map((item) => (
+                              <tr key={item.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                                <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>{item.title}</td>
+                                <td style={{ padding: "12px 8px", color: "#6b7280" }}>{formatTimeAgo(item.completedAt)}</td>
+                                <td style={{ padding: "12px 8px", color: "#6b7280" }}>{item.correct}/{item.total} câu</td>
+                                <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#10b981" }}>{item.score}%</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={4} style={{ padding: "20px 8px", color: "#a3acc2", textAlign: "center" }}>
+                                Chưa có lịch sử làm bài Quiz.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1503,18 +1647,24 @@ const getHeatmapCells = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>Academic Vocabulary - Unit 1</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>3 giờ trước</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>20 từ</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#10b981" }}>Đạt mục tiêu</td>
-                          </tr>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>IELTS Topic: Environment</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>3 ngày trước</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>15 từ</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "#10b981" }}>Đạt mục tiêu</td>
-                          </tr>
+                          {getFlashcardHistory().length > 0 ? (
+                            getFlashcardHistory().map((item) => (
+                              <tr key={item.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                                <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>{item.title}</td>
+                                <td style={{ padding: "12px 8px", color: "#6b7280" }}>Đang học</td>
+                                <td style={{ padding: "12px 8px", color: "#6b7280" }}>{item.masteredCount}/{item.totalCount} từ</td>
+                                <td style={{ padding: "12px 8px", fontWeight: "bold", color: item.isCompleted ? "#10b981" : "#f59e0b" }}>
+                                  {item.isCompleted ? "Đạt mục tiêu" : "Đang tiến bộ"}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={4} style={{ padding: "20px 8px", color: "#a3acc2", textAlign: "center" }}>
+                                Chưa có lịch sử học Flashcard.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1527,23 +1677,27 @@ const getHeatmapCells = () => {
                           <tr style={{ borderBottom: "1px solid #e5e7eb", color: "#a3acc2" }}>
                             <th style={{ padding: "12px 8px" }}>Đề kiểm tra</th>
                             <th style={{ padding: "12px 8px" }}>Ngày thi</th>
-                            <th style={{ padding: "12px 8px" }}>Thời gian làm bài</th>
                             <th style={{ padding: "12px 8px" }}>Kết quả</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>Đề thi thử THPT Quốc gia 2026 - Lần 1</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>25/06/2026</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>58 phút</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "rgb(139, 92, 246)" }}>8.2 / 10</td>
-                          </tr>
-                          <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>Mini Test 5: Reading Comprehension</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>20/06/2026</td>
-                            <td style={{ padding: "12px 8px", color: "#6b7280" }}>30 phút</td>
-                            <td style={{ padding: "12px 8px", fontWeight: "bold", color: "rgb(139, 92, 246)" }}>9.5 / 10</td>
-                          </tr>
+                          {getTestHistory().length > 0 ? (
+                            getTestHistory().map((item) => (
+                              <tr key={item.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                                <td style={{ padding: "12px 8px", fontWeight: 600, color: "#1c2a4c" }}>{item.title}</td>
+                                <td style={{ padding: "12px 8px", color: "#6b7280" }}>{formatDate(item.completedAt)}</td>
+                                <td style={{ padding: "12px 8px", fontWeight: "bold", color: "rgb(139, 92, 246)" }}>
+                                  {(item.score / 10).toFixed(1)} / 10
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={3} style={{ padding: "20px 8px", color: "#a3acc2", textAlign: "center" }}>
+                                Chưa có lịch sử làm bài kiểm tra.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
