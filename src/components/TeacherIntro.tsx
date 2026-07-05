@@ -63,7 +63,7 @@ export default function TeacherIntro() {
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Giáo viên Tiếng Anh đã đồng hành cùng hơn <strong>10.000 học sinh</strong> 2K8 và có hơn <strong>5.000 học sinh</strong> đăng ký tham gia các khoá học.
+                  Giáo viên Tiếng Anh đã đồng hành cùng hơn <strong>10.000 học sinh</strong> và có hơn <strong>5.000 học sinh</strong> đăng ký tham gia các khoá học.
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
