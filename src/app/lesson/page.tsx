@@ -213,22 +213,6 @@ function LessonPageContent() {
                     </Link>
                   ) 
                 },
-                { 
-                  title: (
-                    <span style={{ color: "inherit" }}>
-                      {(() => {
-                        const titleLower = (lesson?.title || "").toLowerCase();
-                        if (titleLower.includes("từ loại")) {
-                          return "CHUYÊN ĐỀ 01: TỪ LOẠI | LÝ THUYẾT TRỌNG TÂM VÀ ỨNG DỤNG";
-                        }
-                        if (titleLower.includes("thì") || titleLower.includes("tense")) {
-                          return "CHUYÊN ĐỀ 02: CÁC THÌ TRONG TIẾNG ANH | THÌ HIỆN TẠI VÀ QUÁ KHỨ";
-                        }
-                        return "CHUYÊN ĐỀ: BÀI GIẢNG TRỌNG TÂM";
-                      })()}
-                    </span>
-                  ) 
-                },
                 {
                   title: (
                     <span style={{ color: "#f40c44" }}>{lesson.title}</span>
