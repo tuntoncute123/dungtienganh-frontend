@@ -66,6 +66,17 @@
   transition: width 0.3s ease;
 }
 
+.partHeader {
+  margin: 16px 0 8px;
+  padding: 10px 16px;
+  background: linear-gradient(90deg, rgba(53, 168, 115, 0.1), rgba(53, 168, 115, 0.02));
+  border-left: 4px solid #35a873;
+  border-radius: 0 8px 8px 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: #35a873;
+}
+
 .questionsList {
   display: flex;
   flex-direction: column;

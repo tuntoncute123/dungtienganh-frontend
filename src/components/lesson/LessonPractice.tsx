@@ -23,6 +23,7 @@ interface Question {
   options: any; // e.g. { A: "...", B: "..." }
   correctAnswer: string;
   explanation?: string | null;
+  partTitle?: string | null;
 }
 
 interface Exam {
@@ -301,20 +302,98 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
 
       {/* Questions list */}
       <div className={styles.questionsList}>
-        {questions.map((q) => {
+        {questions.map((q, index) => {
           const userAns = answers[q.number] || "";
           const hasOptions = q.options && (q.options.A || q.options.B || q.options.C || q.options.D);
           const isCorrect = isQuestionCorrect(q);
+          const showPartTitle = q.partTitle && (index === 0 || questions[index - 1].partTitle !== q.partTitle);
 
           return (
-            <div key={q.id} className={styles.questionItem}>
-              {/* Question Text */}
-              <div className={styles.questionHeader}>
-                <div className={styles.questionNumber}>{q.number}</div>
-                {!hasOptions && q.text.includes("_____") ? (
-                  // Inline fill-in-the-blanks (Part 6)
-                  <p className={styles.questionText}>
-                    <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[0] }} />
+            <React.Fragment key={q.id}>
+              {showPartTitle && (
+                <div className={styles.partHeader}>
+                  {q.partTitle}
+                </div>
+              )}
+              <div className={styles.questionItem}>
+                {/* Question Text */}
+                <div className={styles.questionHeader}>
+                  <div className={styles.questionNumber}>{q.number}</div>
+                  {!hasOptions && q.text.includes("_____") ? (
+                    // Inline fill-in-the-blanks (Part 6)
+                    <p className={styles.questionText}>
+                      <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[0] }} />
+                      <input
+                        type="text"
+                        className={`${styles.gapInput} ${
+                          isSubmitted
+                            ? isCorrect
+                              ? styles.gapInputCorrect
+                              : styles.gapInputIncorrect
+                            : ""
+                        }`}
+                        value={userAns}
+                        disabled={isSubmitted}
+                        placeholder={isSubmitted ? "" : "..."}
+                        onChange={(e) => handleTextChange(q.number, e.target.value)}
+                      />
+                      <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[1] }} />
+                    </p>
+                  ) : (
+                    <p className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
+                  )}
+                </div>
+
+                {/* Options (Multiple Choice) */}
+                {hasOptions && (
+                  <div className={styles.optionsGrid}>
+                    {(Object.keys(q.options) as string[]).map((optKey) => {
+                      const optionText = q.options[optKey];
+                      const isSelected = userAns === optKey;
+                      const isCorrectAnswer = q.correctAnswer === optKey;
+
+                      let cardClass = styles.optionCard;
+                      if (isSubmitted) {
+                        cardClass += ` ${styles.optionDisabled}`;
+                        if (isCorrectAnswer) {
+                          cardClass += ` ${styles.optionCorrect}`;
+                        } else if (isSelected) {
+                          cardClass += ` ${styles.optionIncorrect}`;
+                        } else {
+                          cardClass += ` ${styles.optionMuted}`;
+                        }
+                      } else if (isSelected) {
+                        cardClass += ` ${styles.optionSelected}`;
+                      }
+
+                      return (
+                        <div
+                          key={optKey}
+                          className={cardClass}
+                          onClick={() => handleOptionClick(q.number, optKey)}
+                        >
+                          <div className={styles.optionInner}>
+                            <div className={styles.optionLetter}>{optKey}</div>
+                            <span className={styles.optionText} dangerouslySetInnerHTML={{ __html: optionText }} />
+                          </div>
+                          {isSubmitted && isCorrectAnswer && (
+                            <CheckCircleOutlined style={{ color: "#10b981", fontSize: 16 }} />
+                          )}
+                          {isSubmitted && isSelected && !isCorrectAnswer && (
+                            <CloseCircleOutlined style={{ color: "#ef4444", fontSize: 16 }} />
+                          )}
+                          {!isSubmitted && isSelected && (
+                            <CheckOutlined style={{ color: "#35a873", fontSize: 14 }} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Input Box below for Gap Filling without _____ placeholder */}
+                {!hasOptions && !q.text.includes("_____") && (
+                  <div className={styles.gapInputContainer}>
                     <input
                       type="text"
                       className={`${styles.gapInput} ${
@@ -326,120 +405,50 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
                       }`}
                       value={userAns}
                       disabled={isSubmitted}
-                      placeholder={isSubmitted ? "" : "..."}
+                      placeholder={isSubmitted ? "" : "Nhập câu trả lời..."}
                       onChange={(e) => handleTextChange(q.number, e.target.value)}
                     />
-                    <span dangerouslySetInnerHTML={{ __html: q.text.split("_____")[1] }} />
-                  </p>
-                ) : (
-                  <p className={styles.questionText} dangerouslySetInnerHTML={{ __html: q.text }} />
+                  </div>
+                )}
+
+                {/* Feedback feedback label below Gap Filling */}
+                {isSubmitted && !hasOptions && (
+                  <div className={styles.feedbackLabel}>
+                    {isCorrect ? (
+                      <span className={styles.feedbackCorrect}>
+                        <CheckCircleOutlined /> Trả lời chính xác!
+                      </span>
+                    ) : (
+                      <span className={styles.feedbackIncorrect}>
+                        <CloseCircleOutlined /> Đáp án đúng: <strong>{q.correctAnswer}</strong>
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Explanation Accordion */}
+                {isSubmitted && q.explanation && (
+                  <div className={styles.explanationBox}>
+                    <div
+                      className={styles.explanationHeader}
+                      onClick={() => toggleExplanation(q.number)}
+                    >
+                      <span className={styles.explanationTitle}>
+                        <InfoCircleOutlined />
+                        Xem giải thích chi tiết
+                      </span>
+                      {expandedExplanations[q.number] ? <CaretUpOutlined /> : <CaretDownOutlined />}
+                    </div>
+                    {expandedExplanations[q.number] && (
+                      <div className={styles.explanationContent}>
+                        <p style={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
+                        <p className={styles.correctAnswerText}>⇒ Đáp án đúng: {q.correctAnswer}</p>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-
-              {/* Options (Multiple Choice) */}
-              {hasOptions && (
-                <div className={styles.optionsGrid}>
-                  {(Object.keys(q.options) as string[]).map((optKey) => {
-                    const optionText = q.options[optKey];
-                    const isSelected = userAns === optKey;
-                    const isCorrectAnswer = q.correctAnswer === optKey;
-
-                    let cardClass = styles.optionCard;
-                    if (isSubmitted) {
-                      cardClass += ` ${styles.optionDisabled}`;
-                      if (isCorrectAnswer) {
-                        cardClass += ` ${styles.optionCorrect}`;
-                      } else if (isSelected) {
-                        cardClass += ` ${styles.optionIncorrect}`;
-                      } else {
-                        cardClass += ` ${styles.optionMuted}`;
-                      }
-                    } else if (isSelected) {
-                      cardClass += ` ${styles.optionSelected}`;
-                    }
-
-                    return (
-                      <div
-                        key={optKey}
-                        className={cardClass}
-                        onClick={() => handleOptionClick(q.number, optKey)}
-                      >
-                        <div className={styles.optionInner}>
-                          <div className={styles.optionLetter}>{optKey}</div>
-                          <span className={styles.optionText} dangerouslySetInnerHTML={{ __html: optionText }} />
-                        </div>
-                        {isSubmitted && isCorrectAnswer && (
-                          <CheckCircleOutlined style={{ color: "#10b981", fontSize: 16 }} />
-                        )}
-                        {isSubmitted && isSelected && !isCorrectAnswer && (
-                          <CloseCircleOutlined style={{ color: "#ef4444", fontSize: 16 }} />
-                        )}
-                        {!isSubmitted && isSelected && (
-                          <CheckOutlined style={{ color: "#35a873", fontSize: 14 }} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Input Box below for Gap Filling without _____ placeholder */}
-              {!hasOptions && !q.text.includes("_____") && (
-                <div className={styles.gapInputContainer}>
-                  <input
-                    type="text"
-                    className={`${styles.gapInput} ${
-                      isSubmitted
-                        ? isCorrect
-                          ? styles.gapInputCorrect
-                          : styles.gapInputIncorrect
-                        : ""
-                    }`}
-                    value={userAns}
-                    disabled={isSubmitted}
-                    placeholder={isSubmitted ? "" : "Nhập câu trả lời..."}
-                    onChange={(e) => handleTextChange(q.number, e.target.value)}
-                  />
-                </div>
-              )}
-
-              {/* Feedback feedback label below Gap Filling */}
-              {isSubmitted && !hasOptions && (
-                <div className={styles.feedbackLabel}>
-                  {isCorrect ? (
-                    <span className={styles.feedbackCorrect}>
-                      <CheckCircleOutlined /> Trả lời chính xác!
-                    </span>
-                  ) : (
-                    <span className={styles.feedbackIncorrect}>
-                      <CloseCircleOutlined /> Đáp án đúng: <strong>{q.correctAnswer}</strong>
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Explanation Accordion */}
-              {isSubmitted && q.explanation && (
-                <div className={styles.explanationBox}>
-                  <div
-                    className={styles.explanationHeader}
-                    onClick={() => toggleExplanation(q.number)}
-                  >
-                    <span className={styles.explanationTitle}>
-                      <InfoCircleOutlined />
-                      Xem giải thích chi tiết
-                    </span>
-                    {expandedExplanations[q.number] ? <CaretUpOutlined /> : <CaretDownOutlined />}
-                  </div>
-                  {expandedExplanations[q.number] && (
-                    <div className={styles.explanationContent}>
-                      <p style={{ whiteSpace: "pre-line" }} dangerouslySetInnerHTML={{ __html: q.explanation }} />
-                      <p className={styles.correctAnswerText}>⇒ Đáp án đúng: {q.correctAnswer}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            </React.Fragment>
           );
         })}
       </div>
