@@ -489,15 +489,15 @@ export default function ProfilePage() {
   // Dynamic Quiz History
   const getQuizHistory = () => {
     const history: any[] = [];
-    lessons.forEach(l => {
-      if (l.exerciseId) {
-        const saved = localStorage.getItem(`practice_completed_${l.exerciseId}`);
+    exams.forEach(e => {
+      if (e.category === "progress-test") {
+        const saved = localStorage.getItem(`practice_completed_${e.id}`);
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
             history.push({
-              id: l.exerciseId,
-              title: `Quiz: ${l.title}`,
+              id: e.id,
+              title: `Quiz: ${e.title}`,
               completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
               correct: parsed.correct || 0,
               total: parsed.total || 10,
@@ -514,19 +514,21 @@ export default function ProfilePage() {
   const getTestHistory = () => {
     const history: any[] = [];
     exams.forEach(e => {
-      const saved = localStorage.getItem(`practice_completed_${e.id}`);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          history.push({
-            id: e.id,
-            title: e.title,
-            completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
-            correct: parsed.correct || 0,
-            total: parsed.total || 50,
-            score: parsed.score || 0
-          });
-        } catch(err) {}
+      if (e.category === "mock-test" || e.category === "school-exams") {
+        const saved = localStorage.getItem(`practice_completed_${e.id}`);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            history.push({
+              id: e.id,
+              title: e.title,
+              completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
+              correct: parsed.correct || 0,
+              total: parsed.total || 50,
+              score: parsed.score || 0
+            });
+          } catch(err) {}
+        }
       }
     });
     return history.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
