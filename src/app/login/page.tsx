@@ -68,7 +68,7 @@ export default function LoginPage() {
 
   return (
     <div className="login-page-container">
-      <Card className="login-card" bordered={false}>
+      <Card className="login-card" variant="borderless">
         <div className="login-header">
           <div className="login-logo-wrap">
             <img src="/logo.png?v=2" alt="Logo" className="login-logo" />

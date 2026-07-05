@@ -178,7 +178,7 @@ const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
     }
     const paddedData = [...data];
     while (paddedData.length < 28) {
-      paddedData.unshift({ flashcard: 0, theory: 0, exercise: 0, exam: 0 });
+      paddedData.unshift({ date: "", flashcard: 0, theory: 0, exercise: 0, exam: 0 });
     }
     const points = paddedData.slice(-28);
 
@@ -205,7 +205,7 @@ const MonthChart: React.FC<ChartProps> = ({ data = [] }) => {
     if (!data || data.length === 0) return 230; // 0%
     const paddedData = [...data];
     while (paddedData.length < 28) {
-      paddedData.unshift({ flashcard: 0, theory: 0, exercise: 0, exam: 0 });
+      paddedData.unshift({ date: "", flashcard: 0, theory: 0, exercise: 0, exam: 0 });
     }
     const lastWeek = paddedData.slice(-7);
     let sum = 0;
