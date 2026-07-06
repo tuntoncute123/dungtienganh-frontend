@@ -144,6 +144,15 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
     localStorage.setItem(`practice_draft_${exerciseId}`, JSON.stringify(newAnswers));
   };
 
+  const normalizeText = (text: any) => {
+    if (text === null || text === undefined) return "";
+    return String(text)
+      .trim()
+      .toLowerCase()
+      .replace(/[‘’`’]/g, "'")
+      .replace(/\s+/g, " ");
+  };
+
   const isQuestionCorrect = (q: Question) => {
     const userAns = answers[q.number];
     if (!userAns) return false;
@@ -151,15 +160,17 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
     const correctVal = q.correctAnswer;
     if (!correctVal) return false;
 
+    const normUser = normalizeText(userAns);
+
     if (correctVal.includes("|")) {
-      const correctList = correctVal.split("|").map(ans => ans.trim().toLowerCase());
-      return correctList.includes(userAns.trim().toLowerCase());
+      const correctList = correctVal.split("|").map(ans => normalizeText(ans));
+      return correctList.includes(normUser);
     }
     if (correctVal.includes(" / ")) {
-      const correctList = correctVal.split(" / ").map(ans => ans.trim().toLowerCase());
-      return correctList.includes(userAns.trim().toLowerCase());
+      const correctList = correctVal.split(" / ").map(ans => normalizeText(ans));
+      return correctList.includes(normUser);
     }
-    return userAns.trim().toLowerCase() === correctVal.trim().toLowerCase();
+    return normUser === normalizeText(correctVal);
   };
 
   const checkSubmit = () => {

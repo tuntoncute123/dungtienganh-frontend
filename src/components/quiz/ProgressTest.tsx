@@ -272,6 +272,15 @@ export default function ProgressTest() {
     }
   };
 
+  const normalizeText = (text: any) => {
+    if (text === null || text === undefined) return "";
+    return String(text)
+      .trim()
+      .toLowerCase()
+      .replace(/[‘’`’]/g, "'")
+      .replace(/\s+/g, " ");
+  };
+
   const isQuestionCorrect = (qNumber: number) => {
     const userAns = answers[qNumber];
     if (!userAns) return false;
@@ -280,10 +289,12 @@ export default function ProgressTest() {
     const correctVal = targetAnswers[qNumber];
     if (!correctVal) return false;
 
+    const normUser = normalizeText(userAns);
+
     if (Array.isArray(correctVal)) {
-      return correctVal.map(c => c.trim().toLowerCase()).includes(userAns.trim().toLowerCase());
+      return correctVal.map(c => normalizeText(c)).includes(normUser);
     }
-    return userAns.trim().toLowerCase() === correctVal.trim().toLowerCase();
+    return normUser === normalizeText(correctVal);
   };
 
   const doSubmit = () => {
