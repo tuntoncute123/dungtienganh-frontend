@@ -57,19 +57,19 @@ export default function TeacherIntro() {
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Tốt nghiệp loại giỏi ĐHSP TP.HCM, chuyên ngành Sư Phạm Tiếng Anh.
+                  <span>Tốt nghiệp loại giỏi ĐHSP TP.HCM, chuyên ngành Sư Phạm Tiếng Anh.</span>
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Giáo viên Tiếng Anh đã đồng hành cùng hơn <strong>10.000 học sinh</strong> và có hơn <strong>5.000 học sinh</strong> đăng ký tham gia các khoá học.
+                  <span>Giáo viên Tiếng Anh đã đồng hành cùng hơn <strong>10.000 học sinh</strong> và có hơn <strong>5.000 học sinh</strong> đăng ký tham gia các khoá học.</span>
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Trong kỳ thi tuyển sinh 10, học sinh của cô đạt nhiều thành tích nổi bật với nhiều <strong>điểm 10 môn Tiếng Anh</strong>, cùng hàng trăm học sinh đạt từ <strong>9+</strong> và hàng nghìn học sinh đạt từ <strong>8+</strong>.
+                  <span>Trong kỳ thi tuyển sinh 10, học sinh của cô đạt nhiều thành tích nổi bật với nhiều <strong>điểm 10 môn Tiếng Anh</strong>, cùng hàng trăm học sinh đạt từ <strong>9+</strong> và hàng nghìn học sinh đạt từ <strong>8+</strong>.</span>
                 </li>
               </ul>
             </div>
@@ -82,25 +82,25 @@ export default function TeacherIntro() {
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Bám sát chuẩn kiến thức và định hướng chương trình giáo dục mới, tập trung vào những nội dung trọng tâm giúp học sinh học hiệu quả.
+                  <span>Bám sát chuẩn kiến thức và định hướng chương trình giáo dục mới, tập trung vào những nội dung trọng tâm giúp học sinh học hiệu quả.</span>
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Phong cách giảng dạy nhiệt huyết, sáng tạo, chi tiết và dễ tiếp cận, phù hợp với nhiều trình độ, đặc biệt hỗ trợ tốt cho học sinh mất gốc hoặc cần củng cố nền tảng.
+                  <span>Phong cách giảng dạy nhiệt huyết, sáng tạo, chi tiết và dễ tiếp cận, phù hợp với nhiều trình độ, đặc biệt hỗ trợ tốt cho học sinh mất gốc hoặc cần củng cố nền tảng.</span>
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Chú trọng giúp học sinh hiểu bản chất ngôn ngữ, phát triển tư duy học tập và khả năng vận dụng linh hoạt thay vì học thuộc máy móc.
+                  <span>Chú trọng giúp học sinh hiểu bản chất ngôn ngữ, phát triển tư duy học tập và khả năng vận dụng linh hoạt thay vì học thuộc máy móc.</span>
                 </li>
                 <li>
                   <span className="teacher-intro__icon">
                     <InfoCheckIcon />
                   </span>
-                  Kết hợp nhiều phương pháp học và mẹo làm bài hiệu quả, hỗ trợ học sinh mở rộng tư duy và nâng cao kỹ năng xử lý đề thi.
+                  <span>Kết hợp nhiều phương pháp học và mẹo làm bài hiệu quả, hỗ trợ học sinh mở rộng tư duy và nâng cao kỹ năng xử lý đề thi.</span>
                 </li>
               </ul>
             </div>

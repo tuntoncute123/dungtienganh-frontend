@@ -2008,6 +2008,56 @@ export default function AdminPage() {
               </Upload>
             </Input.Group>
           </Form.Item>
+
+          <Form.Item
+            label="Tài liệu đính kèm (PDF, Word, Excel, Slide,...)"
+            shouldUpdate={(prevValues, currentValues) => prevValues.documents !== currentValues.documents}
+          >
+            {() => {
+              const docs = lessonForm.getFieldValue("documents") || [];
+              return (
+                <div>
+                  <div style={{ marginBottom: docs.length > 0 ? 8 : 0 }}>
+                    {docs.map((doc: any, index: number) => (
+                      <div key={index} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6, background: "#f8fafc", padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0" }}>
+                        <a href={doc.url} target="_blank" rel="noreferrer" style={{ fontSize: 13, textDecoration: "underline", color: "#2563eb", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>
+                          {doc.name}
+                        </a>
+                        <Button 
+                          type="text" 
+                          danger 
+                          size="small" 
+                          icon={<DeleteOutlined />} 
+                          onClick={() => {
+                            const newDocs = docs.filter((_: any, i: number) => i !== index);
+                            lessonForm.setFieldsValue({ documents: newDocs });
+                            // Force update by setting value on a dummy field or similar, or just re-validating
+                            lessonForm.validateFields(["documents"]).catch(() => {});
+                          }} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <Upload
+                    beforeUpload={(file) => {
+                      handleUpload(file, "lessons/documents", (url) => {
+                        const currentDocs = lessonForm.getFieldValue("documents") || [];
+                        const newDocs = [...currentDocs, { name: file.name, url }];
+                        lessonForm.setFieldsValue({ documents: newDocs });
+                        lessonForm.validateFields(["documents"]).catch(() => {});
+                      });
+                      return false;
+                    }}
+                    showUploadList={false}
+                  >
+                    <Button icon={<UploadOutlined />} type="dashed" style={{ width: "100%" }}>
+                      Tải tài liệu lên (.pdf, .docx, .zip,...)
+                    </Button>
+                  </Upload>
+                </div>
+              );
+            }}
+          </Form.Item>
         </Form>
       </Modal>      {/* Exercise Add/Edit Modal (Homework) */}
       <Modal

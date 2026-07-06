@@ -311,9 +311,11 @@ function LessonPageContent() {
                   )}
 
                   {/* Documents */}
-                  <div className="lp-card" style={{ marginTop: 12 }}>
-                    <LessonDocuments documents={lesson.documents || []} />
-                  </div>
+                  {lesson.documents && lesson.documents.length > 0 && (
+                    <div className="lp-card" style={{ marginTop: 12 }}>
+                      <LessonDocuments documents={lesson.documents} />
+                    </div>
+                  )}
                 </>
               ) : (
                 // --- THI ONLINE PAGE VIEW ---
