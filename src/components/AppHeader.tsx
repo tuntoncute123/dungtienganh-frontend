@@ -237,7 +237,20 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem("teacherdung_token");
+    // Gọi API logout để blacklist token trên server
+    if (token) {
+      try {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+      } catch (e) {
+        // Bỏ qua lỗi mạng, vẫn tiếp tục logout local
+        console.warn("Không thể gọi API logout:", e);
+      }
+    }
     localStorage.clear();
     message.success("Đăng xuất thành công!");
     router.push("/login");
