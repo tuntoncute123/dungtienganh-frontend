@@ -614,7 +614,7 @@ export default function ReadingPractice() {
               / 13
             </div>
             <p style={{ color: "#8a8a8e", fontSize: 13 }}>
-              Học tốt Tiếng Anh cùng TeacherDung. Chúc bạn đạt kết quả thật cao!
+              Học tốt Tiếng Anh cùng DungTiengAnh. Chúc bạn đạt kết quả thật cao!
             </p>
           </div>
         </Modal>

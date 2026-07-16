@@ -57,7 +57,7 @@ export default function ReadingPage() {
 
       {/* ── Main Content ── */}
       <Content className="app-content" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>
-        <h1 className="sr-only">Luyện Đọc Hiểu Tiếng Anh (Reading Practice) - TeacherDung</h1>
+        <h1 className="sr-only">Luyện Đọc Hiểu Tiếng Anh (Reading Practice) - DungTiengAnh</h1>
         <ReadingPractice />
       </Content>
     </Layout>

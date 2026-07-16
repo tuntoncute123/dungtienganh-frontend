@@ -44,7 +44,7 @@ export default function MockTestPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
-  
+
   const [tests, setTests] = useState<MockTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [allowedExams, setAllowedExams] = useState<string[]>([]);
@@ -61,7 +61,7 @@ export default function MockTestPage() {
         const user = JSON.parse(userStr);
         setAllowedExams(user.allowedExams || []);
         setRole(user.role || "student");
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -100,7 +100,7 @@ export default function MockTestPage() {
                 total: parsed.total
               };
             }
-          } catch (e) {}
+          } catch (e) { }
         });
         setCompletedTests(completedMap);
       }
@@ -116,7 +116,7 @@ export default function MockTestPage() {
     e.stopPropagation();
     try {
       localStorage.removeItem(`practice_completed_${testId}`);
-    } catch (err) {}
+    } catch (err) { }
     setCompletedTests((prev) => {
       const updated = { ...prev };
       delete updated[testId];
@@ -183,7 +183,7 @@ export default function MockTestPage() {
 
       {/* Main Content */}
       <Content className="app-content">
-        <h1 className="sr-only">Thi Thử Tiếng Anh Online - TeacherDung</h1>
+        <h1 className="sr-only">Thi Thử Tiếng Anh Online - DungTiengAnh</h1>
         <div className="main-scroll">
           <div className="list-category">
             <div className="container">

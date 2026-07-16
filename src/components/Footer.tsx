@@ -23,7 +23,7 @@ export default function Footer() {
           {/* Cột 1: Thương hiệu */}
           <Col xs={24} sm={24} md={12} lg={8} className="footer-brand-col">
             <div className="footer-logo-wrapper">
-              <img src="/logo.png?v=2" alt="TeacherDung Logo" className="footer-logo" />
+              <img src="/logo.png?v=2" alt="DungTiengAnh Logo" className="footer-logo" />
               <span className="footer-brand-name">Dung Tiếng Anh</span>
             </div>
             <p className="footer-slogan">
@@ -123,7 +123,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <p className="copyright-text">
-            © {new Date().getFullYear()} <strong>TeacherDung</strong>. Học tiếng Anh cùng cô Dung. Bảo lưu mọi quyền.
+            © {new Date().getFullYear()} <strong>Dungtienganh</strong>. Học tiếng Anh cùng cô Dung. Bảo lưu mọi quyền.
           </p>
         </div>
       </div>

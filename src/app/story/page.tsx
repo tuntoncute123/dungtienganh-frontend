@@ -136,10 +136,10 @@ function StoryPageContent() {
   const [sidebarPinned, setSidebarPinned] = useState(false);
   const screens = useBreakpoint();
   const isDesktop = !!screens.lg;
-  
+
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const storyId = searchParams.get("id");
 
   const [stories, setStories] = useState<any[]>([]);
@@ -161,7 +161,7 @@ function StoryPageContent() {
     };
     loadStories();
   }, []);
-  
+
   // Find current active story
   const activeStory = stories.find((s) => s.id === storyId) || stories[0];
 
@@ -212,7 +212,7 @@ function StoryPageContent() {
 
       {/* Main Content */}
       <Content className="app-content">
-        <h1 className="sr-only">Đọc Truyện Chêm Tiếng Anh - Học Từ Vựng Tự Nhiên - TeacherDung</h1>
+        <h1 className="sr-only">Đọc Truyện Chêm Tiếng Anh - Học Từ Vựng Tự Nhiên - DungTiengAnh</h1>
         <div className="main-scroll">
           <div className="content-wrapper">
             <div className="content-panel">
@@ -222,7 +222,7 @@ function StoryPageContent() {
                 </div>
               ) : storyId && activeStory ? (
                 <div className="story-detail-grid">
-                  
+
                   {/* Left column - Active story */}
                   <div className="story-detail-main">
                     <div className="story-wrapper">
@@ -232,7 +232,7 @@ function StoryPageContent() {
                       >
                         &lt; Back
                       </button>
-                      
+
                       <div className="story-item active-story-item">
                         <div className="avatar">
                           <img
@@ -282,9 +282,8 @@ function StoryPageContent() {
                           return (
                             <div
                               key={item.id}
-                              className={`story-suggest-item-wrapper ${
-                                isActive ? "play-story" : ""
-                              }`}
+                              className={`story-suggest-item-wrapper ${isActive ? "play-story" : ""
+                                }`}
                             >
                               {isActive && (
                                 <div className="play-story-overlay">Đang phát</div>

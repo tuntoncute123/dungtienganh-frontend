@@ -73,7 +73,7 @@ export default function SchoolExamsPage() {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
-  
+
   const [exams, setExams] = useState<SchoolExam[]>([]);
   const [loading, setLoading] = useState(true);
   const [allowedExams, setAllowedExams] = useState<string[]>([]);
@@ -90,7 +90,7 @@ export default function SchoolExamsPage() {
         const user = JSON.parse(userStr);
         setAllowedExams(user.allowedExams || []);
         setRole(user.role || "student");
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -150,7 +150,7 @@ export default function SchoolExamsPage() {
     e.stopPropagation();
     try {
       localStorage.removeItem(`practice_completed_${examId}`);
-    } catch (err) {}
+    } catch (err) { }
     setCompletedExams((prev) => {
       const updated = { ...prev };
       delete updated[examId];
@@ -220,7 +220,7 @@ export default function SchoolExamsPage() {
 
       {/* Main Content */}
       <Content className="app-content">
-        <h1 className="sr-only">Luyện Đề Thi Thử Tiếng Anh THPT Quốc Gia - TeacherDung</h1>
+        <h1 className="sr-only">Luyện Đề Thi Thử Tiếng Anh THPT Quốc Gia - DungTiengAnh</h1>
         <div className="main-scroll">
           <div className="list-category">
             <div className="container">
@@ -441,10 +441,10 @@ export default function SchoolExamsPage() {
                                     style={
                                       exam.disabled
                                         ? {
-                                            background: isHovered ? "#d1d1d6" : "#e5e5ea",
-                                            color: isHovered ? "#515154" : "#8a8a8e",
-                                            cursor: "not-allowed",
-                                          }
+                                          background: isHovered ? "#d1d1d6" : "#e5e5ea",
+                                          color: isHovered ? "#515154" : "#8a8a8e",
+                                          cursor: "not-allowed",
+                                        }
                                         : undefined
                                     }
                                     onClick={(e) => {

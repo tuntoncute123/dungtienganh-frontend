@@ -12,22 +12,20 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dungtienganh.com"),
-  title: "TeacherDung - Học tiếng Anh cùng cô Dung",
-  description: "Nền tảng học tiếng Anh với lộ trình cá nhân hóa, luyện TOEIC chuyên sâu cùng Cô Dung.",
+  title: "DungTiengAnh - Học tiếng Anh cùng cô Dung",
+  description: "Học tiếng Anh cùng cô Dung - Luyện thi chuyên sâu",
   keywords: [
     "học tiếng anh",
     "cô Dung",
-    "luyện thi toeic",
-    "toeic cô Dung",
     "tiếng anh thpt quốc gia",
     "tiếng anh online",
     "luyện thi đại học",
     "ngữ pháp tiếng anh",
     "học từ vựng"
   ],
-  authors: [{ name: "TeacherDung", url: "https://dungtienganh.com" }],
-  creator: "TeacherDung",
-  publisher: "TeacherDung",
+  authors: [{ name: "DungTiengAnh", url: "https://dungtienganh.com" }],
+  creator: "DungTiengAnh",
+  publisher: "DungTiengAnh",
   robots: {
     index: true,
     follow: true,
@@ -39,22 +37,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "vi_VN",
     url: "https://dungtienganh.com",
-    title: "TeacherDung - Học tiếng Anh cùng cô Dung",
-    description: "Nền tảng học tiếng Anh với lộ trình cá nhân hóa, luyện TOEIC chuyên sâu cùng Cô Dung.",
-    siteName: "TeacherDung",
+    title: "DungTiengAnh - Học tiếng Anh cùng cô Dung",
+    description: "Nền tảng học tiếng Anh với lộ trình cá nhân hóa, ôn thi THPT Quốc gia cùng Cô Dung.",
+    siteName: "DungTiengAnh",
     images: [
       {
         url: "/logo.png?v=2",
         width: 512,
         height: 512,
-        alt: "TeacherDung Logo",
+        alt: "DungTiengAnh Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TeacherDung - Học tiếng Anh cùng cô Dung",
-    description: "Nền tảng học tiếng Anh với lộ trình cá nhân hóa, luyện TOEIC chuyên sâu cùng Cô Dung.",
+    title: "DungTiengAnh - Học tiếng Anh cùng cô Dung",
+    description: "Học tiếng Anh cùng cô Dung - Luyện thi chuyên sâu",
     images: ["/logo.png?v=2"],
   },
 };

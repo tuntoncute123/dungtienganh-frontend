@@ -6,8 +6,8 @@ import CourseCard from "./CourseCard";
 
 const COURSES = [
   {
-    id: "toeic-lr-800",
-    title: "TOEIC LR 800+",
+    id: "thptqg-prep",
+    title: "Tiếng Anh THPT Quốc Gia",
     image:
       "/assets/eb7c1e039aa05154d1e8_4ef10dbd.jpg",
     studiedUnits: 2,
@@ -18,8 +18,8 @@ const COURSES = [
       "/assets/d973cbfe6435a0d1a31b_2a72ccfc.svg",
   },
   {
-    id: "toeic-lr-600",
-    title: "TOEIC LR 600+",
+    id: "grammar-comprehensive",
+    title: "Ngữ Pháp Tiếng Anh Toàn Diện",
     image:
       "/assets/30b48594c71f47ba5acf_4ec9df40.jpg",
     studiedUnits: 2,
@@ -30,8 +30,8 @@ const COURSES = [
       "/assets/2d184cc465f831481c5d_5695e792.svg",
   },
   {
-    id: "toeic-vocab",
-    title: "Từ Vựng TOEIC Chuyên Sâu",
+    id: "vocab-communication",
+    title: "Từ Vựng Tiếng Anh Giao Tiếp",
     image:
       "/assets/0aab811d48fbe42a4be7_d3286638.jpg",
     studiedUnits: 2,
