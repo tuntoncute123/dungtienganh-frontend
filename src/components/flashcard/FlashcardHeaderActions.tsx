@@ -35,7 +35,7 @@ export default function FlashcardHeaderActions() {
             Trở lại trang học tập
           </Button>
         </Link>
-        <Link href="/practice">
+        <Link href="/flashcard/leaderboard">
           <Button 
             type="primary" 
             icon={<TrophyOutlined />} 

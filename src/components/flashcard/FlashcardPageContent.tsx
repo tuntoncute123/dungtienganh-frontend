@@ -23,6 +23,23 @@ import FlashcardDeckCard from "./FlashcardDeckCard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+const syncFlashcardCount = async (count: number) => {
+  const token = localStorage.getItem("teacherdung_token");
+  if (!token) return;
+  try {
+    await fetch(`${API_BASE_URL}/api/users/flashcard-count`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ count })
+    });
+  } catch (e) {
+    console.error("Lỗi khi đồng bộ số lượng flashcard:", e);
+  }
+};
+
 export default function FlashcardPageContent() {
   const { message } = App.useApp();
   const [decks, setDecks] = useState<any[]>([]);
@@ -64,7 +81,7 @@ export default function FlashcardPageContent() {
 
   const [form] = Form.useForm();
 
-  // Load from LocalStorage
+  // Load from LocalStorage & Sync
   useEffect(() => {
     const favs = localStorage.getItem("fc_favorites");
     if (favs) {
@@ -76,7 +93,10 @@ export default function FlashcardPageContent() {
     const prog = localStorage.getItem("fc_progress");
     if (prog) {
       try {
-        setDeckProgress(JSON.parse(prog));
+        const parsed = JSON.parse(prog);
+        setDeckProgress(parsed);
+        const total = Object.values(parsed).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+        syncFlashcardCount(total);
       } catch (e) {}
     }
   }, []);
@@ -164,6 +184,10 @@ export default function FlashcardPageContent() {
     };
     setDeckProgress(updated);
     localStorage.setItem("fc_progress", JSON.stringify(updated));
+
+    // Đồng bộ số lượng lên server
+    const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+    syncFlashcardCount(total);
 
     if (mastered) {
       message.success("Đã thuộc thẻ! Tiến độ đã được cập nhật.");
@@ -285,6 +309,11 @@ export default function FlashcardPageContent() {
         delete updated[deckId];
         setDeckProgress(updated);
         localStorage.setItem("fc_progress", JSON.stringify(updated));
+
+        // Đồng bộ lên server
+        const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+        syncFlashcardCount(total);
+
         message.success("Đã đặt lại tiến độ bộ thẻ!");
       }
     });

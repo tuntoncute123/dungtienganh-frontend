@@ -39,7 +39,7 @@ export default function HonorBoard() {
   }
 
   return (
-    <section className="honor-section">
+    <section className="honor-section" id="honor-board">
       {/* ── Header ── */}
       <div className="honor-header">
         <div className="honor-crown">👑</div>
