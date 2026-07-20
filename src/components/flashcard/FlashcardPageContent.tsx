@@ -57,7 +57,7 @@ export default function FlashcardPageContent() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isStudyOpen, setIsStudyOpen] = useState(false);
   const [studyDeck, setStudyDeck] = useState<any | null>(null);
-  const [studyCards, setStudyCards] = useState<Array<{ front: string; back: string }>>([]);
+  const [studyCards, setStudyCards] = useState<Array<{ front: string; back: string; imageUrl?: string }>>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -68,6 +68,7 @@ export default function FlashcardPageContent() {
     question: string;
     answer: string;
     options: string[];
+    imageUrl?: string | null;
   }>>([]);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
