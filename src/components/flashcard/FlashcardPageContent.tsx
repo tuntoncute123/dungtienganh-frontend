@@ -243,7 +243,8 @@ export default function FlashcardPageContent() {
       return {
         question: card.front,
         answer: correctAnswer,
-        options
+        options,
+        imageUrl: card.imageUrl || null
       };
     });
 
@@ -264,6 +265,24 @@ export default function FlashcardPageContent() {
     const correct = option === quizQuestions[currentQuizIndex].answer;
     if (correct) {
       setScore(prev => prev + 1);
+
+      // Cập nhật tiến độ thuộc từ khi trả lời đúng trong phần Luyện tập
+      if (practiceDeck) {
+        const cardFront = quizQuestions[currentQuizIndex].question;
+        const currentMastered = deckProgress[practiceDeck.id] || [];
+        if (!currentMastered.includes(cardFront)) {
+          const updatedMastered = [...currentMastered, cardFront];
+          const updated = {
+            ...deckProgress,
+            [practiceDeck.id]: updatedMastered
+          };
+          setDeckProgress(updated);
+          localStorage.setItem("fc_progress", JSON.stringify(updated));
+
+          const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+          syncFlashcardCount(total);
+        }
+      }
     }
 
     setTimeout(() => {
@@ -299,6 +318,12 @@ export default function FlashcardPageContent() {
 
   // Reset Progress
   const handleResetProgress = (deckId: string) => {
+    const currentMastered = deckProgress[deckId] || [];
+    if (currentMastered.length === 0) {
+      message.info("Bộ thẻ này hiện chưa có tiến độ học tập nào để làm mới.");
+      return;
+    }
+
     Modal.confirm({
       title: "Làm mới tiến độ học tập",
       content: "Bạn có chắc chắn muốn làm mới tiến độ học của bộ thẻ này? Trạng thái thuộc bài của các từ sẽ quay về ban đầu.",
@@ -509,11 +534,25 @@ export default function FlashcardPageContent() {
               onClick={() => setIsFlipped(!isFlipped)}
             >
               <div className="fc-flashcard-front">
-                <div className="fc-flashcard-word">{studyCards[activeCardIndex].front}</div>
+                {studyCards[activeCardIndex]?.imageUrl && (
+                  <img 
+                    src={studyCards[activeCardIndex].imageUrl} 
+                    alt={studyCards[activeCardIndex].front} 
+                    className="fc-flashcard-img"
+                  />
+                )}
+                <div className="fc-flashcard-word">{studyCards[activeCardIndex]?.front}</div>
                 <div className="fc-flashcard-hint">Bấm để xem nghĩa</div>
               </div>
               <div className="fc-flashcard-back">
-                <div className="fc-flashcard-meaning">{studyCards[activeCardIndex].back}</div>
+                {studyCards[activeCardIndex]?.imageUrl && (
+                  <img 
+                    src={studyCards[activeCardIndex].imageUrl} 
+                    alt={studyCards[activeCardIndex].front} 
+                    className="fc-flashcard-img"
+                  />
+                )}
+                <div className="fc-flashcard-meaning">{studyCards[activeCardIndex]?.back}</div>
                 <div className="fc-flashcard-hint">Bấm để xem từ vựng</div>
               </div>
             </div>
@@ -599,6 +638,15 @@ export default function FlashcardPageContent() {
                 marginBottom: 24 
               }}
             >
+              {quizQuestions[currentQuizIndex]?.imageUrl && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+                  <img 
+                    src={quizQuestions[currentQuizIndex].imageUrl} 
+                    alt={quizQuestions[currentQuizIndex].question} 
+                    style={{ maxHeight: 180, maxWidth: "100%", objectFit: "contain", borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} 
+                  />
+                </div>
+              )}
               <div style={{ fontSize: 12, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Từ vựng cần dịch:</div>
               <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>{quizQuestions[currentQuizIndex].question}</h2>
             </div>
@@ -690,6 +738,7 @@ export default function FlashcardPageContent() {
               <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                 <thead>
                   <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                    <th style={{ padding: "10px 16px", fontWeight: 700, color: "#475569", width: 70 }}>Hình ảnh</th>
                     <th style={{ padding: "10px 16px", fontWeight: 700, color: "#475569" }}>Thuật ngữ / Từ vựng</th>
                     <th style={{ padding: "10px 16px", fontWeight: 700, color: "#475569" }}>Nghĩa tiếng Việt</th>
                   </tr>
@@ -697,6 +746,13 @@ export default function FlashcardPageContent() {
                 <tbody>
                   {(infoDeck.cards || []).map((card: any, idx: number) => (
                     <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 16px" }}>
+                        {card.imageUrl ? (
+                          <img src={card.imageUrl} alt={card.front} style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6, border: "1px solid #e2e8f0" }} />
+                        ) : (
+                          <span style={{ fontSize: 12, color: "#cbd5e1" }}>—</span>
+                        )}
+                      </td>
                       <td style={{ padding: "12px 16px", fontWeight: 600, color: "#0f172a" }}>{card.front}</td>
                       <td style={{ padding: "12px 16px", color: "#334155" }}>{card.back}</td>
                     </tr>

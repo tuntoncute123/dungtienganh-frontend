@@ -131,7 +131,6 @@ export default function FlashcardDeckCard({
             type="text" 
             shape="circle" 
             className="fc-footer-btn"
-            disabled={progress === 0}
             onClick={() => onResetProgress(deck.id)}
           >
             🔄

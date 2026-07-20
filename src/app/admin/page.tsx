@@ -41,7 +41,8 @@ import {
   CheckOutlined,
   BellOutlined,
   AppstoreOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  PictureOutlined
 } from "@ant-design/icons";
 
 let COURSE_MAP: Record<string, string> = {};
@@ -2430,35 +2431,90 @@ export default function AdminPage() {
           <Form.List name="cards">
             {(fields, { add, remove }) => (
               <Card size="small" title="Danh sách các thẻ từ vựng" extra={<Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>Thêm thẻ</Button>}>
-                <div style={{ maxHeight: 300, overflowY: "auto", paddingRight: 8 }}>
+                <div style={{ maxHeight: 380, overflowY: "auto", paddingRight: 8 }}>
                   {fields.map(({ key, name, ...restField }) => (
-                    <Row key={key} gutter={8} style={{ marginBottom: 8, display: "flex", alignItems: "center" }}>
-                      <Col xs={24} sm={11}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, "front"]}
-                          rules={[{ required: true, message: "Nhập mặt trước" }]}
-                          style={{ marginBottom: isMobile ? 8 : 0 }}
-                        >
-                          <Input placeholder="Mặt trước (Tiếng Anh)" style={{ width: "100%" }} />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={21} sm={11}>
-                        <Form.Item
-                          {...restField}
-                          name={[name, "back"]}
-                          rules={[{ required: true, message: "Nhập mặt sau" }]}
-                          style={{ marginBottom: 0 }}
-                        >
-                          <Input placeholder="Mặt sau (Nghĩa Tiếng Việt)" style={{ width: "100%" }} />
-                        </Form.Item>
-                      </Col>
-                      <Col xs={3} sm={2} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <DeleteOutlined onClick={() => remove(name)} style={{ color: "#f43f5e", cursor: "pointer", fontSize: 16 }} />
-                      </Col>
-                    </Row>
+                    <div key={key} style={{ marginBottom: 12, padding: "12px", background: "#f8fafc", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                      <Row gutter={[12, 12]} align="middle">
+                        <Col xs={24} sm={10}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "front"]}
+                            label="Mặt trước (Tiếng Anh)"
+                            rules={[{ required: true, message: "Nhập mặt trước" }]}
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Input placeholder="Ví dụ: night shift" style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={10}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "back"]}
+                            label="Mặt sau (Tiếng Việt)"
+                            rules={[{ required: true, message: "Nhập mặt sau" }]}
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Input placeholder="Ví dụ: ca đêm" style={{ width: "100%" }} />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={4} style={{ textAlign: "right" }}>
+                          <Button type="text" danger onClick={() => remove(name)} icon={<DeleteOutlined />}>
+                            Xóa thẻ
+                          </Button>
+                        </Col>
+                        <Col xs={24}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, "imageUrl"]}
+                            label="Ảnh minh họa (Tùy chọn - Lưu R2 folder: flashcards/images)"
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Input.Group compact>
+                              <Form.Item name={[name, "imageUrl"]} noStyle>
+                                <Input style={{ width: "calc(100% - 110px)" }} placeholder="Tải ảnh lên R2 hoặc dán URL..." />
+                              </Form.Item>
+                              <Upload
+                                beforeUpload={(file) => {
+                                  const isImg = file.type.startsWith("image/");
+                                  if (!isImg) {
+                                    msg.error("Chỉ chấp nhận tệp hình ảnh!");
+                                    return false;
+                                  }
+                                  handleUpload(file, "flashcards/images", (url) => {
+                                    const currentCards = deckForm.getFieldValue("cards") || [];
+                                    currentCards[name] = { ...currentCards[name], imageUrl: url };
+                                    deckForm.setFieldsValue({ cards: currentCards });
+                                  });
+                                  return false;
+                                }}
+                                showUploadList={false}
+                                accept="image/*"
+                              >
+                                <Button icon={<PictureOutlined />} style={{ width: 110 }}>Tải ảnh</Button>
+                              </Upload>
+                            </Input.Group>
+                          </Form.Item>
+                          <Form.Item noStyle shouldUpdate={(prev, curr) => prev.cards?.[name]?.imageUrl !== curr.cards?.[name]?.imageUrl}>
+                            {({ getFieldValue }) => {
+                              const imgUrl = getFieldValue(["cards", name, "imageUrl"]);
+                              if (!imgUrl) return null;
+                              return (
+                                <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                                  <img 
+                                    src={imgUrl} 
+                                    alt="Flashcard preview" 
+                                    style={{ height: 48, maxWidth: 100, objectFit: "cover", borderRadius: 4, border: "1px solid #cbd5e1" }} 
+                                  />
+                                  <span style={{ fontSize: 12, color: "#166534" }}>✅ Đã có ảnh minh họa</span>
+                                </div>
+                              );
+                            }}
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </div>
                   ))}
-                  {fields.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8" }}>Chưa có thẻ nào được thêm. Nhấn 'Thêm thẻ' để bắt đầu.</div>}
+                  {fields.length === 0 && <div style={{ textAlign: "center", color: "#94a3b8", padding: "16px 0" }}>Chưa có thẻ nào được thêm. Nhấn 'Thêm thẻ' để bắt đầu.</div>}
                 </div>
               </Card>
             )}

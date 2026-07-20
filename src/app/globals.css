@@ -3114,11 +3114,10 @@ body {
 .fc-flashcard-flipper {
   width: 100%;
   max-width: 440px;
-  aspect-ratio: 1.6 / 1;
   perspective: 1000px;
   cursor: pointer;
   position: relative;
-  height: 240px;
+  min-height: 280px;
 }
 
 .fc-flashcard-front,
@@ -3134,10 +3133,21 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px;
+  padding: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   border: 4px solid #35a873;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fc-flashcard-img {
+  max-height: 130px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px;
 }
 
 .fc-flashcard-front {
