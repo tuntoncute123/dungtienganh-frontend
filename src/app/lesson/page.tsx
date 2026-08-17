@@ -63,15 +63,41 @@ function LessonPageContent() {
         .then(data => setExamData(data))
         .catch(err => console.error("Lỗi khi tải thông tin bài thi:", err));
 
+      // 1. Initial check from localStorage
       const completedKey = `practice_completed_${lesson.exerciseId}`;
       const completedData = localStorage.getItem(completedKey);
       if (completedData) {
-        const parsed = JSON.parse(completedData);
-        setUserScore(parsed.score ?? 0);
-        setHasCompleted(true);
+        try {
+          const parsed = JSON.parse(completedData);
+          setUserScore(parsed.score ?? 0);
+          setHasCompleted(true);
+        } catch (e) {}
       } else {
         setUserScore(0);
         setHasCompleted(false);
+      }
+
+      // 2. Fetch from Database
+      const token = localStorage.getItem("teacherdung_token");
+      if (token) {
+        fetch(`${API_BASE_URL}/api/user-progress/single?practiceId=${lesson.exerciseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.ok ? res.json() : null)
+          .then(progData => {
+            if (progData) {
+              setUserScore(progData.score ?? 0);
+              setHasCompleted(true);
+              localStorage.setItem(completedKey, JSON.stringify({
+                score: progData.score ?? 0,
+                correct: progData.correct ?? 0,
+                total: progData.total ?? 0,
+                completedAt: progData.completedAt,
+                answers: progData.answers,
+              }));
+            }
+          })
+          .catch(err => console.error("Lỗi khi kiểm tra tiến độ bài học từ DB:", err));
       }
     } else {
       setExamData(null);

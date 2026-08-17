@@ -60,24 +60,59 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
           const data = await res.json();
           setExam(data);
           
-          // Restore completed state or draft state
-          const completedKey = `practice_completed_${exerciseId}`;
-          const draftKey = `practice_draft_${exerciseId}`;
-          const completedData = localStorage.getItem(completedKey);
-          
-          if (completedData) {
-            const parsed = JSON.parse(completedData);
-            if (parsed.answers) setAnswers(parsed.answers);
-            setScoreData({
-              correctCount: parsed.correct ?? 0,
-              incorrectCount: (parsed.total ?? 0) - (parsed.correct ?? 0),
-              score: parsed.score ?? 0
-            });
-            setIsSubmitted(true);
-          } else {
-            const draftData = localStorage.getItem(draftKey);
-            if (draftData) {
-              setAnswers(JSON.parse(draftData));
+          // Restore completed state from Database and fall back to localStorage
+          let loadedFromDb = false;
+          const token = localStorage.getItem("teacherdung_token");
+          if (token) {
+            try {
+              const progRes = await fetch(`${API_BASE_URL}/api/user-progress/single?practiceId=${exerciseId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              if (progRes.ok) {
+                const progData = await progRes.json();
+                if (progData) {
+                  loadedFromDb = true;
+                  if (progData.answers) setAnswers(progData.answers);
+                  setScoreData({
+                    correctCount: progData.correct ?? 0,
+                    incorrectCount: (progData.total ?? 0) - (progData.correct ?? 0),
+                    score: progData.score ?? 0
+                  });
+                  setIsSubmitted(true);
+                  // Cache to localStorage
+                  localStorage.setItem(`practice_completed_${exerciseId}`, JSON.stringify({
+                    score: progData.score ?? 0,
+                    correct: progData.correct ?? 0,
+                    total: progData.total ?? 0,
+                    completedAt: progData.completedAt,
+                    answers: progData.answers
+                  }));
+                }
+              }
+            } catch (err) {
+              console.error("Lỗi khi tải tiến độ từ server:", err);
+            }
+          }
+
+          if (!loadedFromDb) {
+            const completedKey = `practice_completed_${exerciseId}`;
+            const draftKey = `practice_draft_${exerciseId}`;
+            const completedData = localStorage.getItem(completedKey);
+            
+            if (completedData) {
+              const parsed = JSON.parse(completedData);
+              if (parsed.answers) setAnswers(parsed.answers);
+              setScoreData({
+                correctCount: parsed.correct ?? 0,
+                incorrectCount: (parsed.total ?? 0) - (parsed.correct ?? 0),
+                score: parsed.score ?? 0
+              });
+              setIsSubmitted(true);
+            } else {
+              const draftData = localStorage.getItem(draftKey);
+              if (draftData) {
+                setAnswers(JSON.parse(draftData));
+              }
             }
           }
         } else {
@@ -206,18 +241,27 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
     setScoreData(newScoreData);
     setIsSubmitted(true);
 
-    // Save completed status
-    localStorage.setItem(`practice_completed_${exerciseId}`, JSON.stringify({
-      score: scoreVal,
-      correct,
-      total: totalQuestions,
-      completedAt: new Date().toISOString(),
-      answers
-    }));
-
-    // Sync to QuestDB
+    // Save completed status to PostgreSQL Database
     const token = localStorage.getItem("teacherdung_token");
     if (token) {
+      // 1. Save to main Postgres DB
+      fetch(`${API_BASE_URL}/api/user-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          practiceId: exerciseId,
+          type: "exercise",
+          score: scoreVal,
+          correct,
+          total: totalQuestions,
+          answers,
+        }),
+      }).catch((err) => console.error("Failed to save exercise result to DB", err));
+
+      // 2. Sync to QuestDB
       fetch(`${API_BASE_URL}/api/tracking/practice`, {
         method: "POST",
         headers: {
@@ -234,6 +278,15 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
       }).catch(err => console.error("Failed to sync exercise result to QuestDB", err));
     }
 
+    // Save to localStorage for instant offline access
+    localStorage.setItem(`practice_completed_${exerciseId}`, JSON.stringify({
+      score: scoreVal,
+      correct,
+      total: totalQuestions,
+      completedAt: new Date().toISOString(),
+      answers
+    }));
+
     // Clear draft
     localStorage.removeItem(`practice_draft_${exerciseId}`);
     message.success("Nộp bài luyện tập thành công!");
@@ -241,19 +294,18 @@ const LessonPractice = forwardRef<HTMLDivElement, LessonPracticeProps>(({ exerci
 
   const handleRetake = () => {
     Modal.confirm({
-      title: "Xác nhận làm lại?",
-      content: "Bạn có chắc chắn muốn xóa kết quả cũ và làm lại bài luyện tập này không?",
+      title: "Xác nhận làm lại bài?",
+      content: "Bạn có muốn làm lại bài luyện tập này không? Điểm số và kết quả sẽ được cập nhật sau khi bạn nộp bài làm mới.",
       okText: "Làm lại",
       cancelText: "Hủy",
-      okButtonProps: { type: "primary", danger: true },
+      okButtonProps: { type: "primary" },
       onOk: () => {
         setAnswers({});
         setIsSubmitted(false);
         setScoreData({ correctCount: 0, incorrectCount: 0, score: 0 });
         setExpandedExplanations({});
-        localStorage.removeItem(`practice_completed_${exerciseId}`);
         localStorage.removeItem(`practice_draft_${exerciseId}`);
-        message.success("Đã thiết lập lại bài luyện tập!");
+        message.success("Đã sẵn sàng làm lại bài luyện tập!");
       }
     });
   };

@@ -251,7 +251,8 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         console.warn("Không thể gọi API logout:", e);
       }
     }
-    localStorage.clear();
+    localStorage.removeItem("teacherdung_token");
+    localStorage.removeItem("teacherdung_user");
     message.success("Đăng xuất thành công!");
     router.push("/login");
   };

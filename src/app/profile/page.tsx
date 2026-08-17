@@ -276,6 +276,7 @@ export default function ProfilePage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [flashcardDecks, setFlashcardDecks] = useState<any[]>([]);
   const [deckProgress, setDeckProgress] = useState<any>({});
+  const [userProgressMap, setUserProgressMap] = useState<Record<string, any>>({});
 
   // Profile Edit states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -283,13 +284,13 @@ export default function ProfilePage() {
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   const handleOpenEditModal = () => {
-    editForm.setFieldsValue({
-      name: userProfile?.name || "",
-      examDate: userProfile?.examDate ? dayjs(userProfile.examDate) : null,
-      password: "",
-      confirmPassword: ""
-    });
-    setIsEditModalOpen(true);
+    if (userProfile) {
+      editForm.setFieldsValue({
+        name: userProfile.name,
+        examDate: userProfile.examDate ? dayjs(userProfile.examDate) : null,
+      });
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleSaveProfile = async (values: any) => {
@@ -364,6 +365,48 @@ export default function ProfilePage() {
           setUserProfile(data);
         }
 
+        // Fetch user practice submissions from Database
+        try {
+          const resProg = await fetch(`${API_BASE_URL}/api/user-progress`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (resProg.ok) {
+            const progData = await resProg.json();
+            if (progData && progData.map) {
+              setUserProgressMap(progData.map);
+              // Cache to localStorage
+              Object.keys(progData.map).forEach((k) => {
+                const item = progData.map[k];
+                localStorage.setItem(`practice_completed_${k}`, JSON.stringify({
+                  score: item.score,
+                  correct: item.correct,
+                  total: item.total,
+                  completedAt: item.completedAt,
+                  answers: item.answers
+                }));
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch user progress", e);
+        }
+
+        // Fetch flashcard progress from Database
+        try {
+          const resFcProg = await fetch(`${API_BASE_URL}/api/user-progress/flashcard`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (resFcProg.ok) {
+            const fcProgData = await resFcProg.json();
+            if (fcProgData.flashcardProgress && Object.keys(fcProgData.flashcardProgress).length > 0) {
+              setDeckProgress(fcProgData.flashcardProgress);
+              localStorage.setItem("fc_progress", JSON.stringify(fcProgData.flashcardProgress));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch flashcard progress", e);
+        }
+
         // Fetch all lessons
         const resLessons = await fetch(`${API_BASE_URL}/api/lessons`);
         if (resLessons.ok) {
@@ -396,11 +439,11 @@ export default function ProfilePage() {
           }
         }
 
-        // Load flashcard progress from localStorage
+        // Fall back to flashcard progress from localStorage if not loaded from DB
         const prog = localStorage.getItem("fc_progress");
         if (prog) {
           try {
-            setDeckProgress(JSON.parse(prog));
+            setDeckProgress((prev: any) => (prev && Object.keys(prev).length > 0) ? prev : JSON.parse(prog));
           } catch (e) {}
         }
       } catch (e) {
@@ -486,24 +529,34 @@ export default function ProfilePage() {
     return `${day}/${month}/${year}`;
   };
 
+  const getPracticeItemData = (id: string) => {
+    if (userProgressMap[id]) {
+      return userProgressMap[id];
+    }
+    const saved = localStorage.getItem(`practice_completed_${id}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return null;
+  };
+
   // Dynamic Quiz History
   const getQuizHistory = () => {
     const history: any[] = [];
     exams.forEach(e => {
       if (e.category === "progress-test") {
-        const saved = localStorage.getItem(`practice_completed_${e.id}`);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            history.push({
-              id: e.id,
-              title: `Quiz: ${e.title}`,
-              completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
-              correct: parsed.correct || 0,
-              total: parsed.total || 10,
-              score: parsed.score || 0
-            });
-          } catch(e) {}
+        const itemData = getPracticeItemData(e.id);
+        if (itemData) {
+          history.push({
+            id: e.id,
+            title: `Quiz: ${e.title}`,
+            completedAt: itemData.completedAt ? new Date(itemData.completedAt) : new Date(),
+            correct: itemData.correct || 0,
+            total: itemData.total || 10,
+            score: itemData.score || 0
+          });
         }
       }
     });
@@ -515,19 +568,16 @@ export default function ProfilePage() {
     const history: any[] = [];
     exams.forEach(e => {
       if (e.category === "mock-test" || e.category === "school-exams") {
-        const saved = localStorage.getItem(`practice_completed_${e.id}`);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            history.push({
-              id: e.id,
-              title: e.title,
-              completedAt: parsed.completedAt ? new Date(parsed.completedAt) : new Date(),
-              correct: parsed.correct || 0,
-              total: parsed.total || 50,
-              score: parsed.score || 0
-            });
-          } catch(err) {}
+        const itemData = getPracticeItemData(e.id);
+        if (itemData) {
+          history.push({
+            id: e.id,
+            title: e.title,
+            completedAt: itemData.completedAt ? new Date(itemData.completedAt) : new Date(),
+            correct: itemData.correct || 0,
+            total: itemData.total || 50,
+            score: itemData.score || 0
+          });
         }
       }
     });
@@ -563,7 +613,7 @@ export default function ProfilePage() {
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const filterByTime = (completedAtStr: string) => {
+    const filterByTime = (completedAtStr: string | Date) => {
       if (!completedAtStr) return false;
       const completedDate = new Date(completedAtStr);
       if (tf === "week") return completedDate >= oneWeekAgo;
@@ -577,14 +627,9 @@ export default function ProfilePage() {
     let completedVideos = 0;
     videoLessons.forEach(l => {
       if (l.exerciseId) {
-        const saved = localStorage.getItem(`practice_completed_${l.exerciseId}`);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (filterByTime(parsed.completedAt)) {
-              completedVideos++;
-            }
-          } catch(e) {}
+        const itemData = getPracticeItemData(l.exerciseId);
+        if (itemData && filterByTime(itemData.completedAt)) {
+          completedVideos++;
         }
       }
     });
@@ -596,15 +641,10 @@ export default function ProfilePage() {
     let completedHomework = 0;
     let homeworkScoresSum = 0;
     homeworkLessons.forEach(l => {
-      const saved = localStorage.getItem(`practice_completed_${l.exerciseId}`);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (filterByTime(parsed.completedAt)) {
-            completedHomework++;
-            homeworkScoresSum += parsed.percent || parsed.score || 0;
-          }
-        } catch (e) {}
+      const itemData = getPracticeItemData(l.exerciseId);
+      if (itemData && filterByTime(itemData.completedAt)) {
+        completedHomework++;
+        homeworkScoresSum += itemData.percent || itemData.score || 0;
       }
     });
     const hwPercent = totalHomework > 0 ? Math.round((completedHomework / totalHomework) * 100) : 0;
@@ -618,17 +658,12 @@ export default function ProfilePage() {
     let examScoresSum = 0;
     let maxExamScore = 0;
     myExams.forEach(e => {
-      const saved = localStorage.getItem(`practice_completed_${e.id}`);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (filterByTime(parsed.completedAt)) {
-            completedExams++;
-            const scoreTen = (parsed.percent || parsed.score || 0) / 10;
-            examScoresSum += scoreTen;
-            if (scoreTen > maxExamScore) maxExamScore = scoreTen;
-          }
-        } catch (err) {}
+      const itemData = getPracticeItemData(e.id);
+      if (itemData && filterByTime(itemData.completedAt)) {
+        completedExams++;
+        const scoreTen = (itemData.percent || itemData.score || 0) / 10;
+        examScoresSum += scoreTen;
+        if (scoreTen > maxExamScore) maxExamScore = scoreTen;
       }
     });
     const testPercent = totalExams > 0 ? Math.round((completedExams / totalExams) * 100) : 0;

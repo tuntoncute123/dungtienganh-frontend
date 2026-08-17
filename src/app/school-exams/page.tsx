@@ -119,8 +119,10 @@ export default function SchoolExamsPage() {
         }));
         setExams(formatted);
 
-        // Check localStorage for completed school exams
+        // Check Database and localStorage for completed school exams
         const completedMap: Record<string, { score: number; correct: number; total: number }> = {};
+        
+        // 1. Fallback / initial load from localStorage
         data.forEach((item: any) => {
           try {
             const saved = localStorage.getItem(`practice_completed_${item.id}`);
@@ -132,10 +134,41 @@ export default function SchoolExamsPage() {
                 total: parsed.total
               };
             }
-          } catch (e) {
-            // Ignore
-          }
+          } catch (e) {}
         });
+
+        // 2. Fetch latest from PostgreSQL DB
+        const token = localStorage.getItem("teacherdung_token");
+        if (token) {
+          try {
+            const progRes = await fetch(`${API_BASE_URL}/api/user-progress`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (progRes.ok) {
+              const progData = await progRes.json();
+              if (progData && progData.map) {
+                Object.keys(progData.map).forEach((k) => {
+                  const p = progData.map[k];
+                  completedMap[k] = {
+                    score: p.score,
+                    correct: p.correct,
+                    total: p.total,
+                  };
+                  localStorage.setItem(`practice_completed_${k}`, JSON.stringify({
+                    score: p.score,
+                    correct: p.correct,
+                    total: p.total,
+                    completedAt: p.completedAt,
+                    answers: p.answers,
+                  }));
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Lỗi khi tải tiến độ làm bài từ DB:", err);
+          }
+        }
+
         setCompletedExams(completedMap);
       }
     } catch (e) {
@@ -148,14 +181,6 @@ export default function SchoolExamsPage() {
   const handleRetakeExam = (e: React.MouseEvent, href: string, examId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    try {
-      localStorage.removeItem(`practice_completed_${examId}`);
-    } catch (err) { }
-    setCompletedExams((prev) => {
-      const updated = { ...prev };
-      delete updated[examId];
-      return updated;
-    });
     router.push(href);
   };
 

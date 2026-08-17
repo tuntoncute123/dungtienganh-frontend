@@ -109,8 +109,10 @@ export default function PracticePage() {
         }));
         setTests(formatted);
 
-        // Check localStorage for completed tests
+        // Check Database and localStorage for completed tests
         const completedMap: Record<string, { score: number; correct: number; total: number }> = {};
+        
+        // 1. Fallback / initial load from localStorage
         data.forEach((item: any) => {
           try {
             const saved = localStorage.getItem(`practice_completed_${item.id}`);
@@ -126,6 +128,39 @@ export default function PracticePage() {
             // Ignore localStorage parse errors
           }
         });
+
+        // 2. Fetch latest from PostgreSQL DB
+        const token = localStorage.getItem("teacherdung_token");
+        if (token) {
+          try {
+            const progRes = await fetch(`${API_BASE_URL}/api/user-progress`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (progRes.ok) {
+              const progData = await progRes.json();
+              if (progData && progData.map) {
+                Object.keys(progData.map).forEach((k) => {
+                  const p = progData.map[k];
+                  completedMap[k] = {
+                    score: p.score,
+                    correct: p.correct,
+                    total: p.total,
+                  };
+                  localStorage.setItem(`practice_completed_${k}`, JSON.stringify({
+                    score: p.score,
+                    correct: p.correct,
+                    total: p.total,
+                    completedAt: p.completedAt,
+                    answers: p.answers,
+                  }));
+                });
+              }
+            }
+          } catch (err) {
+            console.error("Lỗi khi tải tiến độ làm bài từ DB:", err);
+          }
+        }
+
         setCompletedTests(completedMap);
       }
     } catch (e) {
@@ -138,17 +173,6 @@ export default function PracticePage() {
   const handleRetakeTest = (e: React.MouseEvent, href: string, testId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    // Clear the completed state for this test
-    try {
-      localStorage.removeItem(`practice_completed_${testId}`);
-    } catch (err) {
-      // Ignore
-    }
-    setCompletedTests((prev) => {
-      const updated = { ...prev };
-      delete updated[testId];
-      return updated;
-    });
     router.push(href);
   };
 

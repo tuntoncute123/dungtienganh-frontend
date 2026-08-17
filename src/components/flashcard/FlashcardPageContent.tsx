@@ -23,6 +23,28 @@ import FlashcardDeckCard from "./FlashcardDeckCard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+const syncFlashcardProgress = async (progress: Record<string, string[]>, favorites?: string[]) => {
+  const token = localStorage.getItem("teacherdung_token");
+  if (!token) return;
+  try {
+    const total = Object.values(progress).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+    await fetch(`${API_BASE_URL}/api/user-progress/flashcard`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        flashcardProgress: progress,
+        flashcardFavorites: favorites,
+        flashcardCount: total,
+      })
+    });
+  } catch (e) {
+    console.error("Lỗi khi đồng bộ tiến độ flashcard lên server:", e);
+  }
+};
+
 const syncFlashcardCount = async (count: number) => {
   const token = localStorage.getItem("teacherdung_token");
   if (!token) return;
@@ -82,8 +104,9 @@ export default function FlashcardPageContent() {
 
   const [form] = Form.useForm();
 
-  // Load from LocalStorage & Sync
+  // Load from LocalStorage & Sync with Database
   useEffect(() => {
+    // 1. Load from LocalStorage
     const favs = localStorage.getItem("fc_favorites");
     if (favs) {
       try {
@@ -96,9 +119,29 @@ export default function FlashcardPageContent() {
       try {
         const parsed = JSON.parse(prog);
         setDeckProgress(parsed);
-        const total = Object.values(parsed).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
-        syncFlashcardCount(total);
       } catch (e) {}
+    }
+
+    // 2. Load from Database
+    const token = localStorage.getItem("teacherdung_token");
+    if (token) {
+      fetch(`${API_BASE_URL}/api/user-progress/flashcard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data) {
+            if (data.flashcardProgress && Object.keys(data.flashcardProgress).length > 0) {
+              setDeckProgress(data.flashcardProgress);
+              localStorage.setItem("fc_progress", JSON.stringify(data.flashcardProgress));
+            }
+            if (data.flashcardFavorites && Array.isArray(data.flashcardFavorites)) {
+              setFavoriteDeckIds(data.flashcardFavorites);
+              localStorage.setItem("fc_favorites", JSON.stringify(data.flashcardFavorites));
+            }
+          }
+        })
+        .catch(err => console.error("Lỗi khi tải tiến độ flashcard từ DB", err));
     }
   }, []);
 
@@ -186,9 +229,8 @@ export default function FlashcardPageContent() {
     setDeckProgress(updated);
     localStorage.setItem("fc_progress", JSON.stringify(updated));
 
-    // Đồng bộ số lượng lên server
-    const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
-    syncFlashcardCount(total);
+    // Đồng bộ tiến độ lên database server
+    syncFlashcardProgress(updated, favoriteDeckIds);
 
     if (mastered) {
       message.success("Đã thuộc thẻ! Tiến độ đã được cập nhật.");
@@ -280,8 +322,8 @@ export default function FlashcardPageContent() {
           setDeckProgress(updated);
           localStorage.setItem("fc_progress", JSON.stringify(updated));
 
-          const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
-          syncFlashcardCount(total);
+          // Đồng bộ lên server
+          syncFlashcardProgress(updated, favoriteDeckIds);
         }
       }
     }
@@ -315,6 +357,7 @@ export default function FlashcardPageContent() {
     }
     setFavoriteDeckIds(updated);
     localStorage.setItem("fc_favorites", JSON.stringify(updated));
+    syncFlashcardProgress(deckProgress, updated);
   };
 
   // Reset Progress
@@ -337,8 +380,7 @@ export default function FlashcardPageContent() {
         localStorage.setItem("fc_progress", JSON.stringify(updated));
 
         // Đồng bộ lên server
-        const total = Object.values(updated).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
-        syncFlashcardCount(total);
+        syncFlashcardProgress(updated, favoriteDeckIds);
 
         message.success("Đã đặt lại tiến độ bộ thẻ!");
       }

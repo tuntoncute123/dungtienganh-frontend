@@ -260,7 +260,8 @@ export default function MyCoursesPage() {
           setRole(data.role || "student");
           localStorage.setItem("teacherdung_user", JSON.stringify(data));
         } else if (res.status === 401) {
-          localStorage.clear();
+          localStorage.removeItem("teacherdung_token");
+          localStorage.removeItem("teacherdung_user");
           router.push("/login");
         }
       } catch (err) {

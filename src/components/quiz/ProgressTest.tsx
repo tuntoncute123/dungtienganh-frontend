@@ -69,8 +69,51 @@ export default function ProgressTest() {
       const isReviewMode = params.get("review") === "true";
       setExamId(targetId);
 
-      // In review mode, restore completed answers and show submitted state
-      if (isReviewMode && targetId) {
+      // Fetch completed status from Database
+      const token = localStorage.getItem("teacherdung_token");
+      if (token && targetId) {
+        fetch(`${API_BASE_URL}/api/user-progress/single?practiceId=${targetId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(res => res.ok ? res.json() : null)
+          .then(progData => {
+            if (progData) {
+              if (progData.answers) {
+                setAnswers(progData.answers);
+              }
+              setScoreData({
+                correctCount: progData.correct ?? 0,
+                incorrectCount: (progData.total ?? 0) - (progData.correct ?? 0),
+                unansweredCount: 0,
+                score: progData.score ?? 0
+              });
+              if (isReviewMode) {
+                setIsSubmitted(true);
+                setResultVisible(true);
+              }
+              // Cache to localStorage
+              localStorage.setItem(`practice_completed_${targetId}`, JSON.stringify({
+                score: progData.score ?? 0,
+                correct: progData.correct ?? 0,
+                total: progData.total ?? 0,
+                completedAt: progData.completedAt,
+                answers: progData.answers
+              }));
+            } else if (!isReviewMode) {
+              // Normal mode: load draft if no DB completion
+              try {
+                const saved = localStorage.getItem("progress_test_draft_v2");
+                if (saved) {
+                  setAnswers(JSON.parse(saved));
+                  message.info("Đã khôi phục bài làm nháp gần nhất!");
+                }
+              } catch (e) {}
+            }
+          })
+          .catch(err => {
+            console.error("Failed to load progress from DB", err);
+          });
+      } else if (isReviewMode && targetId) {
         try {
           const completedData = localStorage.getItem(`practice_completed_${targetId}`);
           if (completedData) {
@@ -321,8 +364,45 @@ export default function ProgressTest() {
     // Clear local storage draft upon submission
     localStorage.removeItem("progress_test_draft_v2");
 
-    // Save completed status for this exam so practice list can detect it
+    // Save completed status to PostgreSQL Database
     if (examId) {
+      const token = localStorage.getItem("teacherdung_token");
+      if (token) {
+        // 1. Save to main Postgres DB
+        fetch(`${API_BASE_URL}/api/user-progress`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            practiceId: examId,
+            type: "exam",
+            score: scoreVal,
+            correct,
+            total: totalQuestions,
+            answers,
+          }),
+        }).catch((err) => console.error("Failed to save exam result to DB", err));
+
+        // 2. Sync to QuestDB
+        fetch(`${API_BASE_URL}/api/tracking/practice`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            practiceId: examId,
+            type: "exam",
+            score: scoreVal,
+            correctCount: correct,
+            totalQuestions: totalQuestions
+          })
+        }).catch(err => console.error("Failed to sync exam result to QuestDB", err));
+      }
+
+      // Save to localStorage for instant offline access
       try {
         const completedKey = `practice_completed_${examId}`;
         localStorage.setItem(completedKey, JSON.stringify({
@@ -332,27 +412,8 @@ export default function ProgressTest() {
           completedAt: new Date().toISOString(),
           answers
         }));
-
-        // Sync to QuestDB
-        const token = localStorage.getItem("teacherdung_token");
-        if (token) {
-          fetch(`${API_BASE_URL}/api/tracking/practice`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              practiceId: examId,
-              type: "exam",
-              score: scoreVal,
-              correctCount: correct,
-              totalQuestions: totalQuestions
-            })
-          }).catch(err => console.error("Failed to sync exam result to QuestDB", err));
-        }
       } catch (e) {
-        console.error("Failed to save completed status", e);
+        console.error("Failed to save completed status to localStorage", e);
       }
     }
   };
@@ -362,7 +423,8 @@ export default function ProgressTest() {
     setIsSubmitted(false);
     setResultVisible(false);
     setCurrentPart(5);
-    message.success("Đã khởi tạo lại bài làm mới!");
+    localStorage.removeItem("progress_test_draft_v2");
+    message.success("Đã sẵn sàng làm lại bài thi mới! Điểm số sẽ được cập nhật khi bạn nộp bài.");
   };
 
   const scrollToQuestion = (qNumber: number) => {
